@@ -75,40 +75,43 @@ class MetaInfo:
 
     def get_unit(self, measure):
         for m in self.measures:
-            key = m.keys()[0]
-            if key == measure:
-                values = m[key]
-                val_list = values.split(",")
-                return val_list[0]
+            mydict = m
+            for mykey, myval in mydict.items():
+                if mykey == measure:
+                    values = m[mykey]
+                    val_list = values.split(",")
+                    return val_list[0]
         return ""
 
     def get_scale(self, measure):
         for m in self.measures:
-            key = m.keys()[0]
-            if key == measure:
-                values = m[key]
-                val_list = values.split(",")
-                return val_list[1]
+            mydict = m
+            for mykey, myval in mydict.items():
+                if mykey == measure:
+                    values = m[mykey]
+                    val_list = values.split(",")
+                    return val_list[1]
         return ""
 
     def get_eventness(self, measure):
         for m in self.measures:
-            key = m.keys()[0]
-            if key == measure:
-                values = m[key]
-                val_list = values.split(",")
-                return val_list[2]
+            mydict = m
+            for mykey, myval in mydict.items():
+                if mykey == measure:
+                    values = m[mykey]
+                    val_list = values.split(",")
+                    return val_list[2]
         return ""
 
     def set_formatted_fields(self):
         #set the field info for this, to be shown on the web page
         s = ""
-        for f in self.fields:
-            mykey = f.keys()[0]
-            myval = f[mykey]
-            s = s + " " + mykey + " : " + myval
-            if self.get_unit(mykey):
-                s = s + ' ('+self.get_unit(mykey)+' '+self.get_scale(mykey)+' '+\
+        for h in self.fields:
+            mydict = h
+            for mykey, myval in mydict.items():
+                s = s + " " + mykey + " : " + myval
+                if self.get_unit(mykey):
+                    s = s + ' ('+self.get_unit(mykey)+' '+self.get_scale(mykey)+' '+\
                                                       self.get_eventness(mykey)+') '
             s = s + "<br/>"
         self.formatted_fields = s
@@ -154,9 +157,10 @@ class MetaInfo:
         s = self.name + " " + self.descr
         for f in self.fields:
             s = s + str(f) + " "
-            mykey = f.keys()[0]
-            if self.get_unit(mykey):
-                s = s + '('+self.get_unit(mykey)+' '+self.get_scale(mykey)+' '+\
+            myhash = f
+            for mykey, myval in myhash.items():
+                if self.get_unit(mykey):
+                    s = s + '('+self.get_unit(mykey)+' '+self.get_scale(mykey)+' '+\
                                                      self.get_eventness(mykey)+') '
         s = s + "\n"
         return s
@@ -168,22 +172,23 @@ class MetaInfo:
         """
         fieldlist = []
         for f in self.fields:
-            #print(str(f))
+            myhash = f
             myfhash = {}
-            mykey = f.keys()[0]
-            myfhash['name'] = mykey
-            myfhash['descr'] = f[mykey]
-            myfhash['scale'] = self.get_scale(mykey)
-            myfhash['eventness'] = self.get_eventness(mykey)
-            myfhash['unit'] = self.get_unit(mykey)
-            fieldlist.append(myfhash)
+            for mykey, myval in myhash.items():
+                myfhash['name'] = mykey
+                myfhash['descr'] = f[mykey]
+                myfhash['scale'] = self.get_scale(mykey)
+                myfhash['eventness'] = self.get_eventness(mykey)
+                myfhash['unit'] = self.get_unit(mykey)
+                fieldlist.append(myfhash)
         return fieldlist          
 
     def getfieldnames(self):
         fieldnames = []
         for f in self.fields:
-            mykey = f.keys()[0]
-            fieldnames.append(mykey)
+            myhash = f
+            for mykey, myval in myhash.items():
+                fieldnames.append(mykey)
         return fieldnames
 
 class MetaList:
