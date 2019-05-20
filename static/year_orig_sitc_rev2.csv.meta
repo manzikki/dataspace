@@ -1,0 +1,6 @@
+descr,Yearly imports and exports of SITC classified goods.
+FIELD,ORIGIN,origin
+FIELD,SITC,sitc
+FIELD,EXPORT_VAL,export,usd,ratio,tally
+FIELD,YEAR,year
+FIELD,IMPORT_VAL,import,usd,ratio,tally

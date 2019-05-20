@@ -1,0 +1,259 @@
+CountryName,ISO3digit,Continent
+Aruba,ABW,South America
+Afghanistan,AFG,Asia
+Angola,AGO,Africa
+Anguilla,AIA,North America
+Albania,ALB,Europe
+Andorra,AND,Europe
+Neth. Antilles,ANT,North America
+United Arab Emirates,ARE,Asia
+Argentina,ARG,South America
+Armenia,ARM,Europe
+American Samoa,ASM,Oceania
+Antarctica,ATA,Antarctica
+Fr. South Antarctic Terr.,ATF,Antarctica
+Antigua and Barbuda,ATG,North America
+Australia,AUS,Australia
+Austria,AUT,Europe
+Azerbaijan,AZE,Asia
+Burundi,BDI,Africa
+Belgium,BEL,Europe
+Benin,BEN,Africa
+Burkina Faso,BFA,Africa
+Bangladesh,BGD,Asia
+Bulgaria,BGR,Europe
+Bahrain,BHR,Asia
+Bahamas,BHS,North America
+Bosnia Herzegovina,BIH,Europe
+Belarus,BLR,Europe
+Belize,BLZ,North America
+Bermuda,BMU,North America
+Bolivia,BOL,South America
+Brazil,BRA,South America
+Barbados,BRB,North America
+Brunei Darussalam,BRN,Asia
+Bhutan,BTN,Asia
+Bouvet Island,BVT,Antarctica
+Botswana,BWA,Africa
+Central African Rep.,CAF,Africa
+Canada,CAN,North America
+Cocos Isds,CCK,Australia
+Switzerland,CHE,Europe
+Chile,CHL,South America
+China,CHN,Asia
+Cote d'Ivoire,CIV,Africa
+Cameroon,CMR,Africa
+Dem. Rep. of the Congo,COD,Africa
+Congo,COG,Africa
+Cook Isds,COK,Oceania
+Colombia,COL,South America
+Comoros,COM,Africa
+Cape Verde,CPV,Europe
+Costa Rica,CRI,South America
+Czechoslovakia,CSK,Europe
+Cuba,CUB,North America
+Curacao,CUW,South America
+Christmas Isds,CXR,Asia
+Cayman Isds,CYM,North America
+Cyprus,CYP,Europe
+Czech Rep.,CZE,Europe
+Fmr Dem. Rep. of Germany,DDR,Europe
+Fmr Fed. Rep. of Germany,DEU,Europe
+Djibouti,DJI,Africa
+Dominica,DMA,North America
+Denmark,DNK,Europe
+Dominican Rep.,DOM,North America
+Algeria,DZA,Africa
+Ecuador,ECU,South America
+Egypt,EGY,Africa
+Eritrea,ERI,Africa
+Western Sahara,ESH,Africa
+Spain,ESP,Europe
+Estonia,EST,Europe
+Ethiopia,ETH,Africa
+EU-27,EU2,Europe
+Finland,FIN,Europe
+Fiji,FJI,Oceania
+Falkland Isds (Malvinas),FLK,South America
+France,FRA,Europe
+Faeroe Isds,FRO,Europe
+French St. Martin,MAF,South America
+FS Micronesia,FSM,Oceania
+Gabon,GAB,Africa
+United Kingdom,GBR,Europe
+Georgia,GEO,Asia
+Ghana,GHA,Africa
+Gibraltar,GIB,Europe
+Guinea,GIN,Africa
+Guadeloupe,GLP,North America
+Guernsey,GGY,Europe
+Gambia,GMB,Africa
+Guinea-Bissau,GNB,Africa
+Equatorial Guinea,GNQ,Africa
+Greece,GRC,Europe
+Grenada,GRD,North America
+Greenland,GRL,North America
+Guatemala,GTM,North America
+French Guiana,GUF,South America
+Guam,GUM,Asia
+Guyana,GUY,South America
+China Hong Kong SAR,HKG,Asia
+Heard Island and McDonald Islands,HMD,Antarctica
+Honduras,HND,North America
+Croatia,HRV,Europe
+Haiti,HTI,North America
+Hungary,HUN,Europe
+Indonesia,IDN,Asia
+India,IND,Asia
+Br. Indian Ocean Terr.,IOT,Asia
+Ireland,IRL,Europe
+Iran,IRN,Asia
+Iraq,IRQ,Asia
+Isle of Man,IMN,Europe
+Iceland,ISL,Asia
+Israel,ISR,Asia
+Italy,ITA,Europe
+Jamaica,JAM,North America
+Jordan,JOR,Asia
+Japan,JPN,Asia
+Jersey,JEY,Europe
+Kazakhstan,KAZ,Asia
+Kenya,KEN,Africa
+Kosovo,UNK,Europe
+Kyrgyzstan,KGZ,Asia
+Cambodia,KHM,Asia
+Kiribati,KIR,Oceania
+Saint Kitts and Nevis,KNA,North America
+Rep. of Korea,KOR,Asia
+Kuwait,KWT,Asia
+Lao People's Dem. Rep.,LAO,Asia
+Lebanon,LBN,Asia
+Liberia,LBR,Africa
+Libya,LBY,Africa
+Liectenstein,LIE,Europe
+Saint Lucia,LCA,North America
+Sint Maarten,SXM,South America
+Sri Lanka,LKA,Asia
+Lesotho,LSO,Africa
+Lithuania,LTU,Europe
+Luxembourg,LUX,Europe
+Latvia,LVA,Europe
+China Macao SAR,MAC,Asia
+Morocco,MAR,Africa
+Rep. of Moldova,MDA,Europe
+Madagascar,MDG,Africa
+Maldives,MDV,Asia
+Mexico,MEX,North America
+Marshall Isds,MHL,Oceania
+TFYR of Macedonia,MKD,Europe
+Mali,MLI,Africa
+Malta,MLT,Europe
+Myanmar,MMR,Asia
+Montenegro,MNE,Europe
+Monaco,MCO,Europe
+Mongolia,MNG,Asia
+N. Mariana Isds,MNP,Oceania
+Mozambique,MOZ,Africa
+Mauritania,MRT,Africa
+Montserrat,MSR,North America
+Martinique,MTQ,North America
+Mauritius,MUS,Africa
+Malawi,MWI,Africa
+Malaysia,MYS,Asia
+Mayotte,MYT,Africa
+Namibia,NAM,Africa
+New Caledonia,NCL,Oceania
+Niger,NER,Africa
+Norfolk Isds,NFK,Oceania
+Nigeria,NGA,Africa
+Nicaragua,NIC,North America
+Niue,NIU,Oceania
+Netherlands,NLD,Europe
+Norway,NOR,Europe
+Nepal,NPL,Asia
+Nauru,NRU,Oceania
+New Zealand,NZL,Oceania
+Oman,OMN,Asia
+East and West Pakistan,PAK,Asia
+Fmr Panama excl.Canal Zone,PAN,North America
+Fmr Pacific Isds,PCI,Oceania
+Pitcairn,PCN,Oceania
+Fmr Panama-Canal-Zone,PCZ,North America
+Peru,PER,South America
+Philippines,PHL,Asia
+Palau,PLW,Oceania
+Papua New Guinea,PNG,Asia
+Poland,POL,Europe
+Dem. People's Rep. of Korea,PRK,Asia
+Portugal,PRT,Europe
+Paraguay,PRY,South America
+Puerto Rico,PRI,North America
+Occ. Palestinian Terr.,PSE,Asia
+French Polynesia,PYF,Oceania
+Qatar,QAT,Asia
+Reunion,REU,Africa
+Romania,ROU,Europe
+Russian Federation,RUS,Europe
+Rwanda,RWA,Africa
+Saudi Arabia,SAU,Asia
+Serbia and Montenegro,SCG,Europe
+Sudan,SDN,Africa
+Senegal,SEN,Africa
+Singapore,SGP,Asia
+South Georgia and the South Sandwich Islands,SGS,Antarctica
+Saint Helena,SHN,Africa
+Solomon Isds,SLB,Oceania
+Sierra Leone,SLE,Africa
+El Salvador,SLV,North America
+San Marino,SMR,Europe
+Somalia,SOM,Africa
+Saint Pierre and Miquelon,SPM,North America
+Serbia,SRB,Europe
+Sao Tome and Principe,STP,Africa
+Fmr USSR,SUN,Europe
+Suriname,SUR,South America
+Slovakia,SVK,Europe
+Slovenia,SVN,Europe
+South Sudan,SSD,Africa
+Sweden,SWE,Europe
+Swaziland,SWZ,Africa
+Seychelles,SYC,Africa
+Syria,SYR,Asia
+Turks and Caicos Isds,TCA,Oceania
+Chad,TCD,Africa
+Togo,TGO,Africa
+Taiwan,TWN,Asia
+Thailand,THA,Asia
+Tajikistan,TJK,Asia
+Tokelau,TKL,Oceania
+Turkmenistan,TKM,Asia
+Timor-Leste,TLS,Asia
+Tonga,TON,Africa
+Trinidad and Tobago,TTO,North America
+Tunisia,TUN,Africa
+Turkey,TUR,Asia
+Tuvalu,TUV,Oceania
+United Rep. of Tanzania,TZA,Africa
+Uganda,UGA,Africa
+Ukraine,UKR,Europe
+United States Minor Outlying Islands,UMI,North America
+Uruguay,URY,South America
+USA,USA,North America
+Uzbekistan,UZB,Asia
+Holy See (Vatican City State),VAT,Europe
+Saint Vincent and the Grenadines,VCT,North America
+Fmr Dem. Rep. of Vietnam,VDR,Asia
+Venezuela,VEN,South America
+Br. Virgin Isds,VGB,North America
+US Virgin Isds,VIR,North America
+Fmr Rep. of Vietnam,VNM,Asia
+Vanuatu,VUT,Oceania
+Wallis and Futuna Isds,WLF,Oceania
+Samoa,WSM,Oceania
+Fmr Arab Rep. of Yemen,YEM,Asia
+Fmr Dem. Yemen,YMD,Asia
+Fmr Yugoslavia,YUG,Europe
+So. African Customs Union,ZAF,Africa
+Zambia,ZMB,Africa
+Zimbabwe,ZWE,Africa
+Undef,XXB,Undef

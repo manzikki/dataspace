@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Cube</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+  </head>
+  <body>
+    <div class="container">
+    {% autoescape false %} {{ msg }} {% endautoescape %}
+    <br/>
+    <form action="">
+        <input class="btn btn-default" type="submit" name="more" value="Select more">
+        <input class="btn btn-default" type="submit" name="generatecube" value="Done, generate cube ({{ csize }} lines)">
+        <input class="btn btn-default" type="submit" name="cancel" value="Cancel cube construction"> 
+    </form>
+    </div>
+  </body>
+</html>
+

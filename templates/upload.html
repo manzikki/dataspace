@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+
+{% block content %}
+    <div class="content-section">
+
+
+<form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    <dl>
+      {{ render_field(form.CSV_file) }}
+    </dl>
+    <button class="btn btn-sm btn-success" type="submit">Add File</button>
+  </form>
+
+
+{% endblock content %}

@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<table id="datasets" border="1" class="table">
+<tr>
+<thead class="thead-light">
+<th>Set name</th> <th class="w-25">Description</th> <th> Fields </th> <th> </th>
+</thead>
+</tr>
+{% for entry in metas %}
+<tr>
+<td> <a href="static/{{ entry.name }}"> {{ entry.name }} </a> <br/>
+<form action="exportrdf" method="post"> <input name="file" type="hidden" value="{{ entry.name }}"> <button type="submit">Export RDF</button></form> 
+</td> 
+<td> {{ entry.descr }} </td>
+<td> {% autoescape false %} {{ entry.formatted_fields }} {% endautoescape %} </td>
+<td> 
+{% if username != "" %}
+<form action="edit" method="post">
+ <input name="file" type="hidden" value="{{ entry.name }}"> 
+ <button type="submit">Edit</button></form> 
+</td>
+{% endif %}
+{% endfor %}
+</tr>
+</table>
+
+{% endblock content %}
