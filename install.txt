@@ -1,0 +1,12 @@
+This program uses the following python modules: flask, flask_wtf, pandas.
+You do not need to install/configure a database.
+
+Installation of dependencies by python3 pip program:
+pip3 install flask
+pip3 install flask_wtf
+pip3 install pandas
+
+Running:
+python3 dataspace.py
+Direct your browser to localhost:5000
+Check dataspace.py for admin password.
