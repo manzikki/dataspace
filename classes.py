@@ -8,7 +8,7 @@ def count_lines(fullname):
     """ counts the lines in given file, returns the number of lines """
     numlines = 0
     with open(fullname) as fil:
-        for line in fil:
+        for _ in fil:
             numlines += 1
     fil.close()
     return numlines
@@ -68,42 +68,52 @@ class MetaInfo:
 
     def addmeasure(self, fieldname, unit, scale, eventness):
         """
-        Adds all fields of a measure.
+        Adds all fields (unit, scale, eventless) of a measure.
+        The measure must exists before using this.
         """
         spec = unit+","+scale+","+eventness
         self.addmeasurespec(fieldname, spec)
 
     def get_unit(self, measure):
-        for m in self.measures:
-            mydict = m
+        """
+        Gets the unit value of a measure if it exists.
+        """
+        for mea in self.measures:
+            mydict = mea
             for mykey, myval in mydict.items():
                 if mykey == measure:
-                    values = m[mykey]
-                    val_list = values.split(",")
+                    val_list = myval.split(",")
                     return val_list[0]
         return ""
 
     def get_scale(self, measure):
-        for m in self.measures:
-            mydict = m
+        """
+        Gets the scale value of a measure if it exists.
+        """
+        for mea in self.measures:
+            mydict = mea
             for mykey, myval in mydict.items():
                 if mykey == measure:
-                    values = m[mykey]
-                    val_list = values.split(",")
+                    val_list = myval.split(",")
                     return val_list[1]
         return ""
 
     def get_eventness(self, measure):
-        for m in self.measures:
-            mydict = m
+        """
+        Gets the eventness value of a measure if it exists.
+        """
+        for mea in self.measures:
+            mydict = mea
             for mykey, myval in mydict.items():
                 if mykey == measure:
-                    values = m[mykey]
-                    val_list = values.split(",")
+                    val_list = myval.split(",")
                     return val_list[2]
         return ""
 
     def set_formatted_fields(self):
+        """
+        Sets the "formatted_fields" attribute that is used for printing the field information.
+        """
         #set the field info for this, to be shown on the web page
         s = ""
         for h in self.fields:
@@ -117,6 +127,9 @@ class MetaInfo:
         self.formatted_fields = s
 
     def read_from_file(self, directory, filen):
+        """
+        Reads the meta info from a file.
+        """
         if not filen.endswith(".meta"):
             filen = filen + ".meta"
         with open(directory+"/"+filen) as csv_file:
@@ -135,6 +148,9 @@ class MetaInfo:
             self.set_formatted_fields()
 
     def write_to_file(self, directory, filen):
+        """
+        Writes the meta info into a file.
+        """
         if not filen.endswith(".meta"):
             filen = filen + ".meta"
         #construct rows
@@ -154,11 +170,14 @@ class MetaInfo:
                 writer.writerow(row)
 
     def get_as_string(self):
+        """
+        For debugging.
+        """
         s = self.name + " " + self.descr
         for f in self.fields:
             s = s + str(f) + " "
             myhash = f
-            for mykey, myval in myhash.items():
+            for mykey, _ in myhash.items():
                 if self.get_unit(mykey):
                     s = s + '('+self.get_unit(mykey)+' '+self.get_scale(mykey)+' '+\
                                                      self.get_eventness(mykey)+') '
@@ -167,32 +186,37 @@ class MetaInfo:
 
     def get_fieldlist(self):
         """
-        returns a list of hashes as follows
+        Returns a list of hashes as follows
         f['name'] = fieldname, f['decr'] = description, f['scale'] = nominal, ..
         """
         fieldlist = []
         for f in self.fields:
             myhash = f
             myfhash = {}
-            for mykey, myval in myhash.items():
+            for mykey, _ in myhash.items():
                 myfhash['name'] = mykey
                 myfhash['descr'] = f[mykey]
                 myfhash['scale'] = self.get_scale(mykey)
                 myfhash['eventness'] = self.get_eventness(mykey)
                 myfhash['unit'] = self.get_unit(mykey)
                 fieldlist.append(myfhash)
-        return fieldlist          
+        return fieldlist
 
     def getfieldnames(self):
+        """
+        Gets the names of fields as a list.
+        """
         fieldnames = []
         for f in self.fields:
             myhash = f
-            for mykey, myval in myhash.items():
+            for mykey, _ in myhash.items():
                 fieldnames.append(mykey)
         return fieldnames
 
 class MetaList:
-    #represents a list of meta information about files in a directory
+    """
+    Represents a list of meta information about files in a directory.
+    """
     metas = []
 
     def __init__(self, filedir):
@@ -201,10 +225,10 @@ class MetaList:
         self.metas = []
         # r=root, d=directories, f = files
         for r, d, f in os.walk(filedir):
-            for file in f:
-                if '.meta' in file:
-                    files.append(file)
-                    #print(file)
+            for filen in f:
+                if '.meta' in filen:
+                    files.append(filen)
+                    #print(filen)
         for f in files:
             #open the meta file and read the CSV
             myinfo = MetaInfo(f)
@@ -212,15 +236,24 @@ class MetaList:
             self.metas.append(myinfo)
 
     def get(self):
+        """
+        Returns the metas that is a list of MetaInfo objects.
+        """
         return self.metas
 
     def get_meta_by_name(self, name):
-        for m in self.metas:
-            if m.name == name:
-                return m
+        """
+        Returns a MetaInfo object from the list if the list contains it.
+        """
+        for meta in self.metas:
+            if meta.name == name:
+                return meta
         return None
 
     def get_as_string(self):
+        """
+        For debugging.
+        """
         s = ""
         for m in self.metas:
             s = s + m.get_as_string()

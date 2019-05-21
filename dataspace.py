@@ -219,13 +219,15 @@ def cube():
         if len(selfiles) == 1:
             #generate select boxes for joining files by fields.
             shown_files = []
+            #get the files that are used in the cube and all the fields in those files
 
-            #add the cube fields
-            cube_add = {}
-            cube_add['name'] = 'cube'
-            cube_add['fields_a'] = list(pdcube) #from pandas
-            #fill in from pandas
-            shown_files.append(cube_add)
+            cubemeta = MetaInfo("cube")
+            for cubef in cubefiles:
+                meta = mymetalist.get_meta_by_name(cubef)
+                for fie in meta.getfieldnames():
+                    cubemeta.addfield(fie, "")
+
+            shown_files.append(cubemeta)
 
             for s in selfiles:
                 meta = mymetalist.get_meta_by_name(s)
@@ -241,7 +243,6 @@ def cube():
         mround = 1
         add_to_cube_file = ""
         add_to_cube_field = ""
-        in_cube_file = ""
         #check here if the fields are compatible: use file1, file1, field1, field2
         for ar in request.args:
             if ar != "fieldsubmit":
@@ -260,22 +261,32 @@ def cube():
             in_cube_field = request.args.get('cube')
             #print("in cube: "+in_cube_field)
             #print("to add file "+add_to_cube_file+" field "+add_to_cube_field)
-        uniqfields1 = {}
-        uniqfields2 = {}
 
         #open the files and analyze the fields
+        #print "Looking for field "+field1+" or "+field2
+        #print "from "+file1+" "+file2
+        #print "cube has "+str(cubefiles)
         if file1 == "cube" or file2 == "cube":
             #print(str(ok_files))
             #find out which file in cube has this field
-            for okf in mymetalist.get():
-                for fname in cube['files']:
-                    if fname == okf['name']:
-                        for field in okf['fields_a']:
-                            myfield = field.split(":")[0]
-                            if file1 == "cube" and myfield == field1:
-                                file1 = fname
-                            if file2 == "cube" and myfield == field2:
-                                file2 = fname
+            if file1 == cube:
+                #we need to get field1's real file to file1
+                for fname in cubefiles:
+                    meta = mymetalist.get_meta_by_name(fname)
+                    for fie in meta.getfieldnames():
+                        #print fname+" "+fie
+                        if fie == field1:
+                            #print "Found field "+field1+" in "+fname
+                            file1 = fname
+            else:
+                #we need to get field2's real file to file2
+                for fname in cubefiles:
+                    meta = mymetalist.get_meta_by_name(fname)
+                    for fie in meta.getfieldnames():
+                        #print fname+" "+fie
+                        if fie == field2:
+                            #print "Found field "+field2+" in "+fname
+                            file2 = fname
 
         fxpd = pd.read_csv('static'+"/"+file1) #faster than csv.DictReader
         f1uniques = fxpd[field1].unique()
@@ -285,10 +296,10 @@ def cube():
         notexample = ""
         msg = " Field "+field1+" in "+file1+" has "+str(len(f1uniques))+" unique values."
         notinuf2 = 0
-        for f1 in f1uniques:
-            if f1 not in f2uniques:
+        for f1u in f1uniques:
+            if f1u not in f2uniques:
                 notinuf2 += 1
-                notexample = str(f1)
+                notexample = str(f1u)
 
         if notinuf2:
             msg += " "+str(notinuf2)+" of them are not in "+field2+". "
@@ -302,10 +313,10 @@ def cube():
         msg += "Field "+field2+" in "+file2+" has "+str(len(f2uniques))+" unique values. "
         notexample = ""
         notinuf1 = 0
-        for f2 in f2uniques:
-            if f2 not in f1uniques:
+        for f2u in f2uniques:
+            if f2u not in f1uniques:
                 notinuf1 += 1
-                notexample = str(f2)
+                notexample = str(f2u)
 
         if notinuf1:
             msg += " "+str(notinuf1)+" of them are not in "+field1+". "

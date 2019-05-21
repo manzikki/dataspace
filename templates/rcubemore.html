@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <title>Cube</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="w3.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="container">
+
+      <h1>Please select datasets</h1>
+      <br/>
+      Please select one more set that you want to include in your OLAP cube.
+      <br/><br/>
+      {% autoescape false %} {{ msg}} {% endautoescape %}
+      <br/>
+      <form action="" method="get">
+      <table id="datasets" border="1">
+      <tr>
+      <th>Set name</th> <th>Lines</th> <th>Description</th>
+      </tr>
+      {% for entry in entries %}
+      <tr>
+         <td>{{ entry.name }}</td>
+         <td>{{ entry.size }}</td>
+         <td>{{ entry.descr }}</td>
+         <td><input type="checkbox" name="fileselect" value="{{ entry.name }}" />
+      </tr>
+     {% else %}
+         <em>No entries here so far</em>
+     {% endfor %}
+      </table>
+      <br/>
+
+    <input class="btn btn-default" type="submit" name="oneselect" value="Submit">
+      </form>
+    </div>
+    
+    </div>
+  </body>
+</html>
+
