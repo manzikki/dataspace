@@ -353,7 +353,7 @@ def cube():
         msg = ""
         for i in range(0, len(cubefiles)-1):
             if i % 2 == 0:
-                msg += cubefiles[i] + ":" + cubefields[i] + "->" + \
+                msg += cubefiles[i] + ":" + cubefields[i] + " &rarr; " + \
                 cubefiles[i+1] + ":" + cubefields[i+1]+"<br/>"
 
         ok_files = mymetalist.get()

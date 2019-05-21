@@ -18,9 +18,9 @@
       {{ error }}
       <br/>
       <form action="" method="get">
-      <table id="datasets" border="1">
+      <table id="datasets" class="table" border="1">
       <tr>
-      <th>Set name</th> <th>Description</th>
+      <th>Set name</th> <th>Description</th><th>Select</th>
       </tr>
       {% for entry in entries %}
       <tr>
@@ -35,7 +35,7 @@
       <br/>
 
     <input class="btn btn-default" type="submit" name="twoselect" value="Submit">
-    <button class="btn btn-default"><a href="{{ url_for('appmain')}}">Cancel</a></button>
+    <button class="btn btn-default"><a href="{{ url_for('appmain')}}" style="color:black">Cancel</a></button>
     </form>
     </div>
   </body>
