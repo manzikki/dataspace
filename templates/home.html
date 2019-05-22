@@ -9,8 +9,21 @@
 </tr>
 {% for entry in metas %}
 <tr>
-<td> <a href="static/{{ entry.name }}"> {{ entry.name }} </a> <br/>
-<form action="exportrdf" method="post"> <input name="file" type="hidden" value="{{ entry.name }}"> <button type="submit">Export RDF</button></form> 
+<td>  {{ entry.name }} <br/>
+	  <table id="pair" border="0">
+	  <tr>
+	  <td>
+	   <button class="btn btn-secondary"><a style="color:white" href="static/{{ entry.name }}">Download</a> </button> 
+	  </td><td>
+       <form action="view" method="post"> <input name="file" type="hidden" value="{{ entry.name }}">
+       <button class="btn btn-secondary" type="submit">View</button></form>
+      </td>
+      <td>
+      	<form action="exportrdf" method="post"> <input name="file" type="hidden" value="{{ entry.name }}">
+        <button class="btn btn-secondary" type="submit">Export RDF</button></form>
+      </tr>
+      </table>
+      
 </td> 
 <td> {{ entry.descr }} </td>
 <td> {% autoescape false %} {{ entry.formatted_fields }} {% endautoescape %} </td>
@@ -18,7 +31,7 @@
 {% if username != "" %}
 <form action="edit" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}"> 
- <button type="submit">Edit</button></form> 
+ <button class="btn btn-secondary" type="submit">Edit</button></form> 
 </td>
 {% endif %}
 {% endfor %}

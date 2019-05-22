@@ -17,7 +17,7 @@ app.config['SECRET_KEY'] = '5791628bb0b13'
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'FpacNida986!'
 TMPRDFNAME = "tmp.rdf"
-
+MAX_LINES = 500 #max number of lines in view
 
 @app.route("/")
 @app.route("/home")
@@ -90,6 +90,29 @@ def upload():
                                        fieldlist=fieldlist)
         return redirect(url_for('appmain'))
     return render_template('upload.html', form=form)
+
+@app.route("/view", methods=['GET', 'POST'])
+#view the file
+def view():
+    """
+    View N lines of the file using template view.html
+    """
+    mydict = request.form
+    myfile = mydict['file']
+    rows = []
+    headers = []
+    with open('static/'+myfile) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
+        line_no = 0
+        for row in csv_reader:
+            if line_no == 0:
+                headers = row
+            else:
+                if line_no >= 500:
+                    break
+                rows.append(row)
+            line_no = line_no + 1
+    return render_template('view.html', file=myfile, headers=headers, rows=rows)
 
 
 @app.route("/edit", methods=['GET', 'POST'])
@@ -370,4 +393,4 @@ def cube():
     return appmain()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
