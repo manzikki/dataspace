@@ -17,6 +17,7 @@ app.config['SECRET_KEY'] = '5791628bb0b13'
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'FpacNida986!'
 TMPRDFNAME = "tmp.rdf"
+REQROOT="home" #for WSGI: what is the base URL
 MAX_LINES = 500 #max number of lines in view
 
 @app.route("/")
@@ -33,6 +34,7 @@ def appmain():
     return render_template('home.html', username=username, metas=mymetas.get())
 
 @app.route("/login", methods=['GET', 'POST'])
+@app.route("/home/login", methods=['GET', 'POST'])
 def login():
     """
     Shows the login page.
@@ -54,6 +56,7 @@ def check_file_ok(filename):
     return ""
 
 @app.route('/upload', methods=['GET', 'POST'])
+@app.route('/home/upload', methods=['GET', 'POST'])
 #file upload. Should be available to admin only
 def upload():
     """
@@ -92,6 +95,7 @@ def upload():
     return render_template('upload.html', form=form)
 
 @app.route("/view", methods=['GET', 'POST'])
+@app.route("/home/view", methods=['GET', 'POST'])
 #view the file
 def view():
     """
@@ -116,6 +120,7 @@ def view():
 
 
 @app.route("/edit", methods=['GET', 'POST'])
+@app.route("/home/edit", methods=['GET', 'POST'])
 #edit metadata. admin user only
 def edit():
     """
@@ -132,6 +137,7 @@ def edit():
     return render_template('fileedit.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
 
 @app.route("/editsubmit", methods=['GET', 'POST'])
+@app.route("/home/editsubmit", methods=['GET', 'POST'])
 #get the result of metadata editing
 def editsubmit():
     """
@@ -161,6 +167,7 @@ def editsubmit():
 
 #route for printing all filenames
 @app.route('/printurls', methods=['GET', 'POST'])
+@app.route('/home/printurls', methods=['GET', 'POST'])
 def printurls():
     """
     Route for printing the names of all the files.
@@ -171,6 +178,7 @@ def printurls():
 
 # route for handling exportrdf (export the CSV values file as RDF)
 @app.route('/exportrdf', methods=['GET', 'POST'])
+@app.route('/home/exportrdf', methods=['GET', 'POST'])
 def exportrdf():
     """
     Route for handling exportrdf (export the CSV values file as RDF)
@@ -207,6 +215,7 @@ pdcube = pd.DataFrame()
 # route for handling "cube". Renders the cube construction pages.
 # This horrible function should be re-written.
 @app.route('/cube', methods=['GET', 'POST'])
+@app.route('/home/cube', methods=['GET', 'POST'])
 def cube():
     """
     Handle the cube construction.
