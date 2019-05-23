@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block content %}
+
+{% for entry in metas %}
+{{ req }}/static/{{entry.name}}
+{% endfor %}
+
+{% endblock content %}

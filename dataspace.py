@@ -159,6 +159,16 @@ def editsubmit():
     #call appmain if ok
     return redirect(url_for('appmain'))
 
+#route for printing all filenames
+@app.route('/printurls', methods=['GET', 'POST'])
+def printurls():
+    """
+    Route for printing the names of all the files.
+    """
+    mymetas = MetaList("static")
+    return render_template('urls.html', req=request.url_root, metas=mymetas.get())
+
+
 # route for handling exportrdf (export the CSV values file as RDF)
 @app.route('/exportrdf', methods=['GET', 'POST'])
 def exportrdf():
