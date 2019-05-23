@@ -35,16 +35,16 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
-              <a class="nav-item nav-link" href="/">Home</a>
+              <a class="nav-item nav-link" href="/home">Home</a>
               {% if username != "" %}
-              <a class="nav-item nav-link" href="/upload">Upload</a>
-              <a class="nav-item nav-link" href="/cube?start">Cube tool</a>
+              <a class="nav-item nav-link" href="/home/upload">Upload</a>
+              <a class="nav-item nav-link" href="/home/cube?start">Cube tool</a>
               {% endif %}
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
               {% if username == "" %}
-              <a class="nav-item nav-link" href="/login">Login</a>
+              <a class="nav-item nav-link" href="/home/login">Login</a>
               {% else %}
               {{ username }}
               {% endif %}
