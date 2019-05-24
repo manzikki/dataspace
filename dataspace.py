@@ -27,20 +27,13 @@ def appmain():
     """
     Main route, shows the main page.
     """
-    mymetas = MetaList("static")
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    mymetas = MetaList(dir_path+"/static")
     username = ""
     if 'username' in session:
         username = session['username']
     return render_template('home.html', username=username, metas=mymetas.get())
 
-# static files
-@app.route('/<path:path>')
-@app.route('/home/<path:path>')
-def static_file(path):
-    """
-    Route for handling static files by GET.
-    """
-    return app.send_static_file(path)
 
 @app.route("/login", methods=['GET', 'POST'])
 @app.route("/home/login", methods=['GET', 'POST'])
@@ -76,15 +69,16 @@ def upload():
     form = UploadForm()
     if form.validate_on_submit():
         fil = form.CSV_file.data
+        dir_path = os.path.dirname(os.path.realpath(__file__))
         filename = secure_filename(fil.filename)
         fil.save(os.path.join(
-            'static', filename
+            dir_path, 'static', filename
         ))
         #if the file is ok, prepare the fields for the dialog
         if check_file_ok(filename) == "":
             row1 = []
             #read the first line of file to get field names
-            with open("static/"+filename) as csv_file:
+            with open(dir_path+"/static/"+filename) as csv_file:
                 reader = csv.reader(csv_file, delimiter=',', quotechar='"')
                 row1 = next(reader)
             csv_file.close()
@@ -114,7 +108,8 @@ def view():
     myfile = mydict['file']
     rows = []
     headers = []
-    with open('static/'+myfile) as csv_file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with open(dir_path+'/static/'+myfile) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         line_no = 0
         for row in csv_reader:
@@ -140,7 +135,8 @@ def edit():
     myfile = mydict['file']
     #build a meta object and read it from file
     mymeta = MetaInfo(myfile)
-    mymeta.read_from_file('static', myfile)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    mymeta.read_from_file(dir_path+'/static', myfile)
     fields = mymeta.get_fieldlist()
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
     return render_template('fileedit.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
@@ -170,7 +166,8 @@ def editsubmit():
             scale = mydict[fiter+"=scale"]
             eventness = mydict[fiter+"=eventness"]
             mymeta.addmeasure(fiter, unit, scale, eventness)
-    mymeta.write_to_file('static', myfile)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    mymeta.write_to_file(dir_path+'/static', myfile)
     #call appmain if ok
     return redirect(url_for('appmain'))
 
@@ -181,7 +178,8 @@ def printurls():
     """
     Route for printing the names of all the files.
     """
-    mymetas = MetaList("static")
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    mymetas = MetaList(dir_path+"/static")
     return render_template('urls.html', req=request.url_root, metas=mymetas.get())
 
 
@@ -201,8 +199,9 @@ def exportrdf():
     #print(file)
     if myfile:
         #open the CVS file that the user wants
-        cvsdf = pd.read_csv('static'+"/"+myfile)
-        rdf = open("static/"+TMPRDFNAME, 'w')
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        cvsdf = pd.read_csv(dir_path+'/static'+"/"+myfile)
+        rdf = open(dir_path+"/static/"+TMPRDFNAME, 'w')
         rdf.write(fheaders)
         for index, row in cvsdf.iterrows():
             rdf.write("<Description about=\"I"+str(index)+"\" ")
@@ -242,7 +241,8 @@ def cube():
     username = ''
     if 'username' in session:
         username = session['username']
-    mymetalist = MetaList('static')
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    mymetalist = MetaList(dir_path+'/static')
     #print(mymetalist.get_as_string())
     if 'start' in request.args:
          #TBD: Should return login page if user is not admin.
@@ -338,10 +338,10 @@ def cube():
                         if fie == field2:
                             #print "Found field "+field2+" in "+fname
                             file2 = fname
-
-        fxpd = pd.read_csv('static'+"/"+file1) #faster than csv.DictReader
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        fxpd = pd.read_csv(dir_path+'/static'+"/"+file1) #faster than csv.DictReader
         f1uniques = fxpd[field1].unique()
-        fxpd = pd.read_csv('static'+"/"+file2)
+        fxpd = pd.read_csv(dir_path+'/static'+"/"+file2)
         f2uniques = fxpd[field2].unique()
 
         notexample = ""
@@ -387,13 +387,15 @@ def cube():
         cubefields.append(field2)
         #make numpy/pandas cube
         if cube_round == 0:
-            f1pd = pd.read_csv('static'+"/"+file1)
-            f2pd = pd.read_csv('static'+"/"+file2)
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            f1pd = pd.read_csv(dir_path+'/static'+"/"+file1)
+            f2pd = pd.read_csv(dir_path+'/static'+"/"+file2)
             pdcube = pd.merge(f1pd, f2pd, left_on=field1, right_on=field2)
             cube_round = 1
             #print(pdcube)
         else:
-            fpd = pd.read_csv('static'+"/"+add_to_cube_file)
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            fpd = pd.read_csv(dir_path+'/static'+"/"+add_to_cube_file)
             pdcube = pd.merge(pdcube, fpd, left_on=in_cube_field, right_on=add_to_cube_field)
 
         return render_template('rcubecontinue.html', msg=msg, csize=pdcube.shape[0])
@@ -413,7 +415,8 @@ def cube():
     # 5 The user wants the cube
     if 'generatecube' in request.args:
         #write it into a file
-        pdcube.to_csv('static'+"/"+TMPCUBENAME, encoding='utf-8', index=False)
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        pdcube.to_csv(dir_path+'/static'+"/"+TMPCUBENAME, encoding='utf-8', index=False)
         cube_round = 0 #reset
         return render_template('rcubegen.html')
 
