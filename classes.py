@@ -3,6 +3,7 @@ Classes for simple dataspace manager. Marko Niinimaki, niinimakim@webster.ac.th,
 """
 import os
 import csv
+import codecs
 
 def count_lines(fullname):
     """ counts the lines in given file, returns the number of lines """
@@ -12,6 +13,35 @@ def count_lines(fullname):
             numlines += 1
     fil.close()
     return numlines
+
+class UTF8Recoder:
+    """
+    Iterator that reads an encoded stream and reencodes the input to UTF-8
+    """
+    def __init__(self, f, encoding):
+        self.reader = codecs.getreader(encoding)(f)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        return self.reader.next().encode("utf-8")
+
+class UnicodeReader:
+    """
+    A CSV reader which will iterate over lines in the CSV file "f",
+    which is encoded in the given encoding.
+    """
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+        f = UTF8Recoder(f, encoding)
+        self.reader = csv.reader(f, dialect=dialect, **kwds)
+
+    def next(self):
+        row = self.reader.next()
+        return [unicode(s, "utf-8") for s in row]
+
+    def __iter__(self):
+        return self
 
 class MetaInfo:
     """
@@ -156,21 +186,21 @@ class MetaInfo:
         """
         if not filen.endswith(".meta"):
             filen = filen + ".meta"
-        #construct rows
         row = ['descr', self.descr]
         with open(directory+"/"+filen, 'w') as writeFile:
             writer = csv.writer(writeFile)
             writer.writerow(row)
             for f in self.fields:
-                mykey = f.keys()[0]
-                mydesc = f[mykey]
-                row = ['FIELD', mykey, mydesc]
-                if self.get_scale(mykey):
-                    unit = self.get_unit(mykey)
-                    scale = self.get_scale(mykey)
-                    ev = self.get_eventness(mykey)
-                    row = ['FIELD', mykey, mydesc, unit, scale, ev]
-                writer.writerow(row)
+                mydict = f
+                for mykey, myval in mydict.items():
+                    mydesc = f[mykey]
+                    row = ['FIELD', mykey, mydesc]
+                    if self.get_scale(mykey):
+                        unit = self.get_unit(mykey)
+                        scale = self.get_scale(mykey)
+                        ev = self.get_eventness(mykey)
+                        row = ['FIELD', mykey, mydesc, unit, scale, ev]
+                    writer.writerow(row)
 
     def get_as_string(self):
         """

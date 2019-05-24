@@ -2,13 +2,13 @@
 Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2019
 """
 import os
-import csv
+import csv, codecs, cStringIO
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash
 from werkzeug.utils import secure_filename
 import pandas as pd
 from forms import LoginForm, UploadForm
-from classes import MetaInfo, MetaList
+from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader
 
 
 
@@ -21,6 +21,7 @@ ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'FpacNida986!'
 TMPRDFNAME = "tmp.rdf"
 MAX_LINES = 500 #max number of lines in view
+
 
 @app.route("/")
 @app.route("/home")
@@ -83,9 +84,15 @@ def upload():
         if check_file_ok(filename) == "":
             row1 = []
             #read the first line of file to get field names
-            with open(app.config['SL']+filename) as csv_file:
-                reader = csv.reader(csv_file, delimiter=',', quotechar='"')
+            with open(app.config['SL']+filename, 'rU') as csv_file: #,'rU'
+                reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
                 row1 = next(reader)
+                #remove the BOM
+                if row1:
+                    r1first = row1[0]
+                    while (ord(r1first[0]) > 123):
+                        r1first = r1first[1:]
+                    row1[0] = r1first
             csv_file.close()
             if row1:
                 fieldlist = []
@@ -113,8 +120,9 @@ def view():
     myfile = mydict['file']
     rows = []
     headers = []
-    with open(app.config['SL']+myfile) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
+    with open(app.config['SL']+myfile, 'rU') as csv_file: #,'rU'
+        #csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
+        csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
         line_no = 0
         for row in csv_reader:
             if line_no == 0:
@@ -155,7 +163,7 @@ def editsubmit():
     mydict = request.form
     myfile = mydict['file']
     descr = mydict['descr']
-    mymeta = MetaInfo(file)
+    mymeta = MetaInfo(myfile)
     mymeta.setdescr(descr)
     for fiter in mydict:
         #print(k+" "+mydict[k])
