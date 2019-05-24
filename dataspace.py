@@ -33,6 +33,15 @@ def appmain():
         username = session['username']
     return render_template('home.html', username=username, metas=mymetas.get())
 
+# static files
+@app.route('/<path:path>')
+@app.route('/home/<path:path>')
+def static_file(path):
+    """
+    Route for handling static files by GET.
+    """
+    return app.send_static_file(path)
+
 @app.route("/login", methods=['GET', 'POST'])
 @app.route("/home/login", methods=['GET', 'POST'])
 def login():

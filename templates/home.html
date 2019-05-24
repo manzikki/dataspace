@@ -9,17 +9,17 @@
 </tr>
 {% for entry in metas %}
 <tr>
-<td>  {{ entry.name }} <br/>
+<td>  {{ entry.name }} ({{ entry.fsize }} b) <br/>
 	  <table id="pair" border="0">
 	  <tr>
 	  <td>
 	   <button class="btn btn-secondary"><a style="color:white" href="static/{{ entry.name }}">Download</a> </button> 
 	  </td><td>
-       <form action="view" method="post"> <input name="file" type="hidden" value="{{ entry.name }}">
+       <form action="home/view" method="post"> <input name="file" type="hidden" value="{{ entry.name }}">
        <button class="btn btn-secondary" type="submit">View</button></form>
       </td>
       <td>
-      	<form action="exportrdf" method="post"> <input name="file" type="hidden" value="{{ entry.name }}">
+      	<form action="home/exportrdf" method="post"> <input name="file" type="hidden" value="{{ entry.name }}">
         <button class="btn btn-secondary" type="submit">Export RDF</button></form>
       </tr>
       </table>
@@ -29,7 +29,7 @@
 <td> {% autoescape false %} {{ entry.formatted_fields }} {% endautoescape %} </td>
 <td> 
 {% if username != "" %}
-<form action="edit" method="post">
+<form action="home/edit" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}"> 
  <button class="btn btn-secondary" type="submit">Edit</button></form> 
 </td>
@@ -38,6 +38,6 @@
 </tr>
 </table>
 
-<button class="btn btn-secondary"><a style="color:white" href="/printurls">Get all dataset names</a> </button> 
+<button class="btn btn-secondary"><a style="color:white" href="home/printurls">Get all dataset names</a> </button> 
 
 {% endblock content %}

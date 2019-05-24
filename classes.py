@@ -19,7 +19,7 @@ class MetaInfo:
     """
     descr = ""
     formatted_fields = ""
-    lines = 0
+    fsize = 0
     name = ""
     tags = []
     fields = [] #list of fieldname->fielddesc
@@ -128,10 +128,13 @@ class MetaInfo:
 
     def read_from_file(self, directory, filen):
         """
-        Reads the meta info from a file.
+        Reads the meta info from a file. Gets fsize from the real file.
         """
         if not filen.endswith(".meta"):
             filen = filen + ".meta"
+        nometa = filen.replace(".meta","")
+        if os.path.isfile(directory+"/"+nometa):
+            self.fsize = os.path.getsize(directory+"/"+nometa)
         with open(directory+"/"+filen) as csv_file:
             reader = csv.reader(csv_file, delimiter=',', quotechar='"')
             for row in reader:
