@@ -14,21 +14,26 @@ from classes import MetaInfo, MetaList
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13'
+app.config['S'] = ''  #put the path to 'static' in it in appmain
+app.config['SL'] = '' #same but with "/" at the end
+app.config['U'] = ''  #url base like "/" or "/home"
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'FpacNida986!'
 TMPRDFNAME = "tmp.rdf"
-REQROOT="home" #for WSGI: what is the base URL
 MAX_LINES = 500 #max number of lines in view
 
 @app.route("/")
 @app.route("/home")
-
 def appmain():
     """
     Main route, shows the main page.
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    mymetas = MetaList(dir_path+"/static")
+    app.config['S'] = dir_path+"/static"
+    app.config['SL'] = dir_path+"/static/"
+    if not app.config['U']:
+        app.config['U'] = request.base_url
+    mymetas = MetaList(app.config['S'])
     username = ""
     if 'username' in session:
         username = session['username']
@@ -78,7 +83,7 @@ def upload():
         if check_file_ok(filename) == "":
             row1 = []
             #read the first line of file to get field names
-            with open(dir_path+"/static/"+filename) as csv_file:
+            with open(app.config['SL']+filename) as csv_file:
                 reader = csv.reader(csv_file, delimiter=',', quotechar='"')
                 row1 = next(reader)
             csv_file.close()
@@ -108,8 +113,7 @@ def view():
     myfile = mydict['file']
     rows = []
     headers = []
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(dir_path+'/static/'+myfile) as csv_file:
+    with open(app.config['SL']+myfile) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         line_no = 0
         for row in csv_reader:
@@ -135,8 +139,7 @@ def edit():
     myfile = mydict['file']
     #build a meta object and read it from file
     mymeta = MetaInfo(myfile)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    mymeta.read_from_file(dir_path+'/static', myfile)
+    mymeta.read_from_file(app.config['S'], myfile)
     fields = mymeta.get_fieldlist()
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
     return render_template('fileedit.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
@@ -166,8 +169,7 @@ def editsubmit():
             scale = mydict[fiter+"=scale"]
             eventness = mydict[fiter+"=eventness"]
             mymeta.addmeasure(fiter, unit, scale, eventness)
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    mymeta.write_to_file(dir_path+'/static', myfile)
+    mymeta.write_to_file(app.config['S'], myfile)
     #call appmain if ok
     return redirect(url_for('appmain'))
 
@@ -178,8 +180,7 @@ def printurls():
     """
     Route for printing the names of all the files.
     """
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    mymetas = MetaList(dir_path+"/static")
+    mymetas = MetaList(app.config['S'])
     return render_template('urls.html', req=request.url_root, metas=mymetas.get())
 
 
@@ -199,9 +200,8 @@ def exportrdf():
     #print(file)
     if myfile:
         #open the CVS file that the user wants
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        cvsdf = pd.read_csv(dir_path+'/static'+"/"+myfile)
-        rdf = open(dir_path+"/static/"+TMPRDFNAME, 'w')
+        cvsdf = pd.read_csv(app.config['SL']+myfile)
+        rdf = open(app.config['SL']+TMPRDFNAME, 'w')
         rdf.write(fheaders)
         for index, row in cvsdf.iterrows():
             rdf.write("<Description about=\"I"+str(index)+"\" ")
@@ -211,7 +211,9 @@ def exportrdf():
         #write the real contents as: <RDF:Seq about="FILENAME"> <RDF:li> .. </RDF:li>
         rdf.write("</rdf:RDF>")
         rdf.close()
-        return render_template('rdfexport.html')
+        myurl = app.config['U']+'/static/tmp.rdf'
+        myurl = myurl.replace("//static","/static")
+        return render_template('rdfexport.html', url=myurl)
     return redirect(url_for('appmain'))
 
 TMPCUBENAME = "tmpcube.csv"
@@ -241,8 +243,7 @@ def cube():
     username = ''
     if 'username' in session:
         username = session['username']
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    mymetalist = MetaList(dir_path+'/static')
+    mymetalist = MetaList(app.config['S'])
     #print(mymetalist.get_as_string())
     if 'start' in request.args:
          #TBD: Should return login page if user is not admin.
@@ -338,10 +339,9 @@ def cube():
                         if fie == field2:
                             #print "Found field "+field2+" in "+fname
                             file2 = fname
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        fxpd = pd.read_csv(dir_path+'/static'+"/"+file1) #faster than csv.DictReader
+        fxpd = pd.read_csv(app.config['SL']+file1) #faster than csv.DictReader
         f1uniques = fxpd[field1].unique()
-        fxpd = pd.read_csv(dir_path+'/static'+"/"+file2)
+        fxpd = pd.read_csv(app.config['SL']+file2)
         f2uniques = fxpd[field2].unique()
 
         notexample = ""
@@ -387,15 +387,13 @@ def cube():
         cubefields.append(field2)
         #make numpy/pandas cube
         if cube_round == 0:
-            dir_path = os.path.dirname(os.path.realpath(__file__))
-            f1pd = pd.read_csv(dir_path+'/static'+"/"+file1)
-            f2pd = pd.read_csv(dir_path+'/static'+"/"+file2)
+            f1pd = pd.read_csv(app.config['SL']+file1)
+            f2pd = pd.read_csv(app.config['SL']+file2)
             pdcube = pd.merge(f1pd, f2pd, left_on=field1, right_on=field2)
             cube_round = 1
             #print(pdcube)
         else:
-            dir_path = os.path.dirname(os.path.realpath(__file__))
-            fpd = pd.read_csv(dir_path+'/static'+"/"+add_to_cube_file)
+            fpd = pd.read_csv(app.config['SL']+add_to_cube_file)
             pdcube = pd.merge(pdcube, fpd, left_on=in_cube_field, right_on=add_to_cube_field)
 
         return render_template('rcubecontinue.html', msg=msg, csize=pdcube.shape[0])
@@ -415,8 +413,7 @@ def cube():
     # 5 The user wants the cube
     if 'generatecube' in request.args:
         #write it into a file
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        pdcube.to_csv(dir_path+'/static'+"/"+TMPCUBENAME, encoding='utf-8', index=False)
+        pdcube.to_csv(app.config['SL']+TMPCUBENAME, encoding='utf-8', index=False)
         cube_round = 0 #reset
         return render_template('rcubegen.html')
 
