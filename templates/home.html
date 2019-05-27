@@ -29,9 +29,12 @@
 <td> {% autoescape false %} {{ entry.formatted_fields }} {% endautoescape %} </td>
 <td> 
 {% if username != "" %}
-<form action="home/edit" method="post">
+ <form action="home/edit" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}"> 
- <button class="btn btn-secondary" type="submit">Edit</button></form> 
+ <button class="btn btn-secondary btn-block" type="submit">Edit</button></form><br/>
+ <form action="home/compatible" method="post">
+ <input name="file" type="hidden" value="{{ entry.name }}"> 
+ <button class="btn btn-secondary btn-block" type="submit">Compatibility</button></form> 
 </td>
 {% endif %}
 {% endfor %}

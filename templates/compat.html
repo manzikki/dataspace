@@ -1,16 +1,45 @@
 <html>
   <head>
     <title>Compatible fields</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="w3.css" rel="stylesheet" media="screen">
+      <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+
   </head>
   <body>
     <div class="container">
       Sorry, not yet finished.<br/>
-      {% for d in dimmetas %}
-      {{ d.filename }} {{ d.name }} {{ d.descr }} <br/>
+      In file {{ fname }}, field <br/>
+      <table class="table" style="width: auto;" border="0">
+      {% for d in filemetas %}
+      <tr>
+      <td>{{ d.name }} </td><td> {{ d.descr }} </td> <td>
+
+
+<div class="dropdown show">
+  <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    is compatible with ..
+  </a>
+
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+    {% for f in filenames %}
+    <a class="dropdown-item" href="#">{{ f }}</a>
+    {% endfor %}
+  </div>
+</div>
+      </td>
+      </tr>
       {% endfor %}
+      </table>
     <br/>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
   </body>
 </html>

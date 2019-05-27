@@ -146,18 +146,21 @@ def view():
 #show/let user delare compatible fields. Should be available to admin only
 def compatible():
     """
-    Show/let user delare compatible fields. The compat_list is stored in a file
-    that has comma-separated filename:fieldname rows.
+    Show/let user delare compatible fields that are compatible with some field in this file.
     """
+    mydict = request.form
+    myfile = mydict['file']
     if session['username'] != ADMIN_USERNAME:
         flash('Admin privileges required. Plase log in.')
         return redirect(url_for('appmain'))
     #get field information
-    dimmetas = [] #metas concerning dimensions, not measures
-    mymetalist = MetaList(app.config['S'])
-    mymetas = mymetalist.get()
+    dimmetas = []    #metas concerning dimensions, not measures
+    filemetas = []   #metas in the file given in the request
+    filenames = []   #names of files, but not myfile
+    allmetalist = MetaList(app.config['S'])
+    allmetas = allmetalist.get()
     #print(str(mymetas))
-    for meta in mymetas:
+    for meta in allmetas:
         metafields = meta.get_fieldlist()
         for fieldh in metafields:
             #is this a measure or dimension?
@@ -166,7 +169,12 @@ def compatible():
                 pass
             else:
                 #print(fieldh['filename']+":"+fieldh['name'])
-                dimmetas.append(fieldh)
+                if fieldh['filename'] == myfile:
+                    filemetas.append(fieldh)
+                else:
+                    dimmetas.append(fieldh)
+                    if fieldh['filename'] not in filenames:
+                        filenames.append(fieldh['filename'])
 
     compat_list = []
     #does the file exist?
@@ -176,7 +184,8 @@ def compatible():
             for row in csv_reader:
                 compat_list.append(row)
         csv_file.close()
-    return render_template('compat.html', compat=compat_list, dimmetas=dimmetas)
+    return render_template('compat.html', compat=compat_list, fname=myfile, filemetas=filemetas,\
+                            filenames=filenames, othermetas=dimmetas)
 
 
 @app.route("/edit", methods=['GET', 'POST'])
