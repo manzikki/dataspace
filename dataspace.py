@@ -2,14 +2,14 @@
 Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2019
 """
 import os
-import csv, codecs, cStringIO
+import csv, codecs
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash
 from werkzeug.utils import secure_filename
+import numpy
 import pandas as pd
 from forms import LoginForm, UploadForm
 from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader
-
 
 
 app = Flask(__name__)
@@ -149,6 +149,9 @@ def compatible():
     Show/let user delare compatible fields. The compat_list is stored in a file
     that has comma-separated filename:fieldname rows.
     """
+    if session['username'] != ADMIN_USERNAME:
+        flash('Admin privileges required. Plase log in.')
+        return redirect(url_for('appmain'))
     #does the file exist?
     compat_list = []
     if os.path.isfile(app.config['SL']+"compat.file"):
@@ -197,7 +200,7 @@ def editsubmit():
             if not (fiter == "file" or fiter == "descr"):
                 mymeta.addfield(fiter, mydict[fiter])
     for fiter in mymeta.getfieldnames():
-        if mydict.has_key(fiter+"=unit") and mydict[fiter+"=unit"]:
+        if fiter+"=unit" in mydict and mydict[fiter+"=unit"]:
             unit = mydict[fiter+"=unit"]
             scale = mydict[fiter+"=scale"]
             eventness = mydict[fiter+"=eventness"]

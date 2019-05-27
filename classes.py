@@ -33,15 +33,22 @@ class UnicodeReader:
     which is encoded in the given encoding.
     """
     def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
-        f = UTF8Recoder(f, encoding)
-        self.reader = csv.reader(f, dialect=dialect, **kwds)
+        f1 = UTF8Recoder(f, encoding)
+        constr_ok = True
+        try:
+            self.reader = csv.reader(f1, dialect=dialect, **kwds)
+        except:
+            constr_ok = False
+        if not constr_ok:
+            self.reader = csv.reader(f, dialect=dialect, **kwds)
 
     def next(self):
         row = self.reader.next()
         return [unicode(s, "utf-8") for s in row]
 
     def __iter__(self):
-        return self
+        #for Python2 this should be just "self".
+        return self.reader
 
 class MetaInfo:
     """
@@ -169,15 +176,16 @@ class MetaInfo:
             reader = csv.reader(csv_file, delimiter=',', quotechar='"')
             for row in reader:
                 #print('* '.join(row))
-                if row[0] == 'FIELD':
-                    self.addfield(row[1], row[2])
-                    if len(row) > 3:
-                        #print("Adding "+str(row[3:]))
-                        self.addmeasurespec(row[1], ",".join(row[3:]))
-                if row[0] == 'descr':
-                    self.setdescr(row[1])
-                if row[0] == 'lines':
-                    self.setlines(row[1])
+                if len(row) > 0:
+                    if row[0] == 'FIELD':
+                        self.addfield(row[1], row[2])
+                        if len(row) > 3:
+                            #print("Adding "+str(row[3:]))
+                            self.addmeasurespec(row[1], ",".join(row[3:]))
+                    if row[0] == 'descr':
+                        self.setdescr(row[1])
+                    if row[0] == 'lines':
+                        self.setlines(row[1])
             self.set_formatted_fields()
 
     def write_to_file(self, directory, filen):
