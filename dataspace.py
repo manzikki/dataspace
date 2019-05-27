@@ -38,6 +38,10 @@ def appmain():
     username = ""
     if 'username' in session:
         username = session['username']
+    #check that we can write to the static directory
+    if not os.access(app.config['S'], os.W_OK):
+        return("Directory "+app.config['S']+" is not writable. \
+         Please follow the installation instructions.")
     return render_template('home.html', username=username, metas=mymetas.get())
 
 
@@ -50,7 +54,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         if form.username.data == ADMIN_USERNAME and form.password.data == ADMIN_PASSWORD:
-            flash('You have been logged in!', 'success')
+            #flash('You have been logged in!', 'success')
             session['username'] = ADMIN_USERNAME
             return redirect(url_for('appmain'))
         else:
@@ -77,6 +81,9 @@ def upload():
         fil = form.CSV_file.data
         dir_path = os.path.dirname(os.path.realpath(__file__))
         filename = secure_filename(fil.filename)
+        #already such file?
+        if os.path.isfile(app.config['SL']+filename):
+            pass #call another template to ask the user
         fil.save(os.path.join(
             dir_path, 'static', filename
         ))
@@ -133,6 +140,24 @@ def view():
                 rows.append(row)
             line_no = line_no + 1
     return render_template('view.html', file=myfile, headers=headers, rows=rows)
+
+@app.route('/compatible', methods=['GET', 'POST'])
+@app.route('/home/compatible', methods=['GET', 'POST'])
+#show/let user delare compatible fields. Should be available to admin only
+def compatible():
+    """
+    Show/let user delare compatible fields. The compat_list is stored in a file
+    that has comma-separated filename:fieldname rows.
+    """
+    #does the file exist?
+    compat_list = []
+    if os.path.isfile(app.config['SL']+"compat.file"):
+        with open(app.config['SL']+"compat.file", 'rU') as csv_file:
+            csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
+            for row in csv_reader:
+                compat_list.append(row)
+        csv_file.close()
+    return render_template('compat.html', compat=compat_list)
 
 
 @app.route("/edit", methods=['GET', 'POST'])
