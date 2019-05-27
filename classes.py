@@ -235,6 +235,7 @@ class MetaInfo:
             myhash = f
             myfhash = {}
             for mykey, _ in myhash.items():
+                myfhash['filename'] = self.name
                 myfhash['name'] = mykey
                 myfhash['descr'] = f[mykey]
                 myfhash['scale'] = self.get_scale(mykey)

@@ -152,15 +152,31 @@ def compatible():
     if session['username'] != ADMIN_USERNAME:
         flash('Admin privileges required. Plase log in.')
         return redirect(url_for('appmain'))
-    #does the file exist?
+    #get field information
+    dimmetas = [] #metas concerning dimensions, not measures
+    mymetalist = MetaList(app.config['S'])
+    mymetas = mymetalist.get()
+    #print(str(mymetas))
+    for meta in mymetas:
+        metafields = meta.get_fieldlist()
+        for fieldh in metafields:
+            #is this a measure or dimension?
+            if fieldh['unit']:
+                #cannot use this
+                pass
+            else:
+                #print(fieldh['filename']+":"+fieldh['name'])
+                dimmetas.append(fieldh)
+
     compat_list = []
+    #does the file exist?
     if os.path.isfile(app.config['SL']+"compat.file"):
         with open(app.config['SL']+"compat.file", 'rU') as csv_file:
             csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
             for row in csv_reader:
                 compat_list.append(row)
         csv_file.close()
-    return render_template('compat.html', compat=compat_list)
+    return render_template('compat.html', compat=compat_list, dimmetas=dimmetas)
 
 
 @app.route("/edit", methods=['GET', 'POST'])
