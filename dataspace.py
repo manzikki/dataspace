@@ -51,17 +51,22 @@ def utility_processor():
     """
     Define a function that can be used in a template
     """
-    def is_in_compat(filec, fieldc):
+    def is_in_compat(filea, fielda, fileb, fieldb):
         """
-        Check if filec and fieldc are in any compatibility declaration on the right side.
+        Check if filea,fielda,fileb,fieldb or fileb,fieldb,filea,fielda is listed
+        in the compat file.
         """
         if os.path.isfile(app.config['COMPAT']):
             with open(app.config['COMPAT'], 'rU') as csv_file:
                 csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
                 for row in csv_reader:
                     if len(row) == 4:
-                        if row[2] == filec and row[3] == fieldc:
+                        if row[0] == filea and row[1] == fielda and \
+                                     row[2] == fileb and row[3] == fieldb:
                             return True
+                        if row[2] == filea and row[3] == fielda and \
+                                     row[0] == fileb and row[1] == fieldb:
+                            return True                    
                     #print(str(row))
             csv_file.close()
         return False
@@ -192,7 +197,7 @@ def compatible():
             csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
             for row in csv_reader:
                 compat_list.append(row)
-                print(str(row))
+                #print(str(row))
         csv_file.close()
 
     #print(str(mymetas))

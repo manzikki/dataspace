@@ -22,7 +22,6 @@
 <div class="container">
 
       <h2>In file {{ fname }}, field</h2>
-      {{ is_in_compat("gdppc.csv", "Country Code") }}
       <table class="table" style="width: auto;" border="0">
       {% for d in filemetas %}
       <tr>
@@ -42,7 +41,7 @@
                   {% for key, value in l.items() %}
                      {% if value == f %}
                          {% if key == "filename" %}
-                             {% if not is_in_compat(f,l.name) %}
+                             {% if not is_in_compat(fname, d.name, f,l.name) %}
                           <li><a tabindex="-1" href="compatible-d?f1={{fname}}&fd1={{d.name}}&f2={{f}}&fd2={{l.name}}">  
                              {{ l.name }} ({{ l.descr }}) </a></li>
                              {% endif %}
@@ -64,6 +63,11 @@
                   {{ row[2] }} {{ row[3] }}
               {% endif %}
            {% endif %}
+           {% if row[2] == fname %}
+              {% if row[3] == d.name %}
+                  {{ row[0] }} {{ row[1] }}
+              {% endif %}
+           {% endif %}   
       {% endfor %}
       </td>
       </tr>
