@@ -1,17 +1,26 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Compatible fields</title>
-      <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<style>
+.dropdown-submenu {
+  position: relative;
+}
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+.dropdown-submenu .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -1px;
+}
+</style>
+</head>
+<body>
+   
+<div class="container">
 
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-
-  </head>
-  <body>
-    <div class="container">
       Sorry, not yet finished.<br/>
       In file {{ fname }}, field <br/>
       <table class="table" style="width: auto;" border="0">
@@ -19,28 +28,46 @@
       <tr>
       <td>{{ d.name }} </td><td> {{ d.descr }} </td> <td>
 
+        <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">is compatible with ..
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          {% for f in filenames %}
+          <br/>
+          <li class="dropdown-submenu">
+            <a class="test" tabindex="-1" href="#"> {{ f }} <span class="caret"></span></a>
+            <ul class="dropdown-menu">
 
-<div class="dropdown show">
-  <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    is compatible with ..
-  </a>
-
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-    {% for f in filenames %}
-    <a class="dropdown-item" href="#">{{ f }}</a>
-    {% endfor %}
-  </div>
-</div>
+              {% for l in othermetas %}
+                  {% for key, value in l.items() %}
+                     {% if value == f %}
+                         {% if key == "filename" %}
+                          <li><a tabindex="-1" href="compatible-d?f1={{fname}}">  {{ l.name }} ({{ l.descr }}) </a></li>
+                         {% endif %}
+                     {% endif %}
+                  {% endfor %}
+              {% endfor %}
+            </ul>
+          </li>
+          {% endfor %}
+        </ul>
+        </div>
       </td>
+
       </tr>
-      {% endfor %}
-      </table>
-    <br/>
+     {% endfor %}
+     </table>
+</div>
+<script>
+$(document).ready(function(){
+  $('.dropdown-submenu a.test').on("click", function(e){
+    $(this).next('ul').toggle();
+    e.stopPropagation();
+    e.preventDefault();
+  });
+});
+</script>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
-  </body>
+</body>
 </html>
 

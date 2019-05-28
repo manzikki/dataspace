@@ -184,7 +184,8 @@ def compatible():
             for row in csv_reader:
                 compat_list.append(row)
         csv_file.close()
-    return render_template('compat.html', compat=compat_list, fname=myfile, filemetas=filemetas,\
+
+    return render_template('compat2.html', compat=compat_list, fname=myfile, filemetas=filemetas,\
                             filenames=filenames, othermetas=dimmetas)
 
 
