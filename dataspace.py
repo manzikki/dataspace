@@ -32,6 +32,7 @@ def appmain():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     app.config['S'] = dir_path+"/static"
     app.config['SL'] = dir_path+"/static/"
+    app.config['COMPAT'] = dir_path+"/static/compat.file" #contains compatibility info
     if not app.config['U']:
         app.config['U'] = request.base_url
     mymetas = MetaList(app.config['S'])
@@ -143,13 +144,16 @@ def view():
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
-#show/let user delare compatible fields. Should be available to admin only
+#show/let user declare compatible fields. Should be available to admin only
 def compatible():
     """
-    Show/let user delare compatible fields that are compatible with some field in this file.
+    Show/let user declare compatible fields that are compatible with some field in this file.
     """
     mydict = request.form
-    myfile = mydict['file']
+    if 'file' in mydict:
+        myfile = mydict['file']
+    else:
+        myfile = file1 = request.args.get('file')
     if session['username'] != ADMIN_USERNAME:
         flash('Admin privileges required. Plase log in.')
         return redirect(url_for('appmain'))
@@ -178,16 +182,35 @@ def compatible():
 
     compat_list = []
     #does the file exist?
-    if os.path.isfile(app.config['SL']+"compat.file"):
-        with open(app.config['SL']+"compat.file", 'rU') as csv_file:
+    if os.path.isfile(app.config['COMPAT']):
+        with open(app.config['COMPAT'], 'rU') as csv_file:
             csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
             for row in csv_reader:
                 compat_list.append(row)
+                print(str(row))
         csv_file.close()
 
-    return render_template('compat2.html', compat=compat_list, fname=myfile, filemetas=filemetas,\
+    return render_template('compat.html', compat=compat_list, fname=myfile, filemetas=filemetas,\
                             filenames=filenames, othermetas=dimmetas)
 
+
+@app.route('/compatible-d', methods=['GET', 'POST'])
+@app.route('/home/compatible-d', methods=['GET', 'POST'])
+#store the information that the user just declared compatible. Should be available to admin only.
+def compatible_d():
+    """
+    Store the information that the user just declared compatible. Should be available to admin only.
+    """
+    file1 = request.args.get('f1')
+    field1 = request.args.get('fd1')
+    file2 = request.args.get('f2')
+    field2 = request.args.get('fd2')
+    print(file1+" "+field1+" "+file2+" "+field2)
+    #write the info into the compat file
+    cfile = open(app.config['COMPAT'], "a+")
+    cfile.write(file1+","+field1+","+file2+","+field2+"\n")
+    cfile.close()
+    return redirect(url_for('compatible', file=file1, **request.args))
 
 @app.route("/edit", methods=['GET', 'POST'])
 @app.route("/home/edit", methods=['GET', 'POST'])

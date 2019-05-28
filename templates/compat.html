@@ -21,8 +21,7 @@
    
 <div class="container">
 
-      Sorry, not yet finished.<br/>
-      In file {{ fname }}, field <br/>
+      <h2>In file {{ fname }}, field</h2>
       <table class="table" style="width: auto;" border="0">
       {% for d in filemetas %}
       <tr>
@@ -42,7 +41,7 @@
                   {% for key, value in l.items() %}
                      {% if value == f %}
                          {% if key == "filename" %}
-                          <li><a tabindex="-1" href="compatible-d?f1={{fname}}">  {{ l.name }} ({{ l.descr }}) </a></li>
+                          <li><a tabindex="-1" href="compatible-d?f1={{fname}}&fd1={{d.name}}&f2={{f}}&fd2={{l.name}}">  {{ l.name }} ({{ l.descr }}) </a></li>
                          {% endif %}
                      {% endif %}
                   {% endfor %}
@@ -53,11 +52,22 @@
         </ul>
         </div>
       </td>
-
+      <td>
+        <!-- last: are there rows already in compat that show compatibility with this file/field? -->
+      {% for row in compat %}
+           {% if row[0] == fname %}
+              {% if row[1] == d.name %}
+                  {{ row[2] }} {{ row[3] }}
+              {% endif %}
+           {% endif %}
+      {% endfor %}
+      </td>
       </tr>
      {% endfor %}
      </table>
+<button><a href="{{ url_for('appmain')}}">Done</a></button>
 </div>
+
 <script>
 $(document).ready(function(){
   $('.dropdown-submenu a.test').on("click", function(e){
