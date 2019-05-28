@@ -3,7 +3,7 @@ You do not need to install/configure a database.
 
 Installation of dependencies by python pip program:
 pip install flask
-pip install flask_wtf
+pip install flask-wtf
 pip install pandas
 
 Running:
@@ -28,7 +28,7 @@ Create directories, copy files and change ownerships:
 
 mkdir /var/www/flask
 cp -r * /var/www/flask 
-chown www-data /var/www/flask/static
+chown -R www-data /var/www/flask/static
 
 Add the following stuff at the end of /etc/apache2/sites-enabled/000-default.conf inside of </VirtualHost> tags:
 
