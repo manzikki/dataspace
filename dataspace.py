@@ -2,7 +2,8 @@
 Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2019
 """
 import os
-import csv, codecs
+import csv
+import codecs
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash
 from werkzeug.utils import secure_filename
@@ -45,6 +46,26 @@ def appmain():
          Please follow the installation instructions.")
     return render_template('home.html', username=username, metas=mymetas.get())
 
+@app.context_processor
+def utility_processor():
+    """
+    Define a function that can be used in a template
+    """
+    def is_in_compat(filec, fieldc):
+        """
+        Check if filec and fieldc are in any compatibility declaration on the right side.
+        """
+        if os.path.isfile(app.config['COMPAT']):
+            with open(app.config['COMPAT'], 'rU') as csv_file:
+                csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
+                for row in csv_reader:
+                    if len(row) == 4:
+                        if row[2] == filec and row[3] == fieldc:
+                            return True
+                    #print(str(row))
+            csv_file.close()
+        return False
+    return dict(is_in_compat=is_in_compat)
 
 @app.route("/login", methods=['GET', 'POST'])
 @app.route("/home/login", methods=['GET', 'POST'])
@@ -163,6 +184,17 @@ def compatible():
     filenames = []   #names of files, but not myfile
     allmetalist = MetaList(app.config['S'])
     allmetas = allmetalist.get()
+
+    compat_list = []
+    #does the file exist?
+    if os.path.isfile(app.config['COMPAT']):
+        with open(app.config['COMPAT'], 'rU') as csv_file:
+            csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
+            for row in csv_reader:
+                compat_list.append(row)
+                print(str(row))
+        csv_file.close()
+
     #print(str(mymetas))
     for meta in allmetas:
         metafields = meta.get_fieldlist()
@@ -187,7 +219,7 @@ def compatible():
             csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
             for row in csv_reader:
                 compat_list.append(row)
-                print(str(row))
+                #print(str(row))
         csv_file.close()
 
     return render_template('compat.html', compat=compat_list, fname=myfile, filemetas=filemetas,\
@@ -205,7 +237,7 @@ def compatible_d():
     field1 = request.args.get('fd1')
     file2 = request.args.get('f2')
     field2 = request.args.get('fd2')
-    print(file1+" "+field1+" "+file2+" "+field2)
+    #print(file1+" "+field1+" "+file2+" "+field2)
     #write the info into the compat file
     cfile = open(app.config['COMPAT'], "a+")
     cfile.write(file1+","+field1+","+file2+","+field2+"\n")
@@ -297,7 +329,7 @@ def exportrdf():
         rdf.write("</rdf:RDF>")
         rdf.close()
         myurl = app.config['U']+'/static/tmp.rdf'
-        myurl = myurl.replace("//static","/static")
+        myurl = myurl.replace("//static", "/static")
         return render_template('rdfexport.html', url=myurl)
     return redirect(url_for('appmain'))
 
