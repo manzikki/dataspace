@@ -42,8 +42,8 @@ def appmain():
         username = session['username']
     #check that we can write to the static directory
     if not os.access(app.config['S'], os.W_OK):
-        return("Directory "+app.config['S']+" is not writable. \
-         Please follow the installation instructions.")
+        return "Directory "+app.config['S']+" is not writable. \
+         Please follow the installation instructions."
     return render_template('home.html', username=username, metas=mymetas.get())
 
 @app.context_processor
@@ -66,7 +66,7 @@ def utility_processor():
                             return True
                         if row[2] == filea and row[3] == fielda and \
                                      row[0] == fileb and row[1] == fieldb:
-                            return True                    
+                            return True
                     #print(str(row))
             csv_file.close()
         return False
@@ -92,7 +92,15 @@ def check_file_ok(filename):
     """
     Check that the file is readable by csv reader, TBD.
     """
-    return ""
+    if os.stat(app.config['SL']+filename).st_size == 0:
+        return "File is empty."
+    myf = open(app.config['SL']+filename, "r")
+    myline = myf.readline()
+    myf.close()
+    #check that the line contains commas
+    if "," in myline:
+        return ""
+    return "First line of the file does not contain commas."
 
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
@@ -106,13 +114,12 @@ def upload():
     form = UploadForm()
     if form.validate_on_submit():
         fil = form.CSV_file.data
-        dir_path = os.path.dirname(os.path.realpath(__file__))
         filename = secure_filename(fil.filename)
         #already such file?
         if os.path.isfile(app.config['SL']+filename):
             pass #call another template to ask the user
         fil.save(os.path.join(
-            dir_path, 'static', filename
+            app.config['SL'], filename
         ))
         #if the file is ok, prepare the fields for the dialog
         if check_file_ok(filename) == "":
@@ -124,7 +131,7 @@ def upload():
                 #remove the BOM
                 if row1:
                     r1first = row1[0]
-                    while (ord(r1first[0]) > 123):
+                    while  ord(r1first[0]) > 123:
                         r1first = r1first[1:]
                     row1[0] = r1first
             csv_file.close()
@@ -179,7 +186,7 @@ def compatible():
     if 'file' in mydict:
         myfile = mydict['file']
     else:
-        myfile = file1 = request.args.get('file')
+        myfile = request.args.get('file')
     if session['username'] != ADMIN_USERNAME:
         flash('Admin privileges required. Plase log in.')
         return redirect(url_for('appmain'))

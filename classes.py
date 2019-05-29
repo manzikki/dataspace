@@ -18,8 +18,8 @@ class UTF8Recoder:
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
     """
-    def __init__(self, f, encoding):
-        self.reader = codecs.getreader(encoding)(f)
+    def __init__(self, fil, encoding):
+        self.reader = codecs.getreader(encoding)(fil)
 
     def __iter__(self):
         return self
@@ -32,15 +32,15 @@ class UnicodeReader:
     A CSV reader which will iterate over lines in the CSV file "f",
     which is encoded in the given encoding.
     """
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
-        f1 = UTF8Recoder(f, encoding)
+    def __init__(self, fil, dialect=csv.excel, encoding="utf-8", **kwds):
+        fil1 = UTF8Recoder(fil, encoding)
         constr_ok = True
         try:
-            self.reader = csv.reader(f1, dialect=dialect, **kwds)
+            self.reader = csv.reader(fil1, dialect=dialect, **kwds)
         except:
             constr_ok = False
         if not constr_ok:
-            self.reader = csv.reader(f, dialect=dialect, **kwds)
+            self.reader = csv.reader(fil, dialect=dialect, **kwds)
 
     def next(self):
         row = self.reader.next()
@@ -169,7 +169,7 @@ class MetaInfo:
         """
         if not filen.endswith(".meta"):
             filen = filen + ".meta"
-        nometa = filen.replace(".meta","")
+        nometa = filen.replace(".meta", "")
         if os.path.isfile(directory+"/"+nometa):
             self.fsize = os.path.getsize(directory+"/"+nometa)
         with open(directory+"/"+filen) as csv_file:
@@ -266,7 +266,7 @@ class MetaList:
         files = []
         self.metas = []
         # r=root, d=directories, f = files
-        for r, d, f in os.walk(filedir):
+        for _, _, f in os.walk(filedir):
             for filen in f:
                 if '.meta' in filen:
                     files.append(filen)
