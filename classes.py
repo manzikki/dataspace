@@ -300,3 +300,39 @@ class MetaList:
         for m in self.metas:
             s = s + m.get_as_string()
         return s
+
+class CollectionList:
+    """
+    A collection is a directory that contains files and meta-files.
+    """
+    dirs = []
+    current = ""
+
+    def __init__(self, filedir):
+        # constructor: build the list "dirs"
+        self.current = ""
+        self.metas = []
+        self.dirs = []
+        # r=root, d=directories, f = files
+        for _, ds, _ in os.walk(filedir):
+            for dire in ds:
+                self.dirs.append(dire)
+                #print(dire)
+
+    def get(self):
+        """
+        Returns the list.
+        """
+        return self.dirs
+
+    def setcurrent(self, cur):
+        """
+        Sets the current collection.
+        """
+        self.current = cur
+
+    def getcurrent(self):
+        """
+        Gets the current collection.
+        """
+        return self.current

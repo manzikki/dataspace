@@ -10,14 +10,15 @@ from werkzeug.utils import secure_filename
 import numpy
 import pandas as pd
 from forms import LoginForm, UploadForm
-from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader
-
+from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13'
 app.config['S'] = ''  #put the path to 'static' in it in appmain
 app.config['SL'] = '' #same but with "/" at the end
 app.config['U'] = ''  #url base like "/" or "/home"
+app.config['COLLIST'] = []
+
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'FpacNida986!'
 TMPRDFNAME = "tmp.rdf"
@@ -36,6 +37,13 @@ def appmain():
     app.config['COMPAT'] = dir_path+"/static/compat.file" #contains compatibility info
     if not app.config['U']:
         app.config['U'] = request.base_url
+    if not app.config['COLLIST']:
+        app.config['COLLIST'] = CollectionList(app.config['S'])
+    
+    if app.config['COLLIST'].getcurrent():
+        app.config['S'] = dir_path+"/static/"+app.config['COLLIST'].getcurrent()
+        app.config['SL'] = dir_path+"/static/"+app.config['COLLIST'].getcurrent()+"/"
+    
     mymetas = MetaList(app.config['S'])
     username = ""
     if 'username' in session:
@@ -44,7 +52,8 @@ def appmain():
     if not os.access(app.config['S'], os.W_OK):
         return "Directory "+app.config['S']+" is not writable. \
          Please follow the installation instructions."
-    return render_template('home.html', username=username, metas=mymetas.get())
+    return render_template('home.html', username=username, metas=mymetas.get(),
+                            coldirs=app.config['COLLIST'].get(), curdir=app.config['COLLIST'].getcurrent())
 
 @app.context_processor
 def utility_processor():
@@ -344,6 +353,27 @@ def exportrdf():
         myurl = myurl.replace("//static", "/static")
         return render_template('rdfexport.html', url=myurl)
     return redirect(url_for('appmain'))
+
+@app.route('/changecollection', methods=['GET', 'POST'])
+@app.route('/home/changecollection', methods=['GET', 'POST'])
+def changecollection():
+    """
+    Change the collection.
+    """
+    mycoll = ""
+    if "coll" in request.args:
+        mycoll = request.args["coll"]
+    app.config['COLLIST'].setcurrent(mycoll)
+    return redirect(url_for('appmain'))
+
+@app.route('/renamecollection', methods=['GET', 'POST'])
+@app.route('/home/renamecollection', methods=['GET', 'POST'])
+def renamecollection():
+    """
+    Rename the main collection. TBD.
+    """
+    return("Sorry, not yet implemented.")
+ 
 
 TMPCUBENAME = "tmpcube.csv"
 cubefields = []

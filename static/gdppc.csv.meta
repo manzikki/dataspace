@@ -1,4 +1,4 @@
-descr,Countries by GDP 2000-2017 https://data.worldbank.org/indicator/NY.GDP.PCAP.KN
+descr,Countries by GDP per capita 2000-2017 https://data.worldbank.org/indicator/NY.GDP.PCAP.KN
 FIELD,2015,GDP 2015,USD,ratio,reckoning
 FIELD,2016,GDP 2016,USD,ratio,reckoning
 FIELD,2010,GDP 2010,USD,ratio,reckoning

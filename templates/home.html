@@ -1,6 +1,15 @@
 {% extends "layout.html" %}
-{% block content %}
 
+{% block content %}
+Collections: 
+{% if curdir == "" %}
+    <a href="renamecollection"><button class="btn btn-default">Rename collection</button> </a>
+{% else %}
+    <a href="changecollection?coll="><button class="btn btn-default"> Main </button> </a>
+{% endif %}
+{% for cdir in coldirs %}
+    <a href="changecollection?coll={{cdir}}"><button class="btn btn-default"> {{ cdir }} </button> </a>
+{% endfor %}
 <table id="datasets" border="1" class="table">
 <tr>
 <thead class="thead-light">
