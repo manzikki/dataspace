@@ -271,6 +271,7 @@ class MetaList:
                 if '.meta' in filen:
                     files.append(filen)
                     #print(filen)
+            break #no recurse to subdirs
         for f in files:
             #open the meta file and read the CSV
             myinfo = MetaInfo(f)
@@ -306,6 +307,7 @@ class CollectionList:
     A collection is a directory that contains files and meta-files.
     """
     dirs = []
+    files = []
     current = ""
 
     def __init__(self, filedir):
@@ -313,17 +315,29 @@ class CollectionList:
         self.current = ""
         self.metas = []
         self.dirs = []
+        self.files = []
         # r=root, d=directories, f = files
-        for _, ds, _ in os.walk(filedir):
+        for _, ds, f in os.walk(filedir):
             for dire in ds:
                 self.dirs.append(dire)
-                #print(dire)
+            break
+            for filen in f:
+                if '.meta' in filen:
+                    self.files.append(filen)
+            break
+            #print(dire)
 
     def get(self):
         """
-        Returns the list.
+        Returns the list (directories).
         """
         return self.dirs
+
+    def getfiles(self):
+        """
+        Returns the list of meta files.
+        """
+        return self.files
 
     def setcurrent(self, cur):
         """

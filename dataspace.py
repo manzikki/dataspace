@@ -2,8 +2,8 @@
 Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2019
 """
 import os
-import csv
 import codecs
+from shutil import copyfile
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash
 from werkzeug.utils import secure_filename
@@ -23,7 +23,7 @@ ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'FpacNida986!'
 TMPRDFNAME = "tmp.rdf"
 MAX_LINES = 500 #max number of lines in view
-
+MAX_COLNAME = 20 #max chars in collection
 
 @app.route("/")
 @app.route("/home")
@@ -39,11 +39,10 @@ def appmain():
         app.config['U'] = request.base_url
     if not app.config['COLLIST']:
         app.config['COLLIST'] = CollectionList(app.config['S'])
-    
     if app.config['COLLIST'].getcurrent():
         app.config['S'] = dir_path+"/static/"+app.config['COLLIST'].getcurrent()
         app.config['SL'] = dir_path+"/static/"+app.config['COLLIST'].getcurrent()+"/"
-    
+
     mymetas = MetaList(app.config['S'])
     username = ""
     if 'username' in session:
@@ -53,7 +52,8 @@ def appmain():
         return "Directory "+app.config['S']+" is not writable. \
          Please follow the installation instructions."
     return render_template('home.html', username=username, metas=mymetas.get(),
-                            coldirs=app.config['COLLIST'].get(), curdir=app.config['COLLIST'].getcurrent())
+                           coldirs=app.config['COLLIST'].get(),
+                           curdir=app.config['COLLIST'].getcurrent())
 
 @app.context_processor
 def utility_processor():
@@ -93,8 +93,7 @@ def login():
             #flash('You have been logged in!', 'success')
             session['username'] = ADMIN_USERNAME
             return redirect(url_for('appmain'))
-        else:
-            flash('Login Unsuccessful. Please check username and password', 'danger')
+    flash('Login Unsuccessful. Please check username and password', 'danger')
     return render_template('login.html', title='Login', form=form)
 
 def check_file_ok(filename):
@@ -370,10 +369,56 @@ def changecollection():
 @app.route('/home/renamecollection', methods=['GET', 'POST'])
 def renamecollection():
     """
-    Rename the main collection. TBD.
+    Show form to rename the main collection.
     """
-    return("Sorry, not yet implemented.")
- 
+    #check that there are some files here
+    if app.config['COLLIST'].getcurrent():
+        flash("You can only rename the main collection.")
+        return redirect(url_for('appmain'))
+    if not app.config['COLLIST'].getfiles():
+        flash("Cannot rename an empty collection.")
+        return redirect(url_for('appmain'))
+    return render_template('rename.html')
+
+@app.route('/renamesubmit', methods=['GET', 'POST'])
+@app.route('/home/renamesubmit', methods=['GET', 'POST'])
+def renamesubmit():
+    """
+    Rename the main collection.
+    """
+    if 'username' not in session:
+        flash("Not authenticated.")
+        return redirect(url_for('appmain'))
+    #get the name parameter
+    mydict = request.form
+    if "name" not in mydict:
+        flash("Invalid input.")
+        return redirect(url_for('appmain'))
+    myname = mydict['name']
+    myname = myname[0:MAX_COLNAME]
+    #is this a valid name?
+    if not myname.isalnum():
+        flash("Only alphanumeric characters allowed.")
+        return redirect(url_for('appmain'))
+    #if we are here it's ok to make the directory
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    newdir = dir_path+"/static/"+myname
+    try:
+        os.mkdir(newdir)
+    except:
+        flash("Cannot create collection.")
+        return redirect(url_for('appmain'))
+    #move all the files to the new directory
+    for _, _, files in os.walk(dir_path+"/static"):
+        for filen in files:
+            if filen.endswith(".meta") or filen.endswith(".csv") or filen.endswith(".file"):
+                src = os.path.join(dir_path, "static", filen)
+                dst = os.path.join(dir_path, "static", myname, filen)
+                if os.path.isfile(src):
+                    copyfile(src, dst)
+                    os.remove(src)
+        break #no recurse to subdirs
+    return redirect(url_for('appmain'))
 
 TMPCUBENAME = "tmpcube.csv"
 cubefields = []

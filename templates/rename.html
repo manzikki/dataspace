@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>Rename the main collection</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+  </head>
+  <body>
+    <div class="container">
+    
+    <h2>New name for collection</h2>
+
+    <form method="post" action="renamesubmit">
+    <input size="20" name="name" pattern="[A-Za-z0-9]*" required/>
+    <button type="submit">OK</button> <button><a href="{{ url_for('appmain')}}">Cancel</a></button></td>
+    </form>
+    </div>
+  </body>
+</html>
+
