@@ -43,6 +43,9 @@ class UnicodeReader:
             self.reader = csv.reader(fil, dialect=dialect, **kwds)
 
     def next(self):
+        """
+        Returns next
+        """
         row = self.reader.next()
         return [unicode(s, "utf-8") for s in row]
 
@@ -176,7 +179,8 @@ class MetaInfo:
             reader = csv.reader(csv_file, delimiter=',', quotechar='"')
             for row in reader:
                 #print('* '.join(row))
-                if len(row) > 0:
+                #len(row) > 0:
+                if row:
                     if row[0] == 'FIELD':
                         self.addfield(row[1], row[2])
                         if len(row) > 3:
@@ -309,23 +313,45 @@ class CollectionList:
     dirs = []
     files = []
     current = ""
+    filedir = ""
 
     def __init__(self, filedir):
-        # constructor: build the list "dirs"
+        # constructor: build the list dirs and files
         self.current = ""
         self.metas = []
         self.dirs = []
         self.files = []
+        self.filedir = filedir
         # r=root, d=directories, f = files
-        for _, ds, f in os.walk(filedir):
+        for _, ds, _ in os.walk(filedir):
             for dire in ds:
                 self.dirs.append(dire)
             break
+
+        for _, _, f in os.walk(filedir):
             for filen in f:
                 if '.meta' in filen:
                     self.files.append(filen)
             break
-            #print(dire)
+
+    def reinit(self):
+        """
+        Re-read data.
+        """
+        self.current = ""
+        self.metas = []
+        self.dirs = []
+        self.files = []
+        for _, ds, _ in os.walk(self.filedir):
+            for dire in ds:
+                self.dirs.append(dire)
+            break
+
+        for _, _, f in os.walk(self.filedir):
+            for filen in f:
+                if '.meta' in filen:
+                    self.files.append(filen)
+            break
 
     def get(self):
         """

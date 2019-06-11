@@ -51,7 +51,12 @@ def appmain():
     if not os.access(app.config['S'], os.W_OK):
         return "Directory "+app.config['S']+" is not writable. \
          Please follow the installation instructions."
-    return render_template('home.html', username=username, metas=mymetas.get(),
+    currentcoldir = "static"
+    if app.config['COLLIST'].getcurrent():
+        currentcoldir = "static/"+app.config['COLLIST'].getcurrent()
+    return render_template('home.html', username=username,
+                           currentcoldir=currentcoldir,
+                           metas=mymetas.get(),
                            coldirs=app.config['COLLIST'].get(),
                            curdir=app.config['COLLIST'].getcurrent())
 
@@ -318,7 +323,10 @@ def printurls():
     Route for printing the names of all the files.
     """
     mymetas = MetaList(app.config['S'])
-    return render_template('urls.html', req=request.url_root, metas=mymetas.get())
+    currentcoldir = "static"
+    if app.config['COLLIST'].getcurrent():
+        currentcoldir = "static/"+app.config['COLLIST'].getcurrent()
+    return render_template('urls.html', req=request.url_root, cdir=currentcoldir, metas=mymetas.get())
 
 
 # route for handling exportrdf (export the CSV values file as RDF)
@@ -418,6 +426,8 @@ def renamesubmit():
                     copyfile(src, dst)
                     os.remove(src)
         break #no recurse to subdirs
+    #re-init the collection list to get the new collection in it
+    app.config['COLLIST'].reinit()
     return redirect(url_for('appmain'))
 
 TMPCUBENAME = "tmpcube.csv"

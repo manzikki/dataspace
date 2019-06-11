@@ -2,7 +2,7 @@
 {% block content %}
 
 {% for entry in metas %}
-{{ req }}/static/{{entry.name}}
+{{ req }}{{cdir}}/{{entry.name}}
 {% endfor %}
 
 {% endblock content %}
