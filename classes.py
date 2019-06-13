@@ -4,6 +4,7 @@ Classes for simple dataspace manager. Marko Niinimaki, niinimakim@webster.ac.th,
 import os
 import csv
 import codecs
+import sys
 
 def count_lines(fullname):
     """ counts the lines in given file, returns the number of lines """
@@ -49,8 +50,12 @@ class UnicodeReader:
         row = self.reader.next()
         return [unicode(s, "utf-8") for s in row]
 
+    def __next__(self):
+        row = self.reader.next()
+        return [unicode(s, "utf-8") for s in row]
+
     def __iter__(self):
-        #for Python2 this should be just "self".
+        #for Python2 this should be just "self" (self.reader)
         return self.reader
 
 class MetaInfo:

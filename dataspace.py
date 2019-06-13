@@ -140,17 +140,18 @@ def upload():
             #read the first line of file to get field names
             with open(app.config['SL']+filename, 'rU') as csv_file: #,'rU'
                 reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
-                row1 = next(reader)
-                #remove the BOM
-                if row1:
-                    r1first = row1[0]
-                    while  ord(r1first[0]) > 123:
-                        r1first = r1first[1:]
-                    row1[0] = r1first
+                for row in reader: #read only 1 line
+                    #remove the BOM
+                    if row:
+                        r1first = row[0]
+                        while  ord(r1first[0]) > 123:
+                            r1first = r1first[1:]
+                        row[0] = r1first
+                    break
             csv_file.close()
-            if row1:
+            if row:
                 fieldlist = []
-                for riter in row1:
+                for riter in row:
                     myhash = {}
                     myhash['name'] = riter
                     myhash['descr'] = ""
