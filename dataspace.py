@@ -101,9 +101,9 @@ def login():
     flash('Login Unsuccessful. Please check username and password', 'danger')
     return render_template('login.html', title='Login', form=form)
 
-def check_file_ok(filename):
+def file_not_ok(filename):
     """
-    Check that the file is readable by csv reader, TBD.
+    Check that the file is readable by csv reader.
     """
     if os.stat(app.config['SL']+filename).st_size == 0:
         return "File is empty."
@@ -135,7 +135,10 @@ def upload():
             app.config['SL'], filename
         ))
         #if the file is ok, prepare the fields for the dialog
-        if check_file_ok(filename) == "":
+        if file_not_ok(filename):
+            flash(file_not_ok(filename))
+            return redirect(url_for('appmain'))
+        else:
             row1 = []
             #read the first line of file to get field names
             with open(app.config['SL']+filename, 'rU') as csv_file: #,'rU'
