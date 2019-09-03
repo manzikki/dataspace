@@ -3,6 +3,8 @@ Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac
 """
 import os
 import codecs
+import hashlib
+import base64
 from shutil import copyfile
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash
@@ -32,7 +34,7 @@ def appmain():
     Main route, shows the main page.
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    app.config['S'] = dir_path+"/static"
+    app.config['S'] = os.path.join(dir_path,"static")
     app.config['SL'] = dir_path+"/static/"
     app.config['COMPAT'] = dir_path+"/static/compat.file" #contains compatibility info
     if not app.config['U']:
@@ -343,21 +345,26 @@ def exportrdf():
     #rdf headers to be written
     fheaders = """<?xml version='1.0'?>
 <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#' xmlns:a='http://www.example.org/'>
-    """
+"""
     mydict = request.form
     myfile = mydict['file']
     #print(file)
     if myfile:
+        #get a short hash of the file. we'll use it for ID
+        myid = myfile.encode('utf-8')
+        myid = hashlib.md5(myid).digest()
+        myid = str(base64.b64encode(myid));
+        myid = myid.replace('=', '')
+        myid = myid.replace('\'', '')
         #open the CVS file that the user wants
         cvsdf = pd.read_csv(app.config['SL']+myfile)
-        rdf = open(app.config['SL']+TMPRDFNAME, 'w')
+        rdf = open(os.path.join(app.config['S'],TMPRDFNAME), 'w')
         rdf.write(fheaders)
         for index, row in cvsdf.iterrows():
-            rdf.write("<Description about=\"I"+str(index)+"\" ")
+            rdf.write("<Description about=\""+myid+str(index)+"\" ")
             for dfh in cvsdf:
-                rdf.write(dfh+"=\""+str(row[dfh]).replace("\"", "")+"\" ")
+                rdf.write("a:"+dfh+"=\""+str(row[dfh]).replace("\"", "")+"\" ")
             rdf.write("/>\n")
-        #write the real contents as: <RDF:Seq about="FILENAME"> <RDF:li> .. </RDF:li>
         rdf.write("</rdf:RDF>")
         rdf.close()
         myurl = app.config['U']+'/static/tmp.rdf'
