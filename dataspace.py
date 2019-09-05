@@ -344,7 +344,7 @@ def exportrdf():
     """
     #rdf headers to be written
     fheaders = """<?xml version='1.0'?>
-<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#' xmlns:a='http://www.example.org/'>
+<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#' xmlns:a='http://www.olaprdf.org/'>
 """
     mydict = request.form
     myfile = mydict['file']
