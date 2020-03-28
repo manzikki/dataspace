@@ -356,7 +356,7 @@ def exportrdf():
         myid = myid.replace('\'', '')
         cvsdf = pd.read_csv(app.config['SL']+myfile)
         for index, row in cvsdf.iterrows():
-            mystr = "<Description about=\""+myid+str(index)+"\" "
+            mystr = "<rdf:Description rdf:about=\""+myid+str(index)+"\" "
             for dfh in cvsdf:
                 mystr += "a:"+dfh+"=\""+str(row[dfh]).replace("\"", "")+"\" "
             mystr += "/>\n"
