@@ -23,7 +23,8 @@ app.config['COLLIST'] = []
 
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'FpacNida986!'
-MAX_LINES = 500 #max number of lines in view
+MAX_SHOWN_LINES = 500 #max number of lines in view
+MAX_COUNTED_LINES = 10000
 MAX_COLNAME = 20 #max chars in collection
 
 @app.route("/")
@@ -187,11 +188,15 @@ def view():
             if line_no == 0:
                 headers = row
             else:
-                if line_no >= 500:
+                if line_no <= MAX_SHOWN_LINES:
+                    rows.append(row)
+                if line_no > MAX_COUNTED_LINES:
                     break
-                rows.append(row)
             line_no = line_no + 1
-    return render_template('view.html', file=myfile, headers=headers, rows=rows)
+    shownum = str(line_no)
+    if line_no > MAX_COUNTED_LINES:
+        shownum = "More than " + str(MAX_COUNTED_LINES)
+    return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
