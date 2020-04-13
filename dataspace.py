@@ -542,10 +542,11 @@ def cube():
         #print "Looking for field "+field1+" or "+field2
         #print "from "+file1+" "+file2
         #print "cube has "+str(cubefiles)
+
         if file1 == "cube" or file2 == "cube":
             #print(str(ok_files))
             #find out which file in cube has this field
-            if file1 == cube:
+            if file1 == "cube":
                 #we need to get field1's real file to file1
                 for fname in cubefiles:
                     meta = mymetalist.get_meta_by_name(fname)
