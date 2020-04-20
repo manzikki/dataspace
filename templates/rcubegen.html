@@ -8,6 +8,11 @@
     <div class="container">
     Download the cube <a href="{{ url_for('static', filename='tmpcube.csv') }}">here</a>.
     <br/>
+
+       <form method="post" action="view"> <input name="file" type="hidden" value="tmpcube.csv">
+       <button class="btn btn-secondary" type="submit">View</button></form>
+
+    <br/> 
     <form action="exportrdf" method="post"> <input name="file" type="hidden" value="tmpcube.csv">
         <button class="btn btn-secondary" type="submit">Export RDF</button></form>
     <br/>
