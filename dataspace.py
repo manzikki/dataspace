@@ -640,7 +640,7 @@ def cube():
         #write it into a file
         pdcube.to_csv(app.config['SL']+TMPCUBENAME, encoding='utf-8', index=False)
         cube_round = 0 #reset
-        return render_template('rcubegen.html')
+        return render_template('rcubegen.html', baseurl=request.base_url)
 
     #default if nothing matched
     return appmain()
