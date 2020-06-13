@@ -1,5 +1,5 @@
 """
-Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2019
+Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2017-2020
 """
 import os
 import codecs
@@ -16,6 +16,7 @@ from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionLi
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13'
+#app.config["APPLICATION_ROOT"] = "/home"
 app.config['S'] = ''  #put the path to 'static' in it in appmain
 app.config['SL'] = '' #same but with "/" at the end
 app.config['U'] = ''  #url base like "/" or "/home"
@@ -27,7 +28,7 @@ MAX_SHOWN_LINES = 500 #max number of lines in view
 MAX_COUNTED_LINES = 10000
 MAX_COLNAME = 20 #max chars in collection
 
-@app.route("/")
+
 @app.route("/home")
 def appmain():
     """
@@ -117,6 +118,18 @@ def file_not_ok(filename):
         return ""
     return "First line of the file does not contain commas."
 
+
+@app.route("/new", methods=['GET', 'POST'])
+@app.route("/home/new", methods=['GET', 'POST'])
+#create a new model for a CSV file. Not yet finished. For admin only.
+def newcvs():
+    """
+    Create a new model for a CSV file. Not yet finished. For admin only.
+    """
+    if 'username' not in session:
+        return redirect(url_for('appmain'))
+    return render_template('designnewcsv.html')    
+    
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
 #file upload. Should be available to admin only
@@ -141,28 +154,42 @@ def upload():
             flash(file_not_ok(filename))
             return redirect(url_for('appmain'))
         else:
-            row1 = []
+            row = []
+            row2 = []
             #read the first line of file to get field names
             with open(app.config['SL']+filename, 'rU') as csv_file: #,'rU'
                 reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
-                for row in reader: #read only 1 line
+                rowno = 0
+                for row in reader: #read only 1 line, containing headers
                     #remove the BOM
                     if row:
                         r1first = row[0]
                         while  ord(r1first[0]) > 123:
                             r1first = r1first[1:]
                         row[0] = r1first
-                    break
+                        break
+                for row_sample in reader: #read the second line only
+                    rowno += 1
+                    if row_sample and rowno == 2:
+                        row2 = row_sample
+                        #print(str(row2))
+                        break
+                    
             csv_file.close()
             if row:
                 fieldlist = []
+                colno = 0
                 for riter in row:
                     myhash = {}
                     myhash['name'] = riter
-                    myhash['descr'] = ""
+                    myhash['descr'] = riter
                     myhash['unit'] = ''
                     myhash['scale'] = ''
                     myhash['eventness'] = ''
+                    myhash['sample'] = ""
+                    if len(row2) > colno:
+                        myhash['sample'] = row2[colno]
+                    colno += 1
                     fieldlist.append(myhash)
                 return render_template('fileedit.html', file=filename, descr="",\
                                        fieldlist=fieldlist)
