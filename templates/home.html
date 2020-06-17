@@ -29,7 +29,7 @@ Collections:
 	   <button class="btn btn-secondary"><a style="color:white" href="{{currentcoldir}}/{{ entry.name }}">Download</a> </button> 
 	  </td><td>
        <form action="home/view" method="post"> <input name="file" type="hidden" value="{{ entry.name }}">
-       <button class="btn btn-secondary" type="submit">View</button></form>
+       <button class="btn btn-secondary" type="submit">View/Edit</button></form>
       </td>
       <td>
       	<form action="home/exportrdf" method="post"> <input name="file" type="hidden" value="{{ entry.name }}">
@@ -42,10 +42,10 @@ Collections:
 <td> {% autoescape false %} {{ entry.formatted_fields }} {% endautoescape %} </td>
 <td> 
 {% if username != "" %}
- <form action="home/edit" method="post">
+ <form action="{{ url_for('editmeta') }}" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}"> 
- <button class="btn btn-secondary btn-block" type="submit">Edit</button></form><br/>
- <form action="home/compatible" method="post">
+ <button class="btn btn-secondary btn-block" type="submit">Edit metadata</button></form><br/>
+ <form action="{{ url_for('compatible') }}" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}"> 
  <button class="btn btn-secondary btn-block" type="submit">Compatibility</button></form> 
 </td>
@@ -54,6 +54,6 @@ Collections:
 </tr>
 </table>
 
-<button class="btn btn-secondary"><a style="color:white" href="home/printurls">Get all dataset names</a> </button> 
+<button class="btn btn-secondary"><a style="color:white" href=" {{ url_for('printurls') }}">Get all dataset names</a> </button> 
 
 {% endblock content %}

@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>View</title>
+    <title>Edit</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -11,20 +11,30 @@
 
     {{ file }} - {{ num }} rows
     <br/>
+    
     <table class="table">
     <tr>
     <thead class="thead-light">
     {% for entry in headers %}
     <th>  {{ entry }} </th>
     {% endfor %}
+    <th></th>
     </thead>
      </tr>
+    {% set rowcount = [0] %}
     {% for row in rows %}
+    <form action="editsave" method="post">
     <tr>
+      {% if rowcount.append(rowcount.pop() + 1) %}{% endif %}
+      {% set colcount = [0] %}
       {% for col in row %}
-      <td>{{ col }}</td>
-      {% endfor %}  
+       {% if colcount.append(colcount.pop() + 1) %}{% endif %}
+      <td><input name="{{rowcount}}-{{colcount}}" type="text" value="{{ col }}"/></td>
+      {% endfor %}
+      <input name="fname" type="hidden" value="{{ file }}"/>
+      <td><input type="submit" value="Save changes"/></td>
     </tr>
+    </form>
     {% endfor %}
     </table>
     </div>

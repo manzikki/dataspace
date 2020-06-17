@@ -1,11 +1,13 @@
 """
 Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2017-2020
 """
+import re
 import os
 import codecs
+import tempfile
 import hashlib
 import base64
-from shutil import copyfile
+from shutil import move
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash, Response
 from werkzeug.utils import secure_filename
@@ -21,6 +23,7 @@ app.config['S'] = ''  #put the path to 'static' in it in appmain
 app.config['SL'] = '' #same but with "/" at the end
 app.config['U'] = ''  #url base like "/" or "/home"
 app.config['COLLIST'] = []
+app.config['NEWCSVFIEDLS'] = [] #used by the 'new' function
 
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'FpacNida986!'
@@ -28,11 +31,13 @@ MAX_SHOWN_LINES = 500 #max number of lines in view
 MAX_COUNTED_LINES = 10000
 MAX_COLNAME = 20 #max chars in collection
 
-
+@app.route("/")
 @app.route("/home")
 def appmain():
     """
     Main route, shows the main page.
+    The functionality is explained in
+    https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-The-main-page
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
     app.config['S'] = os.path.join(dir_path,"static")
@@ -128,7 +133,25 @@ def newcvs():
     """
     if 'username' not in session:
         return redirect(url_for('appmain'))
-    return render_template('designnewcsv.html')    
+    mydict = request.form
+    newdsname = mydict.get('dsname', "")
+    newdsdesc = mydict.get('dsdesc', "")
+    if newdsname:
+        #check if exists
+        filename = secure_filename(newdsname) + ".csv"
+        if os.path.isfile(app.config['SL']+filename):
+            return "Sorry, file " + filename + " already exists."
+        mymeta = MetaInfo(filename)
+        mymeta.setdescr(newdsdesc)
+    fieldname = mydict.get('field', "")
+    dtype = mydict.get('dtype', "")
+    if fieldname:
+        myfieldmeta = {}
+        myfieldmeta['field'] = fieldname
+        myfieldmeta['dtype'] = dtype
+        app.config['NEWCSVFIEDLS'].append(myfieldmeta)
+    return render_template('designnewcsv.html', newdsname = newdsname, newdsdesc = newdsdesc,
+                            fields = app.config['NEWCSVFIEDLS'])    
     
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
@@ -144,7 +167,7 @@ def upload():
         fil = form.CSV_file.data
         filename = secure_filename(fil.filename)
         #already such file?
-        if os.path.isfile(app.config['SL']+filename):
+        if os.path.isfile(app.config['SL'] + filename):
             pass #call another template to ask the user
         fil.save(os.path.join(
             app.config['SL'], filename
@@ -199,12 +222,16 @@ def upload():
 @app.route("/view", methods=['GET', 'POST'])
 @app.route("/home/view", methods=['GET', 'POST'])
 #view the file
-def view():
+def view(pfile = ""):
     """
-    View N lines of the file using template view.html
+    View N lines of the file using template view.html or edit.html
+    Param pfile is the name of the file.
     """
     mydict = request.form
-    myfile = mydict['file']
+    if pfile:
+        myfile = pfile
+    else:
+        myfile = mydict['file']
     rows = []
     headers = []
     with open(app.config['SL']+myfile, 'rU') as csv_file: #,'rU'
@@ -223,7 +250,67 @@ def view():
     shownum = str(line_no)
     if line_no > MAX_COUNTED_LINES:
         shownum = "More than " + str(MAX_COUNTED_LINES)
-    return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)
+    if 'username' not in session or line_no > MAX_SHOWN_LINES:
+        return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)    
+    return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows)
+
+
+
+@app.route('/editsave', methods=['GET', 'POST'])
+@app.route('/home/editsave', methods=['GET', 'POST'])
+#save the file including the line the user edited. The edited line's columns are decoded
+#from [row]-[column] labels
+def editsave():
+    if 'username' not in session:
+        return redirect(url_for('appmain'))
+    mydict = request.form.to_dict()
+    fname = request.form.get('fname', '')
+    if not fname:
+        return "Required parameter fname missing."
+    row = 0
+    col = 0
+    for key in mydict:
+        if key == 'fname':
+            next
+        #print(key+" "+mydict[key])
+        #get the key value that looks like [row]-[col]
+        rowcol = re.findall(r'\d+', key)
+        if len(rowcol) == 2:
+            row = int(rowcol[0])
+            col = int(rowcol[1])
+    #copy the file to a temporary file up to row-1
+    #print(str(row))
+    #print(str(col))
+    f = open("static/"+fname, 'r')
+    fw = open("static/"+fname+"tmp", 'w')
+    rowr = 0
+    while rowr < row: 
+        rowr += 1
+        line = f.readline()
+        #print(line, end='')
+        fw.write(line)
+    #print the changed line
+    changed = ""
+    for key in mydict:
+        if key != 'fname':
+            changed += mydict[key]+","
+        #print(key+" "+mydict[key])
+    changed = changed[:-1]
+    #print(changed)
+    fw.write(changed+"\n")
+    #copy the rest
+    f.readline()
+    while True:
+        line = f.readline()
+        if not line:
+            break
+        #print(line, end='')
+        fw.write(line)
+    f.close()
+    #move the temp file to orig file
+    fw.close()
+    move("static/"+fname+"tmp", "static/"+fname)
+    return view(pfile = fname)
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
@@ -306,10 +393,10 @@ def compatible_d():
     cfile.close()
     return redirect(url_for('compatible', file=file1, **request.args))
 
-@app.route("/edit", methods=['GET', 'POST'])
-@app.route("/home/edit", methods=['GET', 'POST'])
+@app.route("/editmeta", methods=['GET', 'POST'])
+@app.route("/home/editmeta", methods=['GET', 'POST'])
 #edit metadata. admin user only
-def edit():
+def editmeta():
     """
     Edit file metadata. Shows the edit form.
     """
@@ -328,7 +415,7 @@ def edit():
 #get the result of metadata editing
 def editsubmit():
     """
-    Receives metadata values from the edit form.
+    Receives metadata values from the edit form. Calls file writing.
     """
     #get the file field
     mydict = request.form

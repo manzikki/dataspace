@@ -17,14 +17,14 @@
 <table id="fields" border="0" class="table">
 <tr>
 <thead class="thead-light">
-<th>Field name</th> <th>Description</th> <th> </th> <th>Measure properties</th>
+<th>Field name</th> <th>Description</th>  <th> Sample </th> <th> </th> <th>Measure properties</th>
 </thead>
 </tr>
 
     {% for f in fieldlist %}
 <tr>
-     <td> {{ f.name }} </td><td> <input type="text" size="50" name="{{ f.name }}" value="{{ f.descr }}" required> </td>
-     <td> </td> <td> Unit: <input type="text" size="10" name="{{ f.name }}=unit" value="{{ f.unit }}"/> 
+     <td width="10%"> {{ f.name }} </td><td width="10%"> <input type="text" size="35" name="{{ f.name }}" value="{{ f.descr }}" required> </td>
+     <td width="10%"> {{ f.sample }} </td> <td > </td> <td width="45%"> Unit: <input type="text" size="10" name="{{ f.name }}=unit" value="{{ f.unit }}"/> 
      Scale:
      <select name="{{f.name}}=scale"><option></option><option value="nominal" {% if f.scale == "nominal" %}selected{% endif %}>Nominal</option>
                          </option><option value="nominal" {% if f.scale == "ordinal" %}selected{% endif %}>Ordinal</option>
