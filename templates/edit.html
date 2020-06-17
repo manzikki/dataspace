@@ -23,7 +23,7 @@
      </tr>
     {% set rowcount = [0] %}
     {% for row in rows %}
-    <form action="editsave" method="post">
+    <form action="{{ url_for('editsave') }}" method="post">
     <tr>
       {% if rowcount.append(rowcount.pop() + 1) %}{% endif %}
       {% set colcount = [0] %}

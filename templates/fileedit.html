@@ -23,8 +23,8 @@
 
     {% for f in fieldlist %}
 <tr>
-     <td width="10%"> {{ f.name }} </td><td width="10%"> <input type="text" size="35" name="{{ f.name }}" value="{{ f.descr }}" required> </td>
-     <td width="10%"> {{ f.sample }} </td> <td > </td> <td width="45%"> Unit: <input type="text" size="10" name="{{ f.name }}=unit" value="{{ f.unit }}"/> 
+     <td width="7%"> {{ f.name }} </td><td width="10%"> <input type="text" size="35" name="{{ f.name }}" value="{{ f.descr }}" required> </td>
+     <td width="7%"> {{ f.sample }} </td> <td > </td> <td width="45%"> Unit: <input type="text" size="10" name="{{ f.name }}=unit" value="{{ f.unit }}"/> 
      Scale:
      <select name="{{f.name}}=scale"><option></option><option value="nominal" {% if f.scale == "nominal" %}selected{% endif %}>Nominal</option>
                          </option><option value="nominal" {% if f.scale == "ordinal" %}selected{% endif %}>Ordinal</option>

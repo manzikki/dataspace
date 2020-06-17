@@ -7,7 +7,7 @@ import codecs
 import tempfile
 import hashlib
 import base64
-from shutil import move
+from shutil import move, copyfile
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash, Response
 from werkzeug.utils import secure_filename
