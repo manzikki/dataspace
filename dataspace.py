@@ -4,7 +4,6 @@ Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac
 import re
 import os
 import codecs
-import tempfile
 import hashlib
 import base64
 from shutil import move, copyfile
@@ -197,7 +196,7 @@ def upload():
                         row2 = row_sample
                         #print(str(row2))
                         break
-                    
+
             csv_file.close()
             if row:
                 fieldlist = []
@@ -251,7 +250,7 @@ def view(pfile=""):
     if line_no > MAX_COUNTED_LINES:
         shownum = "More than " + str(MAX_COUNTED_LINES) + " (too large to edit)."
     if 'username' not in session or line_no > MAX_SHOWN_LINES:
-        return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)    
+        return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)
     return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows)
 
 
@@ -283,7 +282,7 @@ def editsave():
     f = open("static/"+fname, 'r')
     fw = open("static/"+fname+"tmp", 'w')
     rowr = 0
-    while rowr < row: 
+    while rowr < row:
         rowr += 1
         line = f.readline()
         #print(line, end='')
@@ -469,7 +468,7 @@ def exportrdf():
 """)
         myid = myfile.encode('utf-8')
         myid = hashlib.md5(myid).digest()
-        myid = str(base64.b64encode(myid))[1:];
+        myid = str(base64.b64encode(myid))[1:]
         myid = myid.replace('=', '')
         myid = myid.replace('\'', '')
         cvsdf = pd.read_csv(app.config['SL']+myfile)
@@ -481,7 +480,7 @@ def exportrdf():
             yield(mystr)
         yield("</rdf:RDF>\n")
     if myfile:
-        return Response(generate(myfile), mimetype= 'text/plain',
+        return Response(generate(myfile), mimetype='text/plain',
                         headers={"Content-Disposition": "attachment;filename=export.rdf"})
 
 @app.route('/changecollection', methods=['GET', 'POST'])
