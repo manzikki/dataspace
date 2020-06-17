@@ -40,7 +40,7 @@ def appmain():
     https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-The-main-page
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    app.config['S'] = os.path.join(dir_path,"static")
+    app.config['S'] = os.path.join(dir_path, "static")
     app.config['SL'] = dir_path+"/static/"
     app.config['COMPAT'] = dir_path+"/static/compat.file" #contains compatibility info
     if not app.config['U']:
@@ -150,9 +150,9 @@ def newcvs():
         myfieldmeta['field'] = fieldname
         myfieldmeta['dtype'] = dtype
         app.config['NEWCSVFIEDLS'].append(myfieldmeta)
-    return render_template('designnewcsv.html', newdsname = newdsname, newdsdesc = newdsdesc,
-                            fields = app.config['NEWCSVFIEDLS'])    
-    
+    return render_template('designnewcsv.html', newdsname=newdsname, newdsdesc=newdsdesc,
+                           fields=app.config['NEWCSVFIEDLS'])
+
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
 #file upload. Should be available to admin only
@@ -222,7 +222,7 @@ def upload():
 @app.route("/view", methods=['GET', 'POST'])
 @app.route("/home/view", methods=['GET', 'POST'])
 #view the file
-def view(pfile = ""):
+def view(pfile=""):
     """
     View N lines of the file using template view.html or edit.html
     Param pfile is the name of the file.
@@ -247,13 +247,12 @@ def view(pfile = ""):
                 if line_no > MAX_COUNTED_LINES:
                     break
             line_no = line_no + 1
-    shownum = str(line_no)
+    shownum = str(line_no) + " lines."
     if line_no > MAX_COUNTED_LINES:
-        shownum = "More than " + str(MAX_COUNTED_LINES)
+        shownum = "More than " + str(MAX_COUNTED_LINES) + " (too large to edit)."
     if 'username' not in session or line_no > MAX_SHOWN_LINES:
         return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)    
     return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows)
-
 
 
 @app.route('/editsave', methods=['GET', 'POST'])
@@ -310,7 +309,7 @@ def editsave():
     #move the temp file to orig file
     fw.close()
     move("static/"+fname+"tmp", "static/"+fname)
-    return view(pfile = fname)
+    return view(pfile=fname)
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
