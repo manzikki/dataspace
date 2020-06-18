@@ -248,7 +248,7 @@ def view(pfile=""):
             line_no = line_no + 1
     shownum = str(line_no) + " lines."
     if line_no > MAX_COUNTED_LINES:
-        shownum = "More than " + str(MAX_COUNTED_LINES) + " (too large to edit)."
+        shownum = "More than " + str(MAX_COUNTED_LINES) + " lines (too large to edit)."
     if 'username' not in session or line_no > MAX_SHOWN_LINES:
         return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)
     return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows)
@@ -266,7 +266,6 @@ def editsave():
     if not fname:
         return "Required parameter fname missing."
     row = 0
-    col = 0
     for key in mydict:
         if key == 'fname':
             next
@@ -275,12 +274,13 @@ def editsave():
         rowcol = re.findall(r'\d+', key)
         if len(rowcol) == 2:
             row = int(rowcol[0])
-            col = int(rowcol[1])
     #copy the file to a temporary file up to row-1
     #print(str(row))
     #print(str(col))
     f = open("static/"+fname, 'r')
     fw = open("static/"+fname+"tmp", 'w')
+    if not os.access("static/"+fname+"tmp", os.W_OK):
+        return "Could not open a temporary file for writing!"
     rowr = 0
     while rowr < row:
         rowr += 1
@@ -291,9 +291,12 @@ def editsave():
     changed = ""
     for key in mydict:
         if key != 'fname':
-            changed += mydict[key]+","
+            if "," in mydict[key]:
+                changed += '"'+mydict[key]+'",'
+            else:
+                changed += mydict[key]+","
         #print(key+" "+mydict[key])
-    changed = changed[:-1]
+    changed = changed[:-1] #remove the last comma
     #print(changed)
     fw.write(changed+"\n")
     #copy the rest
