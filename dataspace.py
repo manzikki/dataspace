@@ -3,6 +3,7 @@ Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac
 """
 import re
 import os
+import csv
 import codecs
 import hashlib
 import base64
@@ -395,6 +396,33 @@ def compatible_d():
     cfile.close()
     return redirect(url_for('compatible', file=file1, **request.args))
 
+
+def getfieldsamples(filename):
+    """
+    Get a samples of fields in file by reading the header line and the line after that.
+    Return a hash: fieldname -> sample.
+    """
+    headers = []
+    samples = []
+    hsample = {}
+    with open(filename) as csvfile:
+        csvreader = csv.reader(csvfile)
+        lineno = 0
+        for row in csvreader:
+            lineno += 1
+            if lineno == 1:
+                headers = row
+            if lineno == 2:
+                samples = row
+                break
+    if headers and samples:
+        for i in range(0, len(headers)):
+            header = headers[i]
+            sample = samples[i]
+            hsample[header] = sample
+    return hsample
+
+
 @app.route("/editmeta", methods=['GET', 'POST'])
 @app.route("/home/editmeta", methods=['GET', 'POST'])
 #edit metadata. admin user only
@@ -408,8 +436,9 @@ def editmeta():
     #build a meta object and read it from file
     mymeta = MetaInfo(myfile)
     mymeta.read_from_file(app.config['S'], myfile)
-    fields = mymeta.get_fieldlist()
-
+    samples = getfieldsamples("static/"+myfile)
+    fields = mymeta.get_fieldlist(samples)
+    
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
     return render_template('fileedit.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
 

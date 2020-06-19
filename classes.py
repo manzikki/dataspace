@@ -78,7 +78,7 @@ class MetaInfo:
         self.fielddatatypes = []
         self.measures = []
         self.formatted_fields = ""
-        self.name = filename.replace('.meta', '')
+        self.name = filename.replace('.jmeta', '')
 
     def setdescr(self, descr):
         """
@@ -197,7 +197,7 @@ class MetaInfo:
         """
         Reads the meta info from a file. Gets fsize from the real file.
         """
-        nometa = filen.replace(".meta", "")
+        nometa = filen.replace(".jmeta", "")
         jsonfile = open(directory+"/"+nometa+".jmeta")
         jsonstr = jsonfile.readline()
         jsonfile.close()
@@ -236,10 +236,11 @@ class MetaInfo:
         s = s + "\n"
         return s
 
-    def get_fieldlist(self):
+    def get_fieldlist(self, samplehash = {}):
         """
         Returns a list of hashes as follows
         f['name'] = fieldname, f['decr'] = description, f['scale'] = nominal, ..
+        If samplehash is given as a parameter, gets the sample for fields in it.
         """
         fieldlist = []
         for f in self.fields:
@@ -253,6 +254,9 @@ class MetaInfo:
                 myfhash['eventness'] = self.get_eventness(mykey)
                 myfhash['unit'] = self.get_unit(mykey)
                 myfhash['datatype'] = self.get_datatype(mykey)
+                if samplehash:
+                    sample = samplehash.get(mykey, '')
+                    myfhash['sample'] = sample
                 fieldlist.append(myfhash)
         return fieldlist
 
@@ -280,7 +284,7 @@ class MetaList:
         # r=root, d=directories, f = files
         for _, _, f in os.walk(filedir):
             for filen in f:
-                if '.meta' in filen:
+                if '.jmeta' in filen:
                     files.append(filen)
                     #print(filen)
             break #no recurse to subdirs
@@ -357,7 +361,7 @@ class CollectionList:
 
         for _, _, f in os.walk(self.filedir):
             for filen in f:
-                if '.meta' in filen:
+                if '.jmeta' in filen:
                     self.files.append(filen)
             break
 
