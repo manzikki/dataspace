@@ -429,13 +429,14 @@ def editsubmit():
     for fiter in mydict:
         #print(str(fiter))
         if not (fiter.endswith("=scale") or fiter.endswith("=unit") or \
-                                            fiter.endswith("=eventness") or fiter.endswith("=datatype") ):
+                                            fiter.endswith("=eventness") or \
+                                            fiter.endswith("=datatype")):
             if not (fiter == "file" or fiter == "descr"):
                 #field name is fiter and mydict[fiter] is the description, but
                 #additionally we need the datatype
                 dtype = mydict.get(fiter+"=datatype", '')
                 if dtype:
-                    print(fiter+" "+mydict[fiter]+" "+dtype)
+                    #print(fiter+" "+mydict[fiter]+" "+dtype)
                     mymeta.addfield(fiter, mydict[fiter], dtype)
                 else:
                     mymeta.addfield(fiter, mydict[fiter])

@@ -214,7 +214,7 @@ class MetaInfo:
         Writes the meta info into a file.
         """
         jsonstr = json.dumps(self.__dict__)
-        print(jsonstr)
+        #print(jsonstr)
         if not filen.endswith(".jmeta"):
             filen = filen + ".jmeta"
         f = open(directory+"/"+filen, 'w')
