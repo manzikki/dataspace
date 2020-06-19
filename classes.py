@@ -5,6 +5,7 @@ import os
 import csv
 import codecs
 import sys
+import json
 
 def count_lines(fullname):
     """ counts the lines in given file, returns the number of lines """
@@ -68,10 +69,13 @@ class MetaInfo:
     name = ""
     tags = []
     fields = [] #list of fieldname->fielddesc
+    fielddatatypes = []
+    #fielddatatypes = [] #fieldname->fielddatatype
     measures = []
 
     def __init__(self, filename):
         self.fields = []
+        self.fielddatatypes = []
         self.measures = []
         self.formatted_fields = ""
         self.name = filename.replace('.meta', '')
@@ -94,13 +98,17 @@ class MetaInfo:
         """
         self.tags = tags
 
-    def addfield(self, fieldname, fielddesc):
+    def addfield(self, fieldname, fielddesc, fielddatatype=""):
         """
-        Adds a field fieldname->fielddesc assoc array in the array fields
+        Adds a field fieldname->fielddesc assoc array in the array fields and
+        fieldname -> field data type in fielddatatypes.
         """
         myfield = {}
         myfield[fieldname] = fielddesc
         self.fields.append(myfield)
+        myfielddt = {}
+        myfielddt[fieldname] = fielddatatype
+        self.fielddatatypes.append(myfielddt)
 
     def addmeasurespec(self, fieldname, measurespec):
         """
@@ -155,6 +163,17 @@ class MetaInfo:
                     return val_list[2]
         return ""
 
+    def get_datatype(self, fieldname):
+        """
+        Gets the datatype.
+        """
+        for fds in self.fielddatatypes:
+            mydict = fds
+            for mykey, myval in mydict.items():
+                if mykey == fieldname:
+                    return myval
+        return ""
+
     def set_formatted_fields(self):
         """
         Sets the "formatted_fields" attribute that is used for printing the field information.
@@ -168,6 +187,9 @@ class MetaInfo:
                 if self.get_unit(mykey):
                     s = s + ' ('+self.get_unit(mykey)+' '+self.get_scale(mykey)+' '+\
                                                       self.get_eventness(mykey)+') '
+                mydt = self.get_datatype(mykey)
+                if mydt:
+                    s = s + " " + mydt
             s = s + "<br/>"
         self.formatted_fields = s
 
@@ -175,49 +197,29 @@ class MetaInfo:
         """
         Reads the meta info from a file. Gets fsize from the real file.
         """
-        if not filen.endswith(".meta"):
-            filen = filen + ".meta"
         nometa = filen.replace(".meta", "")
+        jsonfile = open(directory+"/"+nometa+".jmeta")
+        jsonstr = jsonfile.readline()
+        jsonfile.close()
+        #print(jsonstr)
+
+        self.__dict__ = json.loads(jsonstr)
         if os.path.isfile(directory+"/"+nometa):
             self.fsize = os.path.getsize(directory+"/"+nometa)
-        with open(directory+"/"+filen) as csv_file:
-            reader = csv.reader(csv_file, delimiter=',', quotechar='"')
-            for row in reader:
-                #print('* '.join(row))
-                #len(row) > 0:
-                if row:
-                    if row[0] == 'FIELD':
-                        self.addfield(row[1], row[2])
-                        if len(row) > 3:
-                            #print("Adding "+str(row[3:]))
-                            self.addmeasurespec(row[1], ",".join(row[3:]))
-                    if row[0] == 'descr':
-                        self.setdescr(row[1])
-                    if row[0] == 'lines':
-                        self.setlines(row[1])
-            self.set_formatted_fields()
+
+        self.set_formatted_fields()
 
     def write_to_file(self, directory, filen):
         """
         Writes the meta info into a file.
         """
-        if not filen.endswith(".meta"):
-            filen = filen + ".meta"
-        row = ['descr', self.descr]
-        with open(directory+"/"+filen, 'w') as writeFile:
-            writer = csv.writer(writeFile)
-            writer.writerow(row)
-            for f in self.fields:
-                mydict = f
-                for mykey, myval in mydict.items():
-                    mydesc = f[mykey]
-                    row = ['FIELD', mykey, mydesc]
-                    if self.get_scale(mykey):
-                        unit = self.get_unit(mykey)
-                        scale = self.get_scale(mykey)
-                        ev = self.get_eventness(mykey)
-                        row = ['FIELD', mykey, mydesc, unit, scale, ev]
-                    writer.writerow(row)
+        jsonstr = json.dumps(self.__dict__)
+        print(jsonstr)
+        if not filen.endswith(".jmeta"):
+            filen = filen + ".jmeta"
+        f = open(directory+"/"+filen, 'w')
+        f.write(jsonstr)
+        f.close()
 
     def get_as_string(self):
         """
@@ -250,6 +252,7 @@ class MetaInfo:
                 myfhash['scale'] = self.get_scale(mykey)
                 myfhash['eventness'] = self.get_eventness(mykey)
                 myfhash['unit'] = self.get_unit(mykey)
+                myfhash['datatype'] = self.get_datatype(mykey)
                 fieldlist.append(myfhash)
         return fieldlist
 

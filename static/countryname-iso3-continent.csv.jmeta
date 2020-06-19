@@ -1,0 +1,1 @@
+{"fields": [{"Continent": "Continent"}, {"CountryName": "Country name"}, {"ISO3digit": "Country ISO3 code"}], "fielddatatypes": [{"Continent": "string"}, {"CountryName": "string"}, {"ISO3digit": "string"}], "measures": [], "formatted_fields": "", "name": "countryname-iso3-continent.csv", "descr": "Countries by ISO3 code, continents. USSR and Russia are in Europe."}

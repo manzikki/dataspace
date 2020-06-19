@@ -208,7 +208,8 @@ def upload():
                     myhash['unit'] = ''
                     myhash['scale'] = ''
                     myhash['eventness'] = ''
-                    myhash['sample'] = ""
+                    myhash['sample'] = ''
+                    myhash['datatype'] = ''
                     if len(row2) > colno:
                         myhash['sample'] = row2[colno]
                     colno += 1
@@ -408,6 +409,7 @@ def editmeta():
     mymeta = MetaInfo(myfile)
     mymeta.read_from_file(app.config['S'], myfile)
     fields = mymeta.get_fieldlist()
+
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
     return render_template('fileedit.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
 
@@ -425,11 +427,18 @@ def editsubmit():
     mymeta = MetaInfo(myfile)
     mymeta.setdescr(descr)
     for fiter in mydict:
-        #print(k+" "+mydict[k])
+        #print(str(fiter))
         if not (fiter.endswith("=scale") or fiter.endswith("=unit") or \
-                                            fiter.endswith("=eventness")):
+                                            fiter.endswith("=eventness") or fiter.endswith("=datatype") ):
             if not (fiter == "file" or fiter == "descr"):
-                mymeta.addfield(fiter, mydict[fiter])
+                #field name is fiter and mydict[fiter] is the description, but
+                #additionally we need the datatype
+                dtype = mydict.get(fiter+"=datatype", '')
+                if dtype:
+                    print(fiter+" "+mydict[fiter]+" "+dtype)
+                    mymeta.addfield(fiter, mydict[fiter], dtype)
+                else:
+                    mymeta.addfield(fiter, mydict[fiter])
     for fiter in mymeta.getfieldnames():
         if fiter+"=unit" in mydict and mydict[fiter+"=unit"]:
             unit = mydict[fiter+"=unit"]

@@ -10,7 +10,7 @@
     {{ file }}
 
     <br/>
-    <form method="post" action="editsubmit">
+    <form method="post" action=" {{ url_for('editsubmit') }} ">
     <input type="hidden" name="file" value="{{file}}"/>
     <input size="70" name="descr" value="{{descr}}" required/>
     <br/><br/>
@@ -32,13 +32,19 @@
                          </option><option {% if f.scale == "ratio" %}selected{% endif %} value="ratio">Ratio</option>
                       </select>
 
-
      E-ness:
      <select name="{{f.name}}=eventness"><option></option><option value="tally" {% if f.eventness == "tally" %}selected{% endif %}>Tally</option>
                          </option><option value="reckoning" {% if f.eventness == "reckoning" %}selected{% endif %}>Reckoning</option>
                          </option><option value="snapshot" {% if f.eventness == "snapshot" %}selected{% endif %}>Snapshot</option>
                       </select>
      </td>
+</tr>
+<td>Data type:</td><td><select name="{{f.name}}=datatype"><option></option>
+    <option value="integer" {% if f.datatype == "integer" %}selected{% endif %} >Integer</option>
+    <option value="string" {% if f.datatype == "string" %}selected{% endif %} >String</option>
+    <option value="decimal" {% if f.datatype == "decimal" %}selected{% endif %} >Decimal</option>
+  </select>
+<tr>     
 </tr>
     {% endfor %}
     <br/>

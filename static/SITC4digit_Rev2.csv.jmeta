@@ -1,0 +1,1 @@
+{"fields": [{"Commodity_description": "Commodity description"}, {"Commodity_Code": "Commodity code"}], "fielddatatypes": [{"Commodity_description": "string"}, {"Commodity_Code": "string"}], "measures": [], "formatted_fields": "", "name": "SITC4digit_Rev2.csv", "descr": "SITC 4-digit codes and names."}

@@ -1,4 +1,0 @@
-descr,"Countries by ISO3 code, continents. USSR and Russia are in Europe."
-FIELD,Continent,Continent
-FIELD,CountryName,Country name
-FIELD,ISO3digit,Country ISO3 code

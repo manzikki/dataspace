@@ -12,7 +12,7 @@ User authorization: "admin" can upload, edit and build cubes.
 Language: Python. Libraries used: flask, flask-wtf, pandas. See install.txt.
 
 # Relase notes:
-# 0.92 June 2020, basic CSV edit, bug fixes
+# 0.92 June 2020, basic CSV edit, bug fixes, data types, meta data changed to JSON
 # 0.91 Apr 2020, line counting for viewing files
 # 0.9 Jun 2019, big rewrite. RDF support, collections.
 # 0.81 Jul 2018, bug fixes
