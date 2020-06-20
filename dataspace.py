@@ -117,11 +117,11 @@ def file_not_ok(filename):
     """
     if os.stat(app.config['SL']+filename).st_size == 0:
         return "File is empty."
-    myf = open(app.config['SL']+filename, "r")
+    myf = open(app.config['SL']+filename, "rb")
     myline = myf.readline()
     myf.close()
     #check that the line contains commas
-    if "," in myline:
+    if "," in str(myline):
         return ""
     return "First line of the file does not contain commas."
 
@@ -182,7 +182,7 @@ def upload():
             row = []
             row2 = []
             #read the first line of file to get field names
-            with open(app.config['SL']+filename, 'rU') as csv_file: #,'rU'
+            with open(app.config['SL']+filename, 'r', encoding='utf-8') as csv_file: #,'rU'
                 reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
                 rowno = 0
                 for row in reader: #read only 1 line, containing headers
@@ -237,7 +237,7 @@ def view(pfile=""):
         myfile = mydict['file']
     rows = []
     headers = []
-    with open(app.config['SL']+myfile, 'rU') as csv_file: #,'rU'
+    with open(app.config['SL']+myfile, 'r', encoding='utf-8') as csv_file: #,'rU'
         #csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
         line_no = 0
