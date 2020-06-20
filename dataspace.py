@@ -281,9 +281,9 @@ def editsave():
     #copy the file to a temporary file up to row-1
     #print(str(row))
     #print(str(col))
-    f = open("static/"+fname, 'r')
-    fw = open("static/"+fname+"tmp", 'w')
-    if not os.access("static/"+fname+"tmp", os.W_OK):
+    f = open(app.config['SL']+fname, 'r')
+    fw = open(app.config['SL']+fname+"tmp", 'w')
+    if not os.access(app.config['SL']+fname+"tmp", os.W_OK):
         return "Could not open a temporary file for writing!"
     rowr = 0
     while rowr < row:
@@ -314,7 +314,7 @@ def editsave():
     f.close()
     #move the temp file to orig file
     fw.close()
-    move("static/"+fname+"tmp", "static/"+fname)
+    move(app.config['SL']+fname+"tmp", app.config['SL']+fname)
     return view(pfile=fname)
 
 @app.route('/compatible', methods=['GET', 'POST'])
