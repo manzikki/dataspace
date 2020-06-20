@@ -342,7 +342,7 @@ class CollectionList:
 
         for _, _, f in os.walk(filedir):
             for filen in f:
-                if '.meta' in filen:
+                if '.jmeta' in filen:
                     self.files.append(filen)
             break
 

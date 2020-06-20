@@ -99,6 +99,8 @@ def utility_processor():
 def login():
     """
     Shows the login page.
+    The functionality is explained in:
+    https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-login
     """
     form = LoginForm()
     if form.validate_on_submit():
@@ -436,7 +438,7 @@ def editmeta():
     #build a meta object and read it from file
     mymeta = MetaInfo(myfile)
     mymeta.read_from_file(app.config['S'], myfile)
-    samples = getfieldsamples("static/"+myfile)
+    samples = getfieldsamples(app.config['SL']+myfile)
     fields = mymeta.get_fieldlist(samples)
     
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
@@ -583,7 +585,7 @@ def renamesubmit():
     #move all the files to the new directory
     for _, _, files in os.walk(dir_path+"/static"):
         for filen in files:
-            if filen.endswith(".meta") or filen.endswith(".csv") or filen.endswith(".file"):
+            if filen.endswith(".jmeta") or filen.endswith(".csv") or filen.endswith(".file"):
                 src = os.path.join(dir_path, "static", filen)
                 dst = os.path.join(dir_path, "static", myname, filen)
                 if os.path.isfile(src):
