@@ -71,7 +71,7 @@ def appmain():
 @app.context_processor
 def utility_processor():
     """
-    Define a function that can be used in a template
+    Define a function that can be used in a template. This is for compatibility checking.
     """
     def is_in_compat(filea, fielda, fileb, fieldb):
         """
@@ -113,7 +113,7 @@ def login():
 
 def file_not_ok(filename):
     """
-    Check that the file is readable by csv reader.
+    Check that the file is readable by csv reader. Returns "" if ok, otherwise an error msg.
     """
     if os.stat(app.config['SL']+filename).st_size == 0:
         return "File is empty."
@@ -125,6 +125,64 @@ def file_not_ok(filename):
         return ""
     return "First line of the file does not contain commas."
 
+@app.route("/editmeta", methods=['GET', 'POST'])
+@app.route("/home/editmeta", methods=['GET', 'POST'])
+#edit metadata. Admin only.
+def editmeta():
+    """
+    Edit file metadata. Shows the edit form.
+    The functionality is explained in:
+    https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-edit-file-metadata
+    """
+    if 'username' not in session:
+        return redirect(url_for('appmain'))
+    #get the file field
+    mydict = request.form
+    myfile = mydict['file']
+    #build a meta object and read it from file
+    mymeta = MetaInfo(myfile)
+    mymeta.read_from_file(app.config['S'], myfile)
+    samples = getfieldsamples(app.config['SL']+myfile)
+    fields = mymeta.get_fieldlist(samples)
+    #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
+    return render_template('fileedit.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
+
+@app.route("/editsubmit", methods=['GET', 'POST'])
+@app.route("/home/editsubmit", methods=['GET', 'POST'])
+#get the result of metadata editing
+def editsubmit():
+    """
+    Receives metadata values from the edit form. Calls file writing.
+    """
+    #get the file field
+    mydict = request.form
+    myfile = mydict['file']
+    descr = mydict['descr']
+    mymeta = MetaInfo(myfile)
+    mymeta.setdescr(descr)
+    for fiter in mydict:
+        #print(str(fiter))
+        if not (fiter.endswith("=scale") or fiter.endswith("=unit") or \
+                                            fiter.endswith("=eventness") or \
+                                            fiter.endswith("=datatype")):
+            if not (fiter == "file" or fiter == "descr"):
+                #field name is fiter and mydict[fiter] is the description, but
+                #additionally we need the datatype
+                dtype = mydict.get(fiter+"=datatype", '')
+                if dtype:
+                    #print(fiter+" "+mydict[fiter]+" "+dtype)
+                    mymeta.addfield(fiter, mydict[fiter], dtype)
+                else:
+                    mymeta.addfield(fiter, mydict[fiter])
+    for fiter in mymeta.getfieldnames():
+        if fiter+"=unit" in mydict and mydict[fiter+"=unit"]:
+            unit = mydict[fiter+"=unit"]
+            scale = mydict[fiter+"=scale"]
+            eventness = mydict[fiter+"=eventness"]
+            mymeta.addmeasure(fiter, unit, scale, eventness)
+    mymeta.write_to_file(app.config['S'], myfile)
+    #call appmain if ok
+    return redirect(url_for('appmain'))
 
 @app.route("/new", methods=['GET', 'POST'])
 @app.route("/home/new", methods=['GET', 'POST'])
@@ -157,7 +215,7 @@ def newcvs():
 
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
-#file upload. Should be available to admin only
+#file upload. Available to admin only
 def upload():
     """
     Upload function, shows the file upload dialog, receives the file.
@@ -317,6 +375,47 @@ def editsave():
     move(app.config['SL']+fname+"tmp", app.config['SL']+fname)
     return view(pfile=fname)
 
+@app.route('/saveasfile', methods=['GET', 'POST'])
+@app.route('/home/saveasfile', methods=['GET', 'POST'])
+#save the generated cube as a CSV file. Admin only.
+def saveasfile():
+    if 'username' not in session:
+        return redirect(url_for('appmain'))
+    mydict = request.form
+    if 'savefilename' not in mydict:
+        return "Required parameter (savefilename) missing."
+    myfile = mydict['savefilename']
+    move(app.config['SL']+"tmpcube.csv", app.config['SL']+myfile)
+    #Reconstruct field names from the cubefile- request params and build the jmeta.
+    metafieldhashes = []
+    for key in mydict:
+        if key.startswith("cubefile-"):
+            fname = key.replace("cubefile-", "")
+            #open the corresponding file
+            mymeta = MetaInfo(fname)
+            mymeta.read_from_file(app.config['SL'], fname)
+            fieldh = mymeta.get_fieldlist()
+            metafieldhashes.append(fieldh)
+    savemeta = MetaInfo(myfile) #build the meta for the saved file
+    savemeta.setdescr("Cube generated")
+    #read the file "samples" to get fieldnames
+    samples = getfieldsamples(app.config['SL']+myfile)
+    #add the metadata to fields
+    for field in samples:
+        fdesc = ""
+        #scan the meta hashes for this field
+        for mhashes in metafieldhashes:
+            #print(str(mhash))
+            for mhash in mhashes:
+                    name = mhash['name']
+                    descr = mhash['descr']
+                    if field == name:
+                        fdesc = descr
+        savemeta.addfield(field, fdesc)
+    savemeta.set_formatted_fields()
+    savemeta.write_to_file(app.config['S'], myfile)
+    return redirect(url_for('appmain'))
+
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
 #show/let user declare compatible fields. Should be available to admin only
@@ -330,7 +429,7 @@ def compatible():
     else:
         myfile = request.args.get('file')
     if session['username'] != ADMIN_USERNAME:
-        flash('Admin privileges required. Plase log in.')
+        flash('Admin privileges required. Please log in.')
         return redirect(url_for('appmain'))
     #get field information
     dimmetas = []    #metas concerning dimensions, not measures
@@ -407,7 +506,7 @@ def getfieldsamples(filename):
     headers = []
     samples = []
     hsample = {}
-    with open(filename) as csvfile:
+    with open(filename, 'r', encoding='utf-8') as csvfile:
         csvreader = csv.reader(csvfile)
         lineno = 0
         for row in csvreader:
@@ -425,61 +524,6 @@ def getfieldsamples(filename):
     return hsample
 
 
-@app.route("/editmeta", methods=['GET', 'POST'])
-@app.route("/home/editmeta", methods=['GET', 'POST'])
-#edit metadata. admin user only
-def editmeta():
-    """
-    Edit file metadata. Shows the edit form.
-    """
-    #get the file field
-    mydict = request.form
-    myfile = mydict['file']
-    #build a meta object and read it from file
-    mymeta = MetaInfo(myfile)
-    mymeta.read_from_file(app.config['S'], myfile)
-    samples = getfieldsamples(app.config['SL']+myfile)
-    fields = mymeta.get_fieldlist(samples)
-    
-    #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
-    return render_template('fileedit.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
-
-@app.route("/editsubmit", methods=['GET', 'POST'])
-@app.route("/home/editsubmit", methods=['GET', 'POST'])
-#get the result of metadata editing
-def editsubmit():
-    """
-    Receives metadata values from the edit form. Calls file writing.
-    """
-    #get the file field
-    mydict = request.form
-    myfile = mydict['file']
-    descr = mydict['descr']
-    mymeta = MetaInfo(myfile)
-    mymeta.setdescr(descr)
-    for fiter in mydict:
-        #print(str(fiter))
-        if not (fiter.endswith("=scale") or fiter.endswith("=unit") or \
-                                            fiter.endswith("=eventness") or \
-                                            fiter.endswith("=datatype")):
-            if not (fiter == "file" or fiter == "descr"):
-                #field name is fiter and mydict[fiter] is the description, but
-                #additionally we need the datatype
-                dtype = mydict.get(fiter+"=datatype", '')
-                if dtype:
-                    #print(fiter+" "+mydict[fiter]+" "+dtype)
-                    mymeta.addfield(fiter, mydict[fiter], dtype)
-                else:
-                    mymeta.addfield(fiter, mydict[fiter])
-    for fiter in mymeta.getfieldnames():
-        if fiter+"=unit" in mydict and mydict[fiter+"=unit"]:
-            unit = mydict[fiter+"=unit"]
-            scale = mydict[fiter+"=scale"]
-            eventness = mydict[fiter+"=eventness"]
-            mymeta.addmeasure(fiter, unit, scale, eventness)
-    mymeta.write_to_file(app.config['S'], myfile)
-    #call appmain if ok
-    return redirect(url_for('appmain'))
 
 #route for printing all filenames
 @app.route('/printurls', methods=['GET', 'POST'])
@@ -626,9 +670,11 @@ def cube():
     mymetalist = MetaList(app.config['S'])
     #print(mymetalist.get_as_string())
     if 'start' in request.args:
-         #TBD: Should return login page if user is not admin.
-        return render_template('rcube.html', username=username, entries=mymetalist.get())
-
+        #Return to login page if user is not admin.
+        if username == ADMIN_USERNAME:
+            return render_template('rcube.html', username=username, entries=mymetalist.get())
+        else:
+            return appmain()
     selfiles = request.args.getlist('fileselect')
 
     # 2: User has selected files, show their fields
@@ -777,7 +823,8 @@ def cube():
             fpd = pd.read_csv(app.config['SL']+add_to_cube_file)
             pdcube = pd.merge(pdcube, fpd, left_on=in_cube_field, right_on=add_to_cube_field)
 
-        return render_template('rcubecontinue.html', msg=msg, csize=pdcube.shape[0])
+        return render_template('rcubecontinue.html', msg=msg, csize=pdcube.shape[0],
+                                cubefiles=cubefiles)
 
     # 4 there is some integration stuff already and we continue
     if 'more' in request.args:
@@ -796,7 +843,7 @@ def cube():
         #write it into a file
         pdcube.to_csv(app.config['SL']+TMPCUBENAME, encoding='utf-8', index=False)
         cube_round = 0 #reset
-        return render_template('rcubegen.html', baseurl=request.base_url)
+        return render_template('rcubegen.html', cubefiles=cubefiles, baseurl=request.base_url)
 
     #default if nothing matched
     return appmain()

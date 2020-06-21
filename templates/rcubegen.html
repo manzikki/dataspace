@@ -5,14 +5,22 @@
     <link href="w3.css" rel="stylesheet" media="screen">
   </head>
   <body>
+
     <div class="container">
     Download the cube <a href="{{ url_for('static', filename='tmpcube.csv') }}">here</a>.
     <br/>
-
        <form method="post" action="{{ url_for('view') }}"> <input name="file" type="hidden" value="tmpcube.csv">
        <button class="btn btn-secondary" type="submit">View</button></form>
-
-    <br/> 
+    <br/>
+    <br/>
+    <form action="{{ url_for('saveasfile') }}" method="post">
+      <button class="btn btn-secondary" type="submit">Save as .. </button>
+      {% for c in cubefiles %}
+      <input type="hidden" name="cubefile-{{ c }}"/>
+      {% endfor %}
+      <input type="text" name="savefilename" required/>
+    </form>
+    <br/>
     <form action="{{ url_for('exportrdf') }}" method="post"> <input name="file" type="hidden" value="tmpcube.csv">
         <button class="btn btn-secondary" type="submit">Export RDF</button></form>
     <br/>
