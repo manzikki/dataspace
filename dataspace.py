@@ -145,12 +145,12 @@ def editmeta():
     samples = getfieldsamples(app.config['SL']+myfile)
     fields = mymeta.get_fieldlist(samples)
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
-    return render_template('fileedit.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
+    return render_template('editmeta.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
 
-@app.route("/editsubmit", methods=['GET', 'POST'])
-@app.route("/home/editsubmit", methods=['GET', 'POST'])
+@app.route("/editmetasubmit", methods=['GET', 'POST'])
+@app.route("/home/editmetasubmit", methods=['GET', 'POST'])
 #get the result of metadata editing
-def editsubmit():
+def editmetasubmit():
     """
     Receives metadata values from the edit form. Calls file writing.
     """
@@ -160,26 +160,38 @@ def editsubmit():
     descr = mydict['descr']
     mymeta = MetaInfo(myfile)
     mymeta.setdescr(descr)
+    count = 0 #we'll count over submitted fields. The two first will be omitted since
+              #they are the file and its description
+    infieldcount = -1 #counter of items in field
+    items = 6 #name, description, unit, scale, eventness, datatype
+    fieldname = ""
+    fielddescr = ""
+    fieldunit = ""
+    fieldscale = ""
+    fieldevent = ""
+    fielddatatype = ""
     for fiter in mydict:
-        #print(str(fiter))
-        if not (fiter.endswith("=scale") or fiter.endswith("=unit") or \
-                                            fiter.endswith("=eventness") or \
-                                            fiter.endswith("=datatype")):
-            if not (fiter == "file" or fiter == "descr"):
-                #field name is fiter and mydict[fiter] is the description, but
-                #additionally we need the datatype
-                dtype = mydict.get(fiter+"=datatype", '')
-                if dtype:
-                    #print(fiter+" "+mydict[fiter]+" "+dtype)
-                    mymeta.addfield(fiter, mydict[fiter], dtype)
-                else:
-                    mymeta.addfield(fiter, mydict[fiter])
-    for fiter in mymeta.getfieldnames():
-        if fiter+"=unit" in mydict and mydict[fiter+"=unit"]:
-            unit = mydict[fiter+"=unit"]
-            scale = mydict[fiter+"=scale"]
-            eventness = mydict[fiter+"=eventness"]
-            mymeta.addmeasure(fiter, unit, scale, eventness)
+        count += 1
+        if count > 2:
+            infieldcount += 1
+            infieldcount = infieldcount % items
+            #print(str(infieldcount)+" "+fiter+" ",mydict[fiter])
+            if infieldcount == 0:
+                fieldname = mydict[fiter].strip()
+            if infieldcount == 1:
+                fielddescr = mydict[fiter].strip()
+            if infieldcount == 2:
+                fieldunit = mydict[fiter].strip()
+            if infieldcount == 3:
+                fieldscale = mydict[fiter].strip()
+            if infieldcount == 4:
+                fieldevent = mydict[fiter].strip()
+            if infieldcount == 5:
+                fielddatatype = mydict[fiter].strip()
+                #we construct here
+                mymeta.addfield(fieldname, fielddescr, fielddatatype)
+                if fieldunit:
+                    mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent)
     mymeta.write_to_file(app.config['S'], myfile)
     #call appmain if ok
     return redirect(url_for('appmain'))
@@ -275,8 +287,8 @@ def upload():
                         myhash['sample'] = row2[colno]
                     colno += 1
                     fieldlist.append(myhash)
-                return render_template('fileedit.html', file=filename, descr="",\
-                                       fieldlist=fieldlist)
+                return render_template('editmeta.html', file=filename, descr="",\
+                                       fieldlist=fieldlist) #metaedit will call editmetasubmit
         return redirect(url_for('appmain'))
     return render_template('upload.html', form=form)
 
