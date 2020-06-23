@@ -13,7 +13,7 @@ from flask import Flask, session, render_template, redirect, \
 from werkzeug.utils import secure_filename
 import numpy
 import pandas as pd
-from forms import LoginForm, UploadForm
+from forms import LoginForm, UploadForm, PastedTextForm
 from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList
 
 app = Flask(__name__)
@@ -130,7 +130,7 @@ def file_not_ok(filename):
 #edit metadata. Admin only.
 def editmeta():
     """
-    Edit file metadata. Shows the edit form.
+    Edit file metadata. Shows the edit form. The corresponding jmeta file must exist.
     The functionality is explained in:
     https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-edit-file-metadata
     """
@@ -152,7 +152,7 @@ def editmeta():
 #get the result of metadata editing
 def editmetasubmit():
     """
-    Receives metadata values from the edit form. Calls file writing.
+    Receives metadata values from the edit form (editmeta). Writes the metadata into a jmeta file.
     """
     #get the file field
     mydict = request.form
@@ -170,6 +170,7 @@ def editmetasubmit():
     fieldscale = ""
     fieldevent = ""
     fielddatatype = ""
+    fieldnames = [] #will be written to the CSV file as header
     for fiter in mydict:
         count += 1
         if count > 2:
@@ -177,7 +178,8 @@ def editmetasubmit():
             infieldcount = infieldcount % items
             #print(str(infieldcount)+" "+fiter+" ",mydict[fiter])
             if infieldcount == 0:
-                fieldname = mydict[fiter].strip()
+                fieldname = mydict[fiter].strip().replace(',', '')
+                fieldnames.append(fieldname)
             if infieldcount == 1:
                 fielddescr = mydict[fiter].strip()
             if infieldcount == 2:
@@ -193,37 +195,99 @@ def editmetasubmit():
                 if fieldunit:
                     mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent)
     mymeta.write_to_file(app.config['S'], myfile)
+    #NB: once editing field names is enabled, we must re-write the first line of the CSV file
+    headerline = ','.join(fieldnames)
+    csvfile = open(app.config['SL']+myfile, 'r', encoding='utf-8')
+    outfilen = app.config['SL']+myfile+".out"
+    outfile = open(outfilen, 'w', encoding='utf-8')
+    outfile.write(headerline+"\n")
+    line = csvfile.readline()
+    line = csvfile.readline()
+    while line:
+        outfile.write(line)
+        line = csvfile.readline()
+    csvfile.close()
+    outfile.close()
+    move(outfilen, app.config['SL']+myfile)
     #call appmain if ok
     return redirect(url_for('appmain'))
 
+def build_fieldlist(filename):
+    """
+    Using a CSV file, builds a list of field hashes that can be used in the meta edit.
+    For each field, the hash contains 'name, 'descr' ..
+    The filename parameter must contain the path.
+    """
+    row = []
+    row2 = []
+    fieldlist = []
+    #read the first line of file to get field names
+    with open(filename, 'r', encoding='utf-8') as csv_file: #,'rU'
+        reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
+        rowno = 0
+        for row in reader: #read only 1 line, containing headers
+            #remove the BOM
+            if row:
+                r1first = row[0]
+                while  ord(r1first[0]) > 123:
+                    r1first = r1first[1:]
+                row[0] = r1first
+                break
+        for row_sample in reader: #read the second line only
+            rowno += 1
+            if row_sample and rowno == 2:
+                row2 = row_sample
+                #print(str(row2))
+                break
+
+    csv_file.close()
+    if row:
+        colno = 0
+        for riter in row:
+            myhash = {}
+            myhash['name'] = riter
+            myhash['descr'] = riter
+            myhash['unit'] = ''
+            myhash['scale'] = ''
+            myhash['eventness'] = ''
+            myhash['sample'] = ''
+            myhash['datatype'] = ''
+            if len(row2) > colno:
+                myhash['sample'] = row2[colno]
+            colno += 1
+            fieldlist.append(myhash)
+    return fieldlist
+
+
 @app.route("/new", methods=['GET', 'POST'])
 @app.route("/home/new", methods=['GET', 'POST'])
-#create a new model for a CSV file. Not yet finished. For admin only.
-def newcvs():
+#create a new model for a CSV file. For admin only.
+def new():
     """
-    Create a new model for a CSV file. Not yet finished. For admin only.
+    Create a new CSV by writing or pasting it in a text field.
     """
     if 'username' not in session:
         return redirect(url_for('appmain'))
-    mydict = request.form
-    newdsname = mydict.get('dsname', "")
-    newdsdesc = mydict.get('dsdesc', "")
-    if newdsname:
-        #check if exists
-        filename = secure_filename(newdsname) + ".csv"
-        if os.path.isfile(app.config['SL']+filename):
-            return "Sorry, file " + filename + " already exists."
-        mymeta = MetaInfo(filename)
-        mymeta.setdescr(newdsdesc)
-    fieldname = mydict.get('field', "")
-    dtype = mydict.get('dtype', "")
-    if fieldname:
-        myfieldmeta = {}
-        myfieldmeta['field'] = fieldname
-        myfieldmeta['dtype'] = dtype
-        app.config['NEWCSVFIEDLS'].append(myfieldmeta)
-    return render_template('designnewcsv.html', newdsname=newdsname, newdsdesc=newdsdesc,
-                           fields=app.config['NEWCSVFIEDLS'])
+    form = PastedTextForm()
+    if form.validate_on_submit():
+        #write the contents into a file and call meta edit
+        mydict = request.form
+        print(mydict)
+        csvtext = request.form.get('csvtext').replace("\r\n", "\n")
+        print(csvtext)
+        count = 0
+        checkfilename = "data"+str(count)+".csv"
+        while os.path.isfile(app.config['SL']+checkfilename):
+            count += 1
+            checkfilename = "data"+str(count)+".csv"
+        myfile = open(app.config['SL']+checkfilename, 'w', encoding='utf-8')
+
+        myfile.write(csvtext)
+        myfile.close()
+        fieldlist = build_fieldlist(app.config['SL']+checkfilename)
+        return render_template('editmeta.html', file=checkfilename, descr="",\
+                                fieldlist=fieldlist) #metaedit will call editmetasubmit
+    return render_template('new.html', form=form)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
@@ -249,46 +313,9 @@ def upload():
             flash(file_not_ok(filename))
             return redirect(url_for('appmain'))
         else:
-            row = []
-            row2 = []
-            #read the first line of file to get field names
-            with open(app.config['SL']+filename, 'r', encoding='utf-8') as csv_file: #,'rU'
-                reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
-                rowno = 0
-                for row in reader: #read only 1 line, containing headers
-                    #remove the BOM
-                    if row:
-                        r1first = row[0]
-                        while  ord(r1first[0]) > 123:
-                            r1first = r1first[1:]
-                        row[0] = r1first
-                        break
-                for row_sample in reader: #read the second line only
-                    rowno += 1
-                    if row_sample and rowno == 2:
-                        row2 = row_sample
-                        #print(str(row2))
-                        break
-
-            csv_file.close()
-            if row:
-                fieldlist = []
-                colno = 0
-                for riter in row:
-                    myhash = {}
-                    myhash['name'] = riter
-                    myhash['descr'] = riter
-                    myhash['unit'] = ''
-                    myhash['scale'] = ''
-                    myhash['eventness'] = ''
-                    myhash['sample'] = ''
-                    myhash['datatype'] = ''
-                    if len(row2) > colno:
-                        myhash['sample'] = row2[colno]
-                    colno += 1
-                    fieldlist.append(myhash)
-                return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist) #metaedit will call editmetasubmit
+            build_fieldlist(filename)
+            return render_template('editmeta.html', file=filename, descr="",\
+                                       fieldlist=fieldlist) #editmeta will call editmetasubmit
         return redirect(url_for('appmain'))
     return render_template('upload.html', form=form)
 
@@ -419,10 +446,10 @@ def saveasfile():
         for mhashes in metafieldhashes:
             #print(str(mhash))
             for mhash in mhashes:
-                    name = mhash['name']
-                    descr = mhash['descr']
-                    if field == name:
-                        fdesc = descr
+                name = mhash['name']
+                descr = mhash['descr']
+                if field == name:
+                    fdesc = descr
         savemeta.addfield(field, fdesc)
     savemeta.set_formatted_fields()
     savemeta.write_to_file(app.config['S'], myfile)
@@ -531,11 +558,11 @@ def getfieldsamples(filename):
     if headers and samples:
         for i in range(0, len(headers)):
             header = headers[i]
-            sample = samples[i]
+            sample = ""
+            if i < len(samples):
+                sample = samples[i]
             hsample[header] = sample
     return hsample
-
-
 
 #route for printing all filenames
 @app.route('/printurls', methods=['GET', 'POST'])
@@ -548,8 +575,8 @@ def printurls():
     currentcoldir = "static"
     if app.config['COLLIST'].getcurrent():
         currentcoldir = "static/"+app.config['COLLIST'].getcurrent()
-    return render_template('urls.html', req=request.url_root, cdir=currentcoldir, metas=mymetas.get())
-
+    return render_template('urls.html', req=request.url_root,
+                           cdir=currentcoldir, metas=mymetas.get())
 
 # route for handling exportrdf (export the CSV values file as RDF)
 @app.route('/exportrdf', methods=['GET', 'POST'])
@@ -836,7 +863,7 @@ def cube():
             pdcube = pd.merge(pdcube, fpd, left_on=in_cube_field, right_on=add_to_cube_field)
 
         return render_template('rcubecontinue.html', msg=msg, csize=pdcube.shape[0],
-                                cubefiles=cubefiles)
+                               cubefiles=cubefiles)
 
     # 4 there is some integration stuff already and we continue
     if 'more' in request.args:

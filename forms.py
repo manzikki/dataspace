@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length
 from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms.widgets import TextArea
 
 class LoginForm(FlaskForm):
     username = StringField('Username',
@@ -11,4 +12,8 @@ class LoginForm(FlaskForm):
 
 class UploadForm(FlaskForm):
     CSV_file = FileField(validators=[FileRequired(), FileAllowed(['csv', 'CSV'], 'CSV files only!')])
+    submit = SubmitField('Submit')
+
+class PastedTextForm(FlaskForm):
+    csvtext = TextAreaField('CSVText', validators=[DataRequired()], widget=TextArea() )
     submit = SubmitField('Submit')
