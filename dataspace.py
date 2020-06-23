@@ -219,7 +219,7 @@ def build_fieldlist(filename):
     The filename parameter must contain the path.
     """
     row = []
-    row2 = []
+    row_sample = []
     fieldlist = []
     #read the first line of file to get field names
     with open(filename, 'r', encoding='utf-8') as csv_file: #,'rU'
@@ -236,10 +236,7 @@ def build_fieldlist(filename):
         for row_sample in reader: #read the second line only
             rowno += 1
             if row_sample and rowno == 2:
-                row2 = row_sample
-                #print(str(row2))
                 break
-
     csv_file.close()
     if row:
         colno = 0
@@ -252,8 +249,23 @@ def build_fieldlist(filename):
             myhash['eventness'] = ''
             myhash['sample'] = ''
             myhash['datatype'] = ''
-            if len(row2) > colno:
-                myhash['sample'] = row2[colno]
+            if len(row_sample) > colno:
+                myhash['sample'] = row_sample[colno]
+                #let's try to figure the datatype based on the sample
+                try:
+                    dummy = int(row_sample[colno])
+                    myhash['datatype'] = 'integer'
+                except:
+                    pass
+                #otherwise if can be a decimal or a string
+                if not myhash['datatype']:
+                    try:
+                        dummy = float(row_sample[colno])
+                        myhash['datatype'] = 'decimal'
+                    except:
+                        pass
+                if not myhash['datatype']:
+                    myhash['datatype'] = 'string'
             colno += 1
             fieldlist.append(myhash)
     return fieldlist
@@ -272,9 +284,7 @@ def new():
     if form.validate_on_submit():
         #write the contents into a file and call meta edit
         mydict = request.form
-        print(mydict)
         csvtext = request.form.get('csvtext').replace("\r\n", "\n")
-        print(csvtext)
         count = 0
         checkfilename = "data"+str(count)+".csv"
         while os.path.isfile(app.config['SL']+checkfilename):
