@@ -37,6 +37,11 @@
     </form>
     {% endfor %}
     </table>
+    <form action="{{ url_for('editsave') }}" method="post">
+      <input name="fname" type="hidden" value="{{ file }}"/>
+      <input name="numcols" type="hidden" value="{{ numcols }}"/>
+    <input type="submit" value="Add row" name="addrow"/>
+    </form>
     </div>
   </body>
 </html>

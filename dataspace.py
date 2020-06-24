@@ -273,10 +273,11 @@ def build_fieldlist(filename):
 
 @app.route("/new", methods=['GET', 'POST'])
 @app.route("/home/new", methods=['GET', 'POST'])
-#create a new model for a CSV file. For admin only.
 def new():
     """
     Create a new CSV by writing or pasting it in a text field.
+    The functionality is explained in:
+    https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#new_csv_file
     """
     if 'username' not in session:
         return redirect(url_for('appmain'))
@@ -362,7 +363,8 @@ def view(pfile=""):
         shownum = "More than " + str(MAX_COUNTED_LINES) + " lines (too large to edit)."
     if 'username' not in session or line_no > MAX_SHOWN_LINES:
         return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)
-    return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows)
+    return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows,
+                            numcols=len(headers))
 
 
 @app.route('/editsave', methods=['GET', 'POST'])
@@ -376,6 +378,15 @@ def editsave():
     fname = request.form.get('fname', '')
     if not fname:
         return "Required parameter fname missing."
+    #if the user wanted a new line at the end, just append a new file with commas
+    if 'addrow' in mydict:
+        numcommas = int(mydict['numcols'])-1
+        f = open(app.config['SL']+fname, 'a+')    
+        for cols in range(numcommas):
+            f.write(",")
+        f.write("\n")
+        f.close()
+        return view(pfile=fname)
     row = 0
     for key in mydict:
         if key == 'fname':
@@ -401,14 +412,13 @@ def editsave():
     #print the changed line
     changed = ""
     for key in mydict:
-        if key != 'fname':
+        if key != 'fname' and key != 'addrow':
             if "," in mydict[key]:
                 changed += '"'+mydict[key]+'",'
             else:
                 changed += mydict[key]+","
         #print(key+" "+mydict[key])
     changed = changed[:-1] #remove the last comma
-    #print(changed)
     fw.write(changed+"\n")
     #copy the rest
     f.readline()
