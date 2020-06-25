@@ -324,7 +324,7 @@ def upload():
             flash(file_not_ok(filename))
             return redirect(url_for('appmain'))
         else:
-            build_fieldlist(filename)
+            fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
                                        fieldlist=fieldlist) #editmeta will call editmetasubmit
         return redirect(url_for('appmain'))
