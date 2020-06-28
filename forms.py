@@ -11,7 +11,8 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 class UploadForm(FlaskForm):
-    CSV_file = FileField(validators=[FileRequired(), FileAllowed(['csv', 'CSV'], 'CSV files only!')])
+    CSV_file = FileField(validators=[FileRequired(), FileAllowed(['csv', 'CSV', 'tar.gz', 'zip'],
+    	                                                        'CSV, zip, or tar.gz files only!')])
     submit = SubmitField('Submit')
 
 class PastedTextForm(FlaskForm):

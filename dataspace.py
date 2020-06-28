@@ -1,12 +1,14 @@
 """
 Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2017-2020
 """
+import tarfile
 import re
 import os
 import csv
 import codecs
 import hashlib
 import base64
+from dateutil.parser import parse
 from shutil import move, copyfile
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash, Response
@@ -117,6 +119,21 @@ def file_not_ok(filename):
     """
     if os.stat(app.config['SL']+filename).st_size == 0:
         return "File is empty."
+    if ".tar.gz" in filename:
+        try:
+            tarf = tarfile.open(app.config['SL']+filename, "r:gz")
+            for member in tarf.getmembers():
+                #print(member.name)
+                if member.name.startswith("/") or ".." in member.name:
+                    return "Unsafe element in archive: "+member.name
+                if ".CSV" not in upper(member.name):
+                    return "File "+member.name+" in "+filename+" does not have extension csv."
+        except:
+            #return "tar.gz file open error"
+            return ""
+        return ""
+    if ".zip" in filename:
+        return "Sorry, not yet implemented."
     myf = open(app.config['SL']+filename, "rb")
     myline = myf.readline()
     myf.close()
@@ -124,6 +141,40 @@ def file_not_ok(filename):
     if "," in str(myline):
         return ""
     return "First line of the file does not contain commas."
+
+def process_compressed_file(fname_no_path):
+    """
+    Puts together all the content of a tar.gz file so that the header appears on top.
+    """
+    tarf = tarfile.open(app.config['SL']+fname_no_path, "r:gz")
+    tarf.extractall(app.config['SL'])
+    #outputf = open(app.config['SL']+fname_no_path+".csv", "a")
+    count = 0
+    outputf = ""
+    for member in tarf.getmembers():
+        count += 1
+        #print(member.name)
+        if count == 1:
+            move(app.config['SL']+member.name, app.config['SL']+fname_no_path+".csv")
+            outputf = open(app.config['SL']+fname_no_path+".csv", "a")
+        else:
+            #append to csv but omit the first line
+            csvfile = open(app.config['SL']+member.name, 'r')
+            lineno = 0
+            for line in csvfile:
+                lineno += 1
+                if lineno == 1:
+                    pass
+                if line: 
+                    outputf.write(line)
+            csvfile.close()
+        #delete the copied file
+        if os.path.isfile(app.config['SL']+member.name):
+            os.remove(app.config['SL']+member.name)
+    #delete the tar.gz file
+    tarf.close()
+    os.remove(app.config['SL']+fname_no_path)
+    outputf.close()
 
 @app.route("/editmeta", methods=['GET', 'POST'])
 @app.route("/home/editmeta", methods=['GET', 'POST'])
@@ -252,19 +303,29 @@ def build_fieldlist(filename):
             if len(row_sample) > colno:
                 myhash['sample'] = row_sample[colno]
                 #let's try to figure the datatype based on the sample
+                conv_ok = False
                 try:
                     dummy = int(row_sample[colno])
                     myhash['datatype'] = 'integer'
+                    conv_ok = True
                 except:
                     pass
                 #otherwise if can be a decimal or a string
-                if not myhash['datatype']:
+                if not conv_ok:
                     try:
                         dummy = float(row_sample[colno])
                         myhash['datatype'] = 'decimal'
+                        conv_ok = True
                     except:
                         pass
-                if not myhash['datatype']:
+                if not conv_ok:
+                    try:
+                        datetime = parse(row_sample[colno])
+                        myhash['datatype'] = 'datetime'
+                        conv_ok = True
+                    except:
+                        pass
+                if not conv_ok:
                     myhash['datatype'] = 'string'
             colno += 1
             fieldlist.append(myhash)
@@ -324,6 +385,9 @@ def upload():
             flash(file_not_ok(filename))
             return redirect(url_for('appmain'))
         else:
+            if ".tar.gz" in filename:
+                process_compressed_file(filename)
+                filename = filename+".csv"
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
                                        fieldlist=fieldlist) #editmeta will call editmetasubmit
