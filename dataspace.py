@@ -120,7 +120,6 @@ def file_not_ok(filename):
     """
     if os.stat(app.config['SL']+filename).st_size == 0:
         return "File is empty."
-<<<<<<< HEAD
     if ".tar.gz" in filename:
         try:
             tarf = tarfile.open(app.config['SL']+filename, "r:gz")
