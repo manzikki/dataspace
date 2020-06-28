@@ -5,6 +5,7 @@ import tarfile
 import re
 import os
 import csv
+import io
 import codecs
 import hashlib
 import base64
@@ -81,7 +82,7 @@ def utility_processor():
         in the compat file.
         """
         if os.path.isfile(app.config['COMPAT']):
-            with open(app.config['COMPAT'], 'rU') as csv_file:
+            with io.open(app.config['COMPAT'], 'rU') as csv_file:
                 csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
                 for row in csv_reader:
                     if len(row) == 4:
@@ -119,6 +120,7 @@ def file_not_ok(filename):
     """
     if os.stat(app.config['SL']+filename).st_size == 0:
         return "File is empty."
+<<<<<<< HEAD
     if ".tar.gz" in filename:
         try:
             tarf = tarfile.open(app.config['SL']+filename, "r:gz")
@@ -134,7 +136,7 @@ def file_not_ok(filename):
         return ""
     if ".zip" in filename:
         return "Sorry, not yet implemented."
-    myf = open(app.config['SL']+filename, "rb")
+    myf = io.open(app.config['SL']+filename, "rb")
     myline = myf.readline()
     myf.close()
     #check that the line contains commas
@@ -248,9 +250,9 @@ def editmetasubmit():
     mymeta.write_to_file(app.config['S'], myfile)
     #NB: once editing field names is enabled, we must re-write the first line of the CSV file
     headerline = ','.join(fieldnames)
-    csvfile = open(app.config['SL']+myfile, 'r', encoding='utf-8')
+    csvfile = ""
     outfilen = app.config['SL']+myfile+".out"
-    outfile = open(outfilen, 'w', encoding='utf-8')
+    outfile = io.open(outfilen, 'w', encoding='utf-8')
     outfile.write(headerline+"\n")
     line = csvfile.readline()
     line = csvfile.readline()
@@ -273,7 +275,7 @@ def build_fieldlist(filename):
     row_sample = []
     fieldlist = []
     #read the first line of file to get field names
-    with open(filename, 'r', encoding='utf-8') as csv_file: #,'rU'
+    with io.open(filename, 'r', encoding='utf-8') as csv_file: #,'rU'
         reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
         rowno = 0
         for row in reader: #read only 1 line, containing headers
@@ -352,7 +354,7 @@ def new():
         while os.path.isfile(app.config['SL']+checkfilename):
             count += 1
             checkfilename = "data"+str(count)+".csv"
-        myfile = open(app.config['SL']+checkfilename, 'w', encoding='utf-8')
+        myfile = io.open(app.config['SL']+checkfilename, 'w', encoding='utf-8')
 
         myfile.write(csvtext)
         myfile.close()
@@ -409,7 +411,7 @@ def view(pfile=""):
         myfile = mydict['file']
     rows = []
     headers = []
-    with open(app.config['SL']+myfile, 'r', encoding='utf-8') as csv_file: #,'rU'
+    with io.open(app.config['SL']+myfile, 'r', encoding='utf-8') as csv_file: #,'rU'
         #csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
         line_no = 0
@@ -445,7 +447,7 @@ def editsave():
     #if the user wanted a new line at the end, just append a new file with commas
     if 'addrow' in mydict:
         numcommas = int(mydict['numcols'])-1
-        f = open(app.config['SL']+fname, 'a+')    
+        f = io.open(app.config['SL']+fname, 'a+')    
         for cols in range(numcommas):
             f.write(",")
         f.write("\n")
@@ -463,8 +465,8 @@ def editsave():
     #copy the file to a temporary file up to row-1
     #print(str(row))
     #print(str(col))
-    f = open(app.config['SL']+fname, 'r')
-    fw = open(app.config['SL']+fname+"tmp", 'w')
+    f = io.open(app.config['SL']+fname, 'r')
+    fw = io.open(app.config['SL']+fname+"tmp", 'w')
     if not os.access(app.config['SL']+fname+"tmp", os.W_OK):
         return "Could not open a temporary file for writing!"
     rowr = 0
@@ -564,7 +566,7 @@ def compatible():
     compat_list = []
     #does the file exist?
     if os.path.isfile(app.config['COMPAT']):
-        with open(app.config['COMPAT'], 'rU') as csv_file:
+        with io.open(app.config['COMPAT'], 'rU') as csv_file:
             csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
             for row in csv_reader:
                 compat_list.append(row)
@@ -591,7 +593,7 @@ def compatible():
     compat_list = []
     #does the file exist?
     if os.path.isfile(app.config['COMPAT']):
-        with open(app.config['COMPAT'], 'rU') as csv_file:
+        with io.open(app.config['COMPAT'], 'rU') as csv_file:
             csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
             for row in csv_reader:
                 compat_list.append(row)
@@ -615,7 +617,7 @@ def compatible_d():
     field2 = request.args.get('fd2')
     #print(file1+" "+field1+" "+file2+" "+field2)
     #write the info into the compat file
-    cfile = open(app.config['COMPAT'], "a+")
+    cfile = io.open(app.config['COMPAT'], "a+")
     cfile.write(file1+","+field1+","+file2+","+field2+"\n")
     cfile.close()
     return redirect(url_for('compatible', file=file1, **request.args))
@@ -629,7 +631,7 @@ def getfieldsamples(filename):
     headers = []
     samples = []
     hsample = {}
-    with open(filename, 'r', encoding='utf-8') as csvfile:
+    with io.open(filename, 'r', encoding='utf-8') as csvfile:
         csvreader = csv.reader(csvfile)
         lineno = 0
         for row in csvreader:
