@@ -208,12 +208,16 @@ def editmetasubmit():
     """
     #get the file field
     mydict = request.form
+    #print(str(mydict))
     myfile = mydict['file']
     descr = mydict['descr']
+    #numlines = mydict['numlines']
     mymeta = MetaInfo(myfile)
     mymeta.setdescr(descr)
-    count = 0 #we'll count over submitted fields. The two first will be omitted since
-              #they are the file and its description
+    #if numlines:
+    #   mymeta.setlines(numlines)
+    count = 0 #we'll count over submitted fields. The 2 first will be omitted since
+              #they are the file and its description.
     infieldcount = -1 #counter of items in field
     items = 6 #name, description, unit, scale, eventness, datatype
     fieldname = ""
@@ -225,7 +229,7 @@ def editmetasubmit():
     fieldnames = [] #will be written to the CSV file as header
     for fiter in mydict:
         count += 1
-        if count > 2:
+        if count > 3:
             infieldcount += 1
             infieldcount = infieldcount % items
             #print(str(infieldcount)+" "+fiter+" ",mydict[fiter])
@@ -249,7 +253,7 @@ def editmetasubmit():
     mymeta.write_to_file(app.config['S'], myfile)
     #NB: once editing field names is enabled, we must re-write the first line of the CSV file
     headerline = ','.join(fieldnames)
-    csvfile = ""
+    csvfile = io.open(app.config['SL']+myfile, encoding='utf-8')
     outfilen = app.config['SL']+myfile+".out"
     outfile = io.open(outfilen, 'w', encoding='utf-8')
     outfile.write(headerline+"\n")
@@ -263,6 +267,19 @@ def editmetasubmit():
     move(outfilen, app.config['SL']+myfile)
     #call appmain if ok
     return redirect(url_for('appmain'))
+
+def count_lines(filename):
+    """
+    Returns the number of lines of a file.
+    """
+    count = 0
+    myfile = io.open(filename, 'r', encoding='utf-8')
+    line = myfile.readline()
+    while line:
+        line = myfile.readline()
+        count += 1
+    myfile.close()
+    return count
 
 def build_fieldlist(filename):
     """
@@ -359,7 +376,7 @@ def new():
         myfile.close()
         fieldlist = build_fieldlist(app.config['SL']+checkfilename)
         return render_template('editmeta.html', file=checkfilename, descr="",\
-                                fieldlist=fieldlist) #metaedit will call editmetasubmit
+                                fieldlist=fieldlist) #editmeta will call editmetasubmit
     return render_template('new.html', form=form)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -377,7 +394,7 @@ def upload():
         filename = secure_filename(fil.filename)
         #already such file?
         if os.path.isfile(app.config['SL'] + filename):
-            pass #call another template to ask the user
+            pass #should call another template to ask the user
         fil.save(os.path.join(
             app.config['SL'], filename
         ))
@@ -389,9 +406,10 @@ def upload():
             if ".tar.gz" in filename:
                 process_compressed_file(filename)
                 filename = filename+".csv"
+            numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist) #editmeta will call editmetasubmit
+                                       fieldlist=fieldlist, numlines=numlines) #editmeta will call editmetasubmit
         return redirect(url_for('appmain'))
     return render_template('upload.html', form=form)
 
