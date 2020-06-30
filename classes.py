@@ -7,14 +7,6 @@ import codecs
 import sys
 import json
 
-def count_lines(fullname):
-    """ counts the lines in given file, returns the number of lines """
-    numlines = 0
-    with open(fullname) as fil:
-        for _ in fil:
-            numlines += 1
-    fil.close()
-    return numlines
 
 class UTF8Recoder:
     """
@@ -66,6 +58,7 @@ class MetaInfo:
     descr = ""
     formatted_fields = ""
     fsize = 0
+    lines = 0
     name = ""
     tags = []
     fields = [] #list of fieldname->fielddesc
@@ -78,6 +71,7 @@ class MetaInfo:
         self.fielddatatypes = []
         self.measures = []
         self.formatted_fields = ""
+        self.lines = 0
         self.name = filename.replace('.jmeta', '')
 
     def setdescr(self, descr):
