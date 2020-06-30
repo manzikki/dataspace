@@ -22,7 +22,7 @@ Collections:
 </tr>
 {% for entry in metas %}
 <tr>
-<td>  {{ entry.name }} ({{ entry.fsize }} b) <br/>
+<td>  {{ entry.name }} ({{ entry.fsize }} b) {% if entry.lines != 0 %} {{ entry.lines }} lines {% endif %} <br/>
 	  <table id="pair" border="0">
 	  <tr>
 	  <td>
