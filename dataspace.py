@@ -1000,5 +1000,23 @@ def cube():
     #default if nothing matched
     return appmain()
 
+
+@app.route('/delfile', methods=['GET'])
+@app.route('/home/delfile', methods=['GET'])
+def delfile():
+    """
+    Deletes the file given as a parameter. For admin.
+    """
+    if 'username' not in session:
+        flash("Not authenticated.")
+        return redirect(url_for('appmain'))
+    if 'f' not in request.args:
+        return "Required parameter missing."
+    myfile = request.args.get('f')
+    #delete the file and its jmeta
+    os.remove(app.config['SL']+myfile)
+    os.remove(app.config['SL']+myfile+".jmeta")
+    return appmain()
+
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)

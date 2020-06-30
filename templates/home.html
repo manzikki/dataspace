@@ -47,13 +47,43 @@ Collections:
  <button class="btn btn-secondary btn-block" type="submit">Edit metadata</button></form><br/>
  <form action="{{ url_for('compatible') }}" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}"> 
- <button class="btn btn-secondary btn-block" type="submit">Compatibility</button></form> 
+ <button class="btn btn-secondary btn-block" type="submit">Compatibility</button></form>
+ <form>
+ <input name="file" type="hidden" value="{{ entry.name }}">
+ <br/>
+ <button id="{{ entry.name }}" type="button" 
+ onclick="d1=document.getElementById('delf1'); d1.innerHTML='{{entry.name}}'" 
+ class="btn btn-secondary btn-block" data-toggle="modal" data-target="#myModal">Delete</button>
+ </form>
 </td>
 {% endif %}
 {% endfor %}
 </tr>
 </table>
 
-<button class="btn btn-secondary"><a style="color:white" href=" {{ url_for('printurls') }}">Get all dataset names</a> </button> 
+<button class="btn btn-secondary"><a style="color:white" href="{{ url_for('printurls') }}">Get all dataset names</a> </button> 
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <!--button type="button" class="close" data-dismiss="modal">&times;</button-->
+        <h4 class="modal-title">Really delete .. </h4>
+      </div>
+      <div class="modal-body">
+        <p><div id="delf1"></div>?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" 
+        class="btn btn-default" onclick="n=document.getElementById('delf1'); f='/delfile?f='+n.innerHTML; window.location.href=f" data-dismiss="modal">Yes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">No, Cancel</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 {% endblock content %}
