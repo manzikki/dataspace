@@ -199,6 +199,11 @@ def editmeta():
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
     return render_template('editmeta.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
 
+def natural_sort(l): 
+    convert = lambda text: int(text) if text.isdigit() else text.lower() 
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(l, key = alphanum_key)
+
 @app.route("/editmetasubmit", methods=['GET', 'POST'])
 @app.route("/home/editmetasubmit", methods=['GET', 'POST'])
 #get the result of metadata editing
@@ -211,13 +216,11 @@ def editmetasubmit():
     #print(str(mydict))
     myfile = mydict['file']
     descr = mydict['descr']
-    #numlines = mydict['numlines']
+    numlines = mydict['numlines']
     mymeta = MetaInfo(myfile)
     mymeta.setdescr(descr)
-    #if numlines:
-    #   mymeta.setlines(numlines)
-    count = 0 #we'll count over submitted fields. The 2 first will be omitted since
-              #they are the file and its description.
+    if numlines:
+        mymeta.setlines(numlines)
     infieldcount = -1 #counter of items in field
     items = 6 #name, description, unit, scale, eventness, datatype
     fieldname = ""
@@ -226,30 +229,37 @@ def editmetasubmit():
     fieldscale = ""
     fieldevent = ""
     fielddatatype = ""
+    count = 0 #fields are numbered 1-, 2- etc
     fieldnames = [] #will be written to the CSV file as header
-    for fiter in mydict:
+    for fiter in natural_sort(mydict):
+        if fiter ==  "file":
+            next
+        if fiter == "descr":
+            next
+        if fiter == "numlines":
+            next
         count += 1
-        if count > 3:
-            infieldcount += 1
-            infieldcount = infieldcount % items
-            #print(str(infieldcount)+" "+fiter+" ",mydict[fiter])
-            if infieldcount == 0:
-                fieldname = mydict[fiter].strip().replace(',', '')
+        infieldcount += 1
+        infieldcount = infieldcount % items
+        #print(str(infieldcount)+" "+fiter+" ",mydict[fiter])
+        if infieldcount == 0: #name
+            fieldname = mydict[fiter].strip().replace(',', '').replace(str(count)+'-', '')
+            if fiter != "descr":
                 fieldnames.append(fieldname)
-            if infieldcount == 1:
-                fielddescr = mydict[fiter].strip()
-            if infieldcount == 2:
-                fieldunit = mydict[fiter].strip()
-            if infieldcount == 3:
-                fieldscale = mydict[fiter].strip()
-            if infieldcount == 4:
-                fieldevent = mydict[fiter].strip()
-            if infieldcount == 5:
-                fielddatatype = mydict[fiter].strip()
-                #we construct here
-                mymeta.addfield(fieldname, fielddescr, fielddatatype)
-                if fieldunit:
-                    mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent)
+        if infieldcount == 1: #datatype
+            fielddatatype = mydict[fiter].strip().replace(str(count)+'-', '')
+        if infieldcount == 2: #description
+            fielddescr = mydict[fiter].strip().replace(str(count)+'-', '')
+        if infieldcount == 3: #event
+            fieldevent = mydict[fiter].strip().replace(str(count)+'-', '')
+        if infieldcount == 4: #scale
+            fieldscale = mydict[fiter].strip().replace(str(count)+'-', '')
+        if infieldcount == 5: #unit
+            fieldunit = mydict[fiter].strip().replace(str(count)+'-', '')
+            #we construct here
+            mymeta.addfield(fieldname, fielddescr, fielddatatype)
+            if fieldunit:
+                mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent)
     mymeta.write_to_file(app.config['S'], myfile)
     #NB: once editing field names is enabled, we must re-write the first line of the CSV file
     headerline = ','.join(fieldnames)
