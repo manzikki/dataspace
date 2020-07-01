@@ -23,7 +23,7 @@
 </tr>
     {% for f in fieldlist %}
 <tr>
-     <td width="7%"> <input type="text" name="{{loop.index}}-{{ f.name }}" value="{{ f.name }}" size="20" required> </td><td width="10%"> <input type="text" size="20" name="{{loop.index}}-{{ f.name }}=descr" value="{{ f.descr }}" required> </td>
+     <td width="7%"> <input type="text" id="n{{loop.index}}" name="{{loop.index}}-{{ f.name }}" value="{{ f.name }}" size="20" required> </td><td width="10%"> <input type="text" size="20" name="{{loop.index}}-{{ f.name }}=descr" value="{{ f.descr }}" required> </td>
      <td width="7%"> {{ f.sample }} </td> <td > </td> <td width="45%"> Unit: <input type="text" size="10" name="{{loop.index}}-{{ f.name }}=unit" value="{{ f.unit }}"/> 
      Scale:
      <select name="{{loop.index}}-{{f.name}}=scale"><option></option><option value="nominal" {% if f.scale == "nominal" %}selected{% endif %}>Nominal</option>
@@ -53,10 +53,30 @@
   <td><button type="submit">Submit</button></td></form><td><button><a href="{{ url_for('appmain')}}">Cancel</a></button></td>
 </tr>
 
-  </div>
+<tr><td><button type="button" onclick="normalizenames()">Normalize names</button></form></td></tr>
+</div>
 
 </table>
 
-  </body>
+
+<script>
+function normalizenames() {
+  //get all n+number elements
+  n = 1;
+  while (1) {
+      myid = "n"+n;
+      n = n + 1;
+      elem = document.getElementById(myid);
+      if (elem == null) { break; }
+      myval = elem.value.replace(/\[(.+?)\]/g, '');
+      myval = myval.replace(/[^0-9a-zA-Z ]/g, '');
+      myval = myval.replace(/ /g,'_');
+      console.log(myval);
+      elem.value = myval;
+  }
+}
+</script>
+
+</body>
 </html>
 
