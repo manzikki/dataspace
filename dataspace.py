@@ -9,8 +9,8 @@ import io
 import codecs
 import hashlib
 import base64
-from dateutil.parser import parse
 from shutil import move, copyfile
+from dateutil.parser import parse
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash, Response
 from werkzeug.utils import secure_filename
@@ -151,7 +151,7 @@ def process_compressed_file(fname_no_path):
     tarf.extractall(app.config['SL'])
     #outputf = open(app.config['SL']+fname_no_path+".csv", "a")
     count = 0
-    outputf = ""
+    outputf = None
     for member in tarf.getmembers():
         count += 1
         #print(member.name)
@@ -166,7 +166,7 @@ def process_compressed_file(fname_no_path):
                 lineno += 1
                 if lineno == 1:
                     pass
-                if line: 
+                if line:
                     outputf.write(line)
             csvfile.close()
         #delete the copied file
@@ -199,10 +199,13 @@ def editmeta():
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
     return render_template('editmeta.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
 
-def natural_sort(l): 
-    convert = lambda text: int(text) if text.isdigit() else text.lower() 
-    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
-    return sorted(l, key = alphanum_key)
+def natural_sort(mylist):
+    """
+    Natural sort: 1-line will appear before 10-line.
+    """
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+    return sorted(mylist, key=alphanum_key)
 
 @app.route("/editmetasubmit", methods=['GET', 'POST'])
 @app.route("/home/editmetasubmit", methods=['GET', 'POST'])
@@ -232,7 +235,7 @@ def editmetasubmit():
     count = 0 #fields are numbered 1-, 2- etc
     fieldnames = [] #will be written to the CSV file as header
     for fiter in natural_sort(mydict):
-        if fiter ==  "file":
+        if fiter == "file":
             next
         if fiter == "descr":
             next
@@ -330,10 +333,11 @@ def build_fieldlist(filename):
             myhash['datatype'] = ''
             if len(row_sample) > colno:
                 myhash['sample'] = row_sample[colno]
+                sample = row_sample[colno]
                 #let's try to figure the datatype based on the sample
                 conv_ok = False
                 try:
-                    dummy = int(row_sample[colno])
+                    dummy = int(sample)
                     myhash['datatype'] = 'integer'
                     conv_ok = True
                 except:
@@ -341,20 +345,27 @@ def build_fieldlist(filename):
                 #otherwise if can be a decimal or a string
                 if not conv_ok:
                     try:
-                        dummy = float(row_sample[colno])
+                        dummy = float(sample)
                         myhash['datatype'] = 'decimal'
                         conv_ok = True
                     except:
                         pass
                 if not conv_ok:
                     try:
-                        datetime = parse(row_sample[colno])
+                        dummy = parse(sample)
                         myhash['datatype'] = 'datetime'
                         conv_ok = True
                     except:
                         pass
                 if not conv_ok:
                     myhash['datatype'] = 'string'
+                #fix "stupid decisions" like TH77 or 3,161 as datetime
+                if myhash['datatype'] == 'datetime' or myhash['datatype'] == 'string':
+                    if re.search("^[0-9]+,[0-9]+", sample) or \
+                        re.search("^[0-9]+,[0-9]+,[0-9]+", sample):
+                        myhash['datatype'] = 'integer'
+                    if re.search("^\D", sample) and len(sample) < 6:
+                        myhash['datatype'] = 'string'
             colno += 1
             fieldlist.append(myhash)
     return fieldlist
@@ -373,7 +384,7 @@ def new():
     form = PastedTextForm()
     if form.validate_on_submit():
         #write the contents into a file and call meta edit
-        mydict = request.form
+        #mydict = request.form
         csvtext = request.form.get('csvtext').replace("\r\n", "\n")
         count = 0
         checkfilename = "data"+str(count)+".csv"
@@ -391,7 +402,7 @@ def new():
 
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
-#file upload. Available to admin only
+#file upload. Available to admin only.
 def upload():
     """
     Upload function, shows the file upload dialog, receives the file.
@@ -419,7 +430,8 @@ def upload():
             numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist, numlines=numlines) #editmeta will call editmetasubmit
+                                       fieldlist=fieldlist, numlines=numlines)
+                                       #editmeta will call editmetasubmit
         return redirect(url_for('appmain'))
     return render_template('upload.html', form=form)
 
@@ -457,7 +469,7 @@ def view(pfile=""):
     if 'username' not in session or line_no > MAX_SHOWN_LINES:
         return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)
     return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows,
-                            numcols=len(headers))
+                           numcols=len(headers))
 
 
 @app.route('/editsave', methods=['GET', 'POST'])
@@ -465,6 +477,9 @@ def view(pfile=""):
 #save the file including the line the user edited. The edited line's columns are decoded
 #from [row]-[column] labels
 def editsave():
+    """
+    Save the file including the line the user edited. Admin only.
+    """
     if 'username' not in session:
         return redirect(url_for('appmain'))
     mydict = request.form.to_dict()
@@ -474,8 +489,8 @@ def editsave():
     #if the user wanted a new line at the end, just append a new file with commas
     if 'addrow' in mydict:
         numcommas = int(mydict['numcols'])-1
-        f = io.open(app.config['SL']+fname, 'a+')    
-        for cols in range(numcommas):
+        f = io.open(app.config['SL']+fname, 'a+')
+        for _ in range(numcommas):
             f.write(",")
         f.write("\n")
         f.close()
@@ -814,7 +829,7 @@ def cube():
     if 'cancel' in request.args:
         #print("Cancel")
         cube_round = 0 #reset
-        return appmain()
+        return redirect(url_for('appmain'))
     # 1 Starting point: The user will first select 2 files.
     username = ''
     if 'username' in session:
