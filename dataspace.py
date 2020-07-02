@@ -235,16 +235,19 @@ def editmetasubmit():
     if numlines:
         mymeta.setlines(numlines)
     infieldcount = -1 #counter of items in field
-    items = 6 #name, description, unit, scale, eventness, datatype
+    items = ["name", "descr", "unit", "scale", "event", "datatype", "min", "max" ] #min, max
     fieldname = ""
     fielddescr = ""
     fieldunit = ""
     fieldscale = ""
     fieldevent = ""
     fielddatatype = ""
-    count = 0 #fields are numbered 1-, 2- etc
+    fieldmin = ""
+    fieldmax = ""
+    count = 0 #fields are numbered 1-, 2- etc.
     fieldnames = [] #will be written to the CSV file as header
     for fiter in natural_sort(mydict):
+        #print(fiter)
         if fiter == "file":
             next
         if fiter == "descr":
@@ -253,26 +256,32 @@ def editmetasubmit():
             next
         count += 1
         infieldcount += 1
-        infieldcount = infieldcount % items
+        infieldcount = infieldcount % len(items)
         #print(str(infieldcount)+" "+fiter+" ",mydict[fiter])
         if infieldcount == 0: #name
             fieldname = mydict[fiter].strip().replace(',', '').replace(str(count)+'-', '')
             if fiter != "descr":
                 fieldnames.append(fieldname)
-        if infieldcount == 1: #datatype
+        if "=datatype" in fiter: # infieldcount == 1: #datatype
             fielddatatype = mydict[fiter].strip().replace(str(count)+'-', '')
-        if infieldcount == 2: #description
+        if "=descr" in fiter: #infieldcount == 2: #description
             fielddescr = mydict[fiter].strip().replace(str(count)+'-', '')
-        if infieldcount == 3: #event
+        if "=event" in fiter: #infieldcount == 3: #event
             fieldevent = mydict[fiter].strip().replace(str(count)+'-', '')
-        if infieldcount == 4: #scale
+        if "=min" in fiter:
+            if mydict[fiter]:
+                fieldmin = mydict[fiter].strip().replace(str(count)+'-', '')
+        if "=max" in fiter:
+            if mydict[fiter]:
+                fieldmax = mydict[fiter].strip().replace(str(count)+'-', '')
+        if "=scale" in fiter: #infieldcount == 4: #scale
             fieldscale = mydict[fiter].strip().replace(str(count)+'-', '')
-        if infieldcount == 5: #unit
+        if "=unit" in fiter: #infieldcount == 5: #unit
             fieldunit = mydict[fiter].strip().replace(str(count)+'-', '')
-            #we construct here
+            #we construct here, this is the last one
             mymeta.addfield(fieldname, fielddescr, fielddatatype)
             if fieldunit:
-                mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent)
+                mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent, fieldmin, fieldmax)
     mymeta.write_to_file(app.config['S'], myfile)
     #NB: once editing field names is enabled, we must re-write the first line of the CSV file
     headerline = ','.join(fieldnames)

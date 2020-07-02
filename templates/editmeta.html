@@ -1,20 +1,23 @@
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>Editor</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <title>Metadata Editor</title>
   </head>
   <body>
   <div class="container">
     {{ file }}
-
     <br/>
     <form method="post" action=" {{ url_for('editmetasubmit') }} ">
     <input type="hidden" name="numlines" value="{{numlines}}"/>  
     <input type="hidden" name="file" value="{{file}}"/>
     <input size="70" name="descr" value="{{descr}}" required/>
-    <br/><br/>
+    <br/>
+    <button class="btn btn-default"><a style="color:black" href="{{ url_for('appmain')}}">Back to main page</a></button>
 <table id="fields" border="0" class="table">
 <tr>
 <thead class="thead-light">
@@ -44,20 +47,38 @@
     <option value="string" {% if f.datatype == "string" %}selected{% endif %} >String</option>
     <option value="decimal" {% if f.datatype == "decimal" %}selected{% endif %} >Decimal</option>
     <option value="datetime" {% if f.datatype == "datetime" %}selected{% endif %} >Date/Time</option>
-  </select>
+  </select></td>
+  <td></td>
+  <td></td>
+  <td>Range:
+    <input id="{{loop.index}}-{{f.name}}=min" name="{{loop.index}}-{{f.name}}=min" value="" type="hidden"/>
+    <input id="{{loop.index}}-{{f.name}}=max" name="{{loop.index}}-{{f.name}}=max"  value="" type="hidden"/>
+   {% if f.datatype == "integer" %} <span id="{{loop.index}}-ranged"> - &infin; .. &infin; </span>
+<button type="button" class="btn btn-default" data-toggle="modal" 
+ onclick="f1=document.getElementById('f1'); f1.innerHTML= ' {{loop.index}}-{{ f.name }} ';"
+ data-target="#inputrangei">Change</button>
+   {% endif %}
+   {% if f.datatype == "string"  %} <span id="{{loop.index}}-ranged"> 0 .. any length </span>
+<button type="button" class="btn btn-default" data-toggle="modal" 
+ onclick="f2=document.getElementById('f2'); f2.innerHTML= ' {{loop.index}}-{{ f.name }} ';"
+ data-target="#inputranges">Change</button>
+   {% endif %}
+   {% if f.datatype == "decimal" %} any precision {% endif %}
+
+  </td>
 <tr>     
 </tr>
     {% endfor %}
     <br/>
 <tr>
-  <td><button type="submit">Submit</button></td></form><td><button><a href="{{ url_for('appmain')}}">Cancel</a></button></td>
+  <td><button class="btn btn-default" type="submit">Submit</button></td></form>
+  <td><button class="btn btn-default"><a style="color:black" href="{{ url_for('appmain')}}">Cancel</a></button></td>
 </tr>
 
-<tr><td><button type="button" onclick="normalizenames()">Normalize names</button></form></td></tr>
+<tr><td><button class="btn btn-default" type="button" onclick="normalizenames()">Normalize field names</button></form></td></tr>
 </div>
 
 </table>
-
 
 <script>
 function normalizenames() {
@@ -75,7 +96,96 @@ function normalizenames() {
       elem.value = myval;
   }
 }
+
+function deliver_rangesi() {
+  //get the integer ranges from dialog, put them into the main GUI
+  var mymin = document.getElementById("mini").value;
+  var mymax = document.getElementById("maxi").value;
+
+  //var ranged = document.getElementById("ranged");
+  //ranged.innerHTML = mymin+" - "+mymax;
+  //get the right field name from the function
+  var fieldn = document.getElementById("f1").innerHTML.trim();
+  //get the number of this field to update num-ranged
+  var num = parseInt(fieldn);
+  var ranged = document.getElementById(num+"-ranged");
+  ranged.innerHTML = mymin+" - "+mymax;
+  //update the field=min and field=max inputs
+  var fieldmin = document.getElementById(fieldn+"=min");
+  var fieldmax = document.getElementById(fieldn+"=max");
+  fieldmin.value = mymin;
+  fieldmax.value = mymax;
+}
+
+function deliver_rangess() {
+  //get the integer ranges from dialog, put them into the main GUI
+  var mymin = document.getElementById("mins").value;
+  var mymax = document.getElementById("maxs").value;
+
+  //get the right field name from the function
+  var fieldn = document.getElementById("f2").innerHTML.trim();
+  var num = parseInt(fieldn);
+  //update the field=min and field=max inputs
+  var ranged = document.getElementById(num+"-ranged");
+  ranged.innerHTML = mymin+" .. "+mymax;
+  var fieldmin = document.getElementById(fieldn+"=min");
+  var fieldmax = document.getElementById(fieldn+"=max");
+  fieldmin.value = mymin;
+  fieldmax.value = mymax;
+}
 </script>
+
+  <!-- Modals -->
+  <div class="modal fade" id="inputrangei" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Integer Input Range: <span id="f1"></span></h4>
+        </div>
+        <div class="modal-body">
+          <p>Please enter the minimum and maximum values.</p>
+          <input id="mini" type="number" size="6" value=""/> <input size="6" type="number" id="maxi" value=""/>
+          <p>Sorry, not yet implemented.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" onclick="deliver_rangesi()" 
+            data-dismiss="modal">OK</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+
+<div class="modal fade" id="inputranges" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Input Range: <span id="f2"></span></h4>
+        </div>
+        <div class="modal-body">
+          <p>Please enter the minimum and maximum length of the string.</p>
+          <input id="mins" size="6" value="0"/> <input id="maxs" size="6" value="255"/>
+          <p>Sorry, not yet implemented.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" onclick="deliver_rangess()" 
+                  data-dismiss="modal">OK</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
 
 </body>
 </html>
