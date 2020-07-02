@@ -29,7 +29,8 @@ app.config['COLLIST'] = []
 app.config['NEWCSVFIEDLS'] = [] #used by the 'new' function
 
 ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'FpacNida986!'
+ADMIN_PASSWORD_MD5 = "1db422179f1290ab1499f146972b2d82" #FpacNida986! 
+#                     but we read it from a file when the app starts
 MAX_SHOWN_LINES = 500 #max number of lines in view
 MAX_COUNTED_LINES = 10000
 MAX_COLNAME = 20 #max chars in collection
@@ -43,6 +44,13 @@ def appmain():
     https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-The-main-page
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
+    #read admin password from a file if it exists
+    try:
+        pwfile = open("pw.md5")
+        ADMIN_PASSWORD_MD5 = pwfile.readline()
+        pwfile.close()
+    except:
+        pass
     app.config['S'] = os.path.join(dir_path, "static")
     app.config['SL'] = dir_path+"/static/"
     app.config['COMPAT'] = dir_path+"/static/compat.file" #contains compatibility info
@@ -107,11 +115,13 @@ def login():
     """
     form = LoginForm()
     if form.validate_on_submit():
-        if form.username.data == ADMIN_USERNAME and form.password.data == ADMIN_PASSWORD:
+        passw = form.password.data.encode('utf-8')
+        passwmd5 = hashlib.md5(passw).hexdigest()
+        if form.username.data == ADMIN_USERNAME and passwmd5 == ADMIN_PASSWORD_MD5:
             #flash('You have been logged in!', 'success')
             session['username'] = ADMIN_USERNAME
             return redirect(url_for('appmain'))
-    flash('Login Unsuccessful. Please check username and password', 'danger')
+        flash('Login Unsuccessful. Please check username and password', 'danger')
     return render_template('login.html', title='Login', form=form)
 
 def file_not_ok(filename):
@@ -841,7 +851,7 @@ def cube():
         if username == ADMIN_USERNAME:
             return render_template('rcube.html', username=username, entries=mymetalist.get())
         else:
-            return appmain()
+            return redirect(url_for('appmain'))
     selfiles = request.args.getlist('fileselect')
 
     # 2: User has selected files, show their fields
@@ -1013,7 +1023,7 @@ def cube():
         return render_template('rcubegen.html', cubefiles=cubefiles, baseurl=request.base_url)
 
     #default if nothing matched
-    return appmain()
+    return redirect(url_for('appmain'))
 
 
 @app.route('/delfile', methods=['GET'])
@@ -1031,7 +1041,7 @@ def delfile():
     #delete the file and its jmeta
     os.remove(app.config['SL']+myfile)
     os.remove(app.config['SL']+myfile+".jmeta")
-    return appmain()
+    return redirect(url_for('appmain'))
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
