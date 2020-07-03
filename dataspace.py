@@ -387,6 +387,13 @@ def build_fieldlist(filename):
                         myhash['datatype'] = 'integer'
                     if re.search("^\D", sample) and len(sample) < 6:
                         myhash['datatype'] = 'string'
+                #fix odd cases
+                if not sample:
+                    myhash['datatype'] = 'string'
+                else:
+                    if re.search(^[A-Z], sample) or re.search(^[a-z], sample):
+                    myhash['datatype'] = 'string'
+
             colno += 1
             fieldlist.append(myhash)
     return fieldlist
