@@ -1,5 +1,5 @@
 """
-Simple dataspace management for CVS files. Marko Niinimaki niinimakim@webster.ac.th 2017-2020
+Simple dataspace management for CSV files. Marko Niinimaki niinimakim@webster.ac.th 2017-2020
 """
 import tarfile
 import re
@@ -43,6 +43,7 @@ def appmain():
     The functionality is explained in
     https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-The-main-page
     """
+    global ADMIN_PASSWORD_MD5 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     #read admin password from a file if it exists
     try:
@@ -117,6 +118,7 @@ def login():
     if form.validate_on_submit():
         passw = form.password.data.encode('utf-8')
         passwmd5 = hashlib.md5(passw).hexdigest()
+        #print("user entered "+passwmd5+" pw is "+ADMIN_PASSWORD_MD5)
         if form.username.data == ADMIN_USERNAME and passwmd5 == ADMIN_PASSWORD_MD5:
             #flash('You have been logged in!', 'success')
             session['username'] = ADMIN_USERNAME
