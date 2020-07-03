@@ -64,11 +64,15 @@ class MetaInfo:
     fields = [] #list of fieldname->fielddesc
     fielddatatypes = []
     #fielddatatypes = [] #fieldname->fielddatatype
+    fieldmins = [] #fieldname->minvalue
+    fieldmaxs = []
     measures = []
 
     def __init__(self, filename):
         self.fields = []
         self.fielddatatypes = []
+        self.fieldmins = []
+        self.fieldmaxs = []
         self.measures = []
         self.formatted_fields = ""
         self.lines = 0
@@ -92,7 +96,7 @@ class MetaInfo:
         """
         self.tags = tags
 
-    def addfield(self, fieldname, fielddesc, fielddatatype=""):
+    def addfield(self, fieldname, fielddesc, fielddatatype="", mmin=None, mmax=None):
         """
         Adds a field fieldname->fielddesc assoc array in the array fields and
         fieldname -> field data type in fielddatatypes.
@@ -102,6 +106,13 @@ class MetaInfo:
         self.fields.append(myfield)
         myfielddt = {}
         myfielddt[fieldname] = fielddatatype
+        if mmin or mmax:
+            mymins = {}
+            mymins[fieldname] = mmin
+            mymaxs = {}
+            mymaxs[fieldname] = mmax
+            self.fieldmins.append(mymins)
+            self.fieldmaxs.append(mymaxs)
         self.fielddatatypes.append(myfielddt)
 
     def addmeasurespec(self, fieldname, measurespec):
@@ -167,6 +178,29 @@ class MetaInfo:
                 if mykey == fieldname:
                     return myval
         return ""
+
+    def get_min(self, fieldname):
+        """
+        Gets the minimum value, if givem.
+        """
+        for mins in self.fieldmins:
+            mydict = mins
+            for mykey, myval in mydict.items():
+                if mykey == fieldname:
+                    return myval
+        return ""            
+
+    def get_max(self, fieldname):
+        """
+        Gets the max value, if givem.
+        """
+        for maxs in self.fieldmaxs:
+            mydict = maxs
+            for mykey, myval in mydict.items():
+                if mykey == fieldname:
+                    return myval
+        return ""            
+
 
     def set_formatted_fields(self):
         """
@@ -248,6 +282,10 @@ class MetaInfo:
                 myfhash['eventness'] = self.get_eventness(mykey)
                 myfhash['unit'] = self.get_unit(mykey)
                 myfhash['datatype'] = self.get_datatype(mykey)
+                myfhash['min'] = self.get_min(mykey)
+                myfhash['max'] = self.get_max(mykey)
+                #a bit stupid but helps with formatting
+                myfhash['minmax'] = myfhash['min'] + " .. " + myfhash['max']
                 if samplehash:
                     sample = samplehash.get(mykey, '')
                     myfhash['sample'] = sample
