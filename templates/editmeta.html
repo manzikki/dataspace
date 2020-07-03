@@ -51,8 +51,8 @@
   <td></td>
   <td></td>
   <td>Range:
-    <input id="{{loop.index}}-{{f.name}}=min" name="{{loop.index}}-{{f.name}}=min" value=" " type="hidden"/>
-    <input id="{{loop.index}}-{{f.name}}=max" name="{{loop.index}}-{{f.name}}=max"  value=" " type="hidden"/>
+    <input id="{{loop.index}}-{{f.name}}=min" name="{{loop.index}}-{{f.name}}=min" value=" {{ f.min }} " type="hidden"/>
+    <input id="{{loop.index}}-{{f.name}}=max" name="{{loop.index}}-{{f.name}}=max"  value=" {{ f.max }} " type="hidden"/>
    {% if f.datatype == "integer" %} <span id="{{loop.index}}-ranged"> 
       {% if f.minmax == " .. " %}
        - &infin; .. &infin;
