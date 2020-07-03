@@ -259,29 +259,31 @@ def editmetasubmit():
         infieldcount = infieldcount % len(items)
         #print(str(infieldcount)+" "+fiter+" ",mydict[fiter])
         if infieldcount == 0: #name
-            fieldname = mydict[fiter].strip().replace(',', '').replace(str(count)+'-', '')
+            fieldname = mydict[fiter].strip().replace(',', '')
             if fiter != "descr":
                 fieldnames.append(fieldname)
         if "=datatype" in fiter: # infieldcount == 1: #datatype
-            fielddatatype = mydict[fiter].strip().replace(str(count)+'-', '')
+            fielddatatype = mydict[fiter].strip()
         if "=descr" in fiter: #infieldcount == 2: #description
-            fielddescr = mydict[fiter].strip().replace(str(count)+'-', '')
+            fielddescr = mydict[fiter].strip()
         if "=event" in fiter: #infieldcount == 3: #event
-            fieldevent = mydict[fiter].strip().replace(str(count)+'-', '')
+            fieldevent = mydict[fiter].strip()
         if "=min" in fiter:
             if mydict[fiter]:
-                fieldmin = mydict[fiter].strip().replace(str(count)+'-', '')
+                fieldmin = mydict[fiter].strip()
         if "=max" in fiter:
             if mydict[fiter]:
-                fieldmax = mydict[fiter].strip().replace(str(count)+'-', '')
+                fieldmax = mydict[fiter].strip()
         if "=scale" in fiter: #infieldcount == 4: #scale
-            fieldscale = mydict[fiter].strip().replace(str(count)+'-', '')
+            fieldscale = mydict[fiter].strip()
         if "=unit" in fiter: #infieldcount == 5: #unit
-            fieldunit = mydict[fiter].strip().replace(str(count)+'-', '')
+            fieldunit = mydict[fiter].strip()
             #we construct here, this is the last one
-            mymeta.addfield(fieldname, fielddescr, fielddatatype)
+            mymeta.addfield(fieldname, fielddescr, fielddatatype, fieldmin, fieldmax)
+            fieldmin = None
+            fieldmax = None
             if fieldunit:
-                mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent, fieldmin, fieldmax)
+                mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent)
     mymeta.write_to_file(app.config['S'], myfile)
     #NB: once editing field names is enabled, we must re-write the first line of the CSV file
     headerline = ','.join(fieldnames)

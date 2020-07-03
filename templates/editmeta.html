@@ -51,14 +51,26 @@
   <td></td>
   <td></td>
   <td>Range:
-    <input id="{{loop.index}}-{{f.name}}=min" name="{{loop.index}}-{{f.name}}=min" value="" type="hidden"/>
-    <input id="{{loop.index}}-{{f.name}}=max" name="{{loop.index}}-{{f.name}}=max"  value="" type="hidden"/>
-   {% if f.datatype == "integer" %} <span id="{{loop.index}}-ranged"> - &infin; .. &infin; </span>
-<button type="button" class="btn btn-default" data-toggle="modal" 
- onclick="f1=document.getElementById('f1'); f1.innerHTML= ' {{loop.index}}-{{ f.name }} ';"
- data-target="#inputrangei">Change</button>
+    <input id="{{loop.index}}-{{f.name}}=min" name="{{loop.index}}-{{f.name}}=min" value=" " type="hidden"/>
+    <input id="{{loop.index}}-{{f.name}}=max" name="{{loop.index}}-{{f.name}}=max"  value=" " type="hidden"/>
+   {% if f.datatype == "integer" %} <span id="{{loop.index}}-ranged"> 
+      {% if f.minmax == " .. " %}
+       - &infin; .. &infin;
+      {% else %}
+        {{ f.minmax }}
+      {% endif %}
+   </span>
+   <button type="button" class="btn btn-default" data-toggle="modal" 
+        onclick="f1=document.getElementById('f1'); f1.innerHTML= ' {{loop.index}}-{{ f.name }} ';"
+        data-target="#inputrangei">Change</button>
    {% endif %}
-   {% if f.datatype == "string"  %} <span id="{{loop.index}}-ranged"> 0 .. any length </span>
+   {% if f.datatype == "string"  %} <span id="{{loop.index}}-ranged">
+     {% if f.minmax == " .. " %}
+       0 .. any length
+      {% else %}
+        {{ f.minmax }}
+      {% endif %}
+    </span>
 <button type="button" class="btn btn-default" data-toggle="modal" 
  onclick="f2=document.getElementById('f2'); f2.innerHTML= ' {{loop.index}}-{{ f.name }} ';"
  data-target="#inputranges">Change</button>
@@ -147,7 +159,6 @@ function deliver_rangess() {
         <div class="modal-body">
           <p>Please enter the minimum and maximum values.</p>
           <input id="mini" type="number" size="6" value=""/> <input size="6" type="number" id="maxi" value=""/>
-          <p>Sorry, not yet implemented.</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" onclick="deliver_rangesi()" 
@@ -173,7 +184,6 @@ function deliver_rangess() {
         <div class="modal-body">
           <p>Please enter the minimum and maximum length of the string.</p>
           <input id="mins" size="6" value="0"/> <input id="maxs" size="6" value="255"/>
-          <p>Sorry, not yet implemented.</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" onclick="deliver_rangess()" 
