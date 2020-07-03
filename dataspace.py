@@ -391,7 +391,7 @@ def build_fieldlist(filename):
                 if not sample:
                     myhash['datatype'] = 'string'
                 else:
-                    if re.search(^[A-Z], sample) or re.search(^[a-z], sample):
+                    if re.search("^[A-Z]", sample) or re.search("^[a-z]", sample):
                     myhash['datatype'] = 'string'
 
             colno += 1
