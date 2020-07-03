@@ -234,8 +234,6 @@ def editmetasubmit():
     mymeta.setdescr(descr)
     if numlines:
         mymeta.setlines(numlines)
-    infieldcount = -1 #counter of items in field
-    items = ["name", "descr", "unit", "scale", "event", "datatype", "min", "max" ] #min, max
     fieldname = ""
     fielddescr = ""
     fieldunit = ""
@@ -244,7 +242,6 @@ def editmetasubmit():
     fielddatatype = ""
     fieldmin = ""
     fieldmax = ""
-    count = 0 #fields are numbered 1-, 2- etc.
     fieldnames = [] #will be written to the CSV file as header
     for fiter in natural_sort(mydict):
         #print(fiter)
@@ -254,14 +251,10 @@ def editmetasubmit():
             next
         if fiter == "numlines":
             next
-        count += 1
-        infieldcount += 1
-        infieldcount = infieldcount % len(items)
         #print(str(infieldcount)+" "+fiter+" ",mydict[fiter])
-        if infieldcount == 0: #name
+        if "=name" in fiter:
             fieldname = mydict[fiter].strip().replace(',', '')
-            if fiter != "descr":
-                fieldnames.append(fieldname)
+            fieldnames.append(fieldname)
         if "=datatype" in fiter: # infieldcount == 1: #datatype
             fielddatatype = mydict[fiter].strip()
         if "=descr" in fiter: #infieldcount == 2: #description
@@ -360,6 +353,7 @@ def build_fieldlist(filename):
                 try:
                     dummy = int(sample)
                     myhash['datatype'] = 'integer'
+                    #print("intconv")
                     conv_ok = True
                 except:
                     pass
@@ -368,6 +362,7 @@ def build_fieldlist(filename):
                     try:
                         dummy = float(sample)
                         myhash['datatype'] = 'decimal'
+                        #print("floatconv")
                         conv_ok = True
                     except:
                         pass
@@ -375,6 +370,7 @@ def build_fieldlist(filename):
                     try:
                         dummy = parse(sample)
                         myhash['datatype'] = 'datetime'
+                        #print("datetimeconv")
                         conv_ok = True
                     except:
                         pass
@@ -391,7 +387,7 @@ def build_fieldlist(filename):
                 if not sample:
                     myhash['datatype'] = 'string'
                 else:
-                    if re.search("^[A-Z]", sample) or re.search("^[a-z]", sample):
+                    if re.search("^[A-Z]", sample.strip()) or re.search("^[a-z]", sample.strip()):
                         myhash['datatype'] = 'string'
 
             colno += 1

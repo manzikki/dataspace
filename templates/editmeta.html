@@ -26,7 +26,7 @@
 </tr>
     {% for f in fieldlist %}
 <tr>
-     <td width="7%"> <input type="text" id="n{{loop.index}}" name="{{loop.index}}-{{ f.name }}" value="{{ f.name }}" size="20" required> </td><td width="10%"> <input type="text" size="20" name="{{loop.index}}-{{ f.name }}=descr" value="{{ f.descr }}" required> </td>
+     <td width="7%"> <input type="text" id="n{{loop.index}}" name="{{loop.index}}-{{ f.name }}=name" value="{{ f.name }}" size="20" required> </td><td width="10%"> <input type="text" size="20" name="{{loop.index}}-{{ f.name }}=descr" value="{{ f.descr }}" required> </td>
      <td width="7%"> {{ f.sample }} </td> <td > </td> <td width="45%"> Unit: <input type="text" size="10" name="{{loop.index}}-{{ f.name }}=unit" value="{{ f.unit }}"/> 
      Scale:
      <select name="{{loop.index}}-{{f.name}}=scale"><option></option><option value="nominal" {% if f.scale == "nominal" %}selected{% endif %}>Nominal</option>
@@ -61,7 +61,7 @@
       {% endif %}
    </span>
    <button type="button" class="btn btn-default" data-toggle="modal" 
-        onclick="f1=document.getElementById('f1'); f1.innerHTML= ' {{loop.index}}-{{ f.name }} ';"
+        onclick="f1=document.getElementById('f1'); f1.innerHTML= ' {{loop.index}}-{{ f.name }} '; document.getElementById('mini').value=getElementById('{{loop.index}}-{{ f.name }}=min').value; document.getElementById('maxi').value=getElementById('{{loop.index}}-{{ f.name }}=max').value;"
         data-target="#inputrangei">Change</button>
    {% endif %}
    {% if f.datatype == "string"  %} <span id="{{loop.index}}-ranged">
@@ -72,7 +72,7 @@
       {% endif %}
     </span>
 <button type="button" class="btn btn-default" data-toggle="modal" 
- onclick="f2=document.getElementById('f2'); f2.innerHTML= ' {{loop.index}}-{{ f.name }} ';"
+ onclick="f2=document.getElementById('f2'); f2.innerHTML= ' {{loop.index}}-{{ f.name }} '; document.getElementById('mins').value=getElementById('{{loop.index}}-{{ f.name }}=min').value; document.getElementById('maxs').value=getElementById('{{loop.index}}-{{ f.name }}=max').value;"
  data-target="#inputranges">Change</button>
    {% endif %}
    {% if f.datatype == "decimal" %} any precision {% endif %}
@@ -183,7 +183,7 @@ function deliver_rangess() {
         </div>
         <div class="modal-body">
           <p>Please enter the minimum and maximum length of the string.</p>
-          <input id="mins" size="6" value="0"/> <input id="maxs" size="6" value="255"/>
+          <input id="mins" size="6" value=""/> <input id="maxs" size="6" value=""/>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" onclick="deliver_rangess()" 
