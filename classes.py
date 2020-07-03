@@ -181,7 +181,7 @@ class MetaInfo:
 
     def get_min(self, fieldname):
         """
-        Gets the minimum value, if givem.
+        Gets the minimum value, if given.
         """
         for mins in self.fieldmins:
             mydict = mins
@@ -192,15 +192,17 @@ class MetaInfo:
 
     def get_max(self, fieldname):
         """
-        Gets the max value, if givem.
+        Gets the max value, if given.
         """
         for maxs in self.fieldmaxs:
             mydict = maxs
             for mykey, myval in mydict.items():
                 if mykey == fieldname:
                     return myval
-        return ""            
+        return ""        
 
+    def get_lines(self):
+        return self.lines
 
     def set_formatted_fields(self):
         """

@@ -29,7 +29,7 @@ app.config['COLLIST'] = []
 app.config['NEWCSVFIEDLS'] = [] #used by the 'new' function
 
 ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD_MD5 = "1db422179f1290ab1499f146972b2d82" #FpacNida986! 
+ADMIN_PASSWORD_MD5 = "1db422179f1290ab1499f146972b2d82" #FpacNida986!
 #                     but we read it from a file when the app starts
 MAX_SHOWN_LINES = 500 #max number of lines in view
 MAX_COUNTED_LINES = 10000
@@ -204,10 +204,11 @@ def editmeta():
     #build a meta object and read it from file
     mymeta = MetaInfo(myfile)
     mymeta.read_from_file(app.config['S'], myfile)
+    numlines = mymeta.get_lines()
     samples = getfieldsamples(app.config['SL']+myfile)
     fields = mymeta.get_fieldlist(samples)
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
-    return render_template('editmeta.html', file=myfile, descr=mymeta.descr, fieldlist=fields)
+    return render_template('editmeta.html', file=myfile, descr=mymeta.descr, fieldlist=fields, numlines=numlines)
 
 def natural_sort(mylist):
     """
@@ -474,6 +475,10 @@ def view(pfile=""):
         myfile = mydict['file']
     rows = []
     headers = []
+    #Get the metadata so that we know the min/max values
+    mymeta = MetaInfo(myfile)
+    mymeta.read_from_file(app.config['SL'], myfile)
+    fieldlist = mymeta.get_fieldlist()
     with io.open(app.config['SL']+myfile, 'r', encoding='utf-8') as csv_file: #,'rU'
         #csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
@@ -491,9 +496,10 @@ def view(pfile=""):
     if line_no > MAX_COUNTED_LINES:
         shownum = "More than " + str(MAX_COUNTED_LINES) + " lines (too large to edit)."
     if 'username' not in session or line_no > MAX_SHOWN_LINES:
-        return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows)
+        return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows,
+                               fields=fieldlist)
     return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows,
-                           numcols=len(headers))
+                           numcols=len(headers), fields=fieldlist)
 
 
 @app.route('/editsave', methods=['GET', 'POST'])
