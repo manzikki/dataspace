@@ -29,9 +29,11 @@
       {% set colcount = [0] %}
       {% for col in row %}
        {% if colcount.append(colcount.pop() + 1) %}{% endif %}
-      <td> 
+      <td>
         {% if fields[loop.index-1].max and fields[loop.index-1].datatype == "string" %}
-            <input name="{{rowcount}}-{{colcount}}" size="{{ fields[loop.index-1].max }}" type="text" value="{{ col }}"/>
+            <input name="{{rowcount}}-{{colcount}}" maxsize="{{ fields[loop.index-1].max }}" size="{{ fields[loop.index-1].max }}" type="text" value="{{ col }}"/>
+        {% elif fields[loop.index-1].max and fields[loop.index-1].datatype == "integer" %}
+            <input name="{{rowcount}}-{{colcount}}" type="number" min="{{ fields[loop.index-1].min }}" max="{{ fields[loop.index-1].max }}" value="{{ col }}"/>
         {% else %}
          <input name="{{rowcount}}-{{colcount}}" type="text" value="{{ col }}"/>
         {% endif %}
