@@ -139,7 +139,7 @@ def file_not_ok(filename):
                 #print(member.name)
                 if member.name.startswith("/") or ".." in member.name:
                     return "Unsafe element in archive: "+member.name
-                if ".CSV" not in upper(member.name):
+                if ".CSV" not in member.name.upper():
                     return "File "+member.name+" in "+filename+" does not have extension csv."
         except:
             #return "tar.gz file open error"
@@ -437,30 +437,63 @@ def upload():
     if 'username' not in session:
         return redirect(url_for('appmain'))
     form = UploadForm()
+    uploaded = []
     if form.validate_on_submit():
-        fil = form.CSV_file.data
-        filename = secure_filename(fil.filename)
-        #already such file?
-        if os.path.isfile(app.config['SL'] + filename):
-            pass #should call another template to ask the user
-        fil.save(os.path.join(
-            app.config['SL'], filename
-        ))
-        #if the file is ok, prepare the fields for the dialog
-        if file_not_ok(filename):
-            flash(file_not_ok(filename))
-            return redirect(url_for('appmain'))
+        for fil in form.CSVfiles.data:
+            if fil.filename == "":
+                #empty form submit
+                return render_template('upload.html', form=form)
+            if '.CSV' in fil.filename.upper() or '.TAR.GZ' in fil.filename.upper():
+                pass
+            else:
+                return "Sorry, only csv and tar.gz archives of csv files supported."
+            filename = secure_filename(fil.filename)
+            uploaded.append(filename)
+            print(filename)
+            fil.save(os.path.join(
+                app.config['SL'], filename
+            ))
+        if len(uploaded) == 1:
+            #just one file: go to meta edit
+            #if the file is ok, prepare the fields for the dialog
+            if file_not_ok(filename):
+                flash(file_not_ok(filename))
+                return redirect(url_for('appmain'))
+            else:
+                if ".TAR.GZ" in filename.upper():
+                    process_compressed_file(filename)
+                    filename = filename+".csv"
+                numlines = count_lines(app.config['SL']+filename)
+                fieldlist = build_fieldlist(app.config['SL']+filename)
+                return render_template('editmeta.html', file=filename, descr="",\
+                                       fieldlist=fieldlist, numlines=numlines)
         else:
-            if ".tar.gz" in filename:
-                process_compressed_file(filename)
-                filename = filename+".csv"
+            #combine multiple files
+            fileno = 0
+            appendto = open(app.config['SL']+uploaded[0], 'a')
+            for fname in uploaded:
+                if ".CSV" not in filename.upper():
+                    return("Sorry, combining other than CSV files not yet implemented.")        
+                else:
+                    fileno += 1
+                    if fileno == 1:
+                        pass
+                    else:
+                        appendfrom = open(app.config['SL']+fname)
+                        line = appendfrom.readline() #skip headers
+                        while line:
+                            line = appendfrom.readline()
+                            appendto.write(line)
+                        appendfrom.close()
+                        #delete appendfrom
+                        os.remove(app.config['SL']+fname)
+            appendto.close()
+            filename = uploaded[0]
             numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist, numlines=numlines)
-                                       #editmeta will call editmetasubmit
-        return redirect(url_for('appmain'))
-    return render_template('upload.html', form=form)
+                                       fieldlist=fieldlist, numlines=numlines)        
+    return render_template('upload.html', form=form)   
 
 @app.route("/view", methods=['GET', 'POST'])
 @app.route("/home/view", methods=['GET', 'POST'])
