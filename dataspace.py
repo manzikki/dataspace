@@ -43,7 +43,7 @@ def appmain():
     The functionality is explained in
     https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-The-main-page
     """
-    global ADMIN_PASSWORD_MD5 
+    global ADMIN_PASSWORD_MD5
     dir_path = os.path.dirname(os.path.realpath(__file__))
     #read admin password from a file if it exists
     try:
@@ -210,7 +210,8 @@ def editmeta():
     samples = getfieldsamples(app.config['SL']+myfile)
     fields = mymeta.get_fieldlist(samples)
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
-    return render_template('editmeta.html', file=myfile, descr=mymeta.descr, fieldlist=fields, numlines=numlines)
+    return render_template('editmeta.html', file=myfile, descr=mymeta.descr,
+                           fieldlist=fields, numlines=numlines)
 
 def natural_sort(mylist):
     """
@@ -449,7 +450,6 @@ def upload():
                 return "Sorry, only csv and tar.gz archives of csv files supported."
             filename = secure_filename(fil.filename)
             uploaded.append(filename)
-            print(filename)
             fil.save(os.path.join(
                 app.config['SL'], filename
             ))
@@ -459,10 +459,10 @@ def upload():
             if file_not_ok(filename):
                 flash(file_not_ok(filename))
                 return redirect(url_for('appmain'))
-            else:
-                if ".TAR.GZ" in filename.upper():
-                    process_compressed_file(filename)
-                    filename = filename+".csv"
+
+            if ".TAR.GZ" in filename.upper():
+                process_compressed_file(filename)
+                filename = filename+".csv"
                 numlines = count_lines(app.config['SL']+filename)
                 fieldlist = build_fieldlist(app.config['SL']+filename)
                 return render_template('editmeta.html', file=filename, descr="",\
@@ -470,10 +470,19 @@ def upload():
         else:
             #combine multiple files
             fileno = 0
+            #process tar.gz's
+            uncompressed = []
+            for fname in uploaded:
+                if ".TAR.GZ" in fname.upper():
+                    bfname = os.path.basename(fname)
+                    process_compressed_file(bfname)
+                    uncompressed.append(bfname+".csv")
+            if uncompressed:
+                uploaded = uncompressed
             appendto = open(app.config['SL']+uploaded[0], 'a')
             for fname in uploaded:
-                if ".CSV" not in filename.upper():
-                    return("Sorry, combining other than CSV files not yet implemented.")        
+                if ".CSV" not in fname.upper():
+                    return "Sorry, combining other than CSV files not yet implemented."
                 else:
                     fileno += 1
                     if fileno == 1:
@@ -492,8 +501,8 @@ def upload():
             numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist, numlines=numlines)        
-    return render_template('upload.html', form=form)   
+                                       fieldlist=fieldlist, numlines=numlines)
+    return render_template('upload.html', form=form)
 
 @app.route("/view", methods=['GET', 'POST'])
 @app.route("/home/view", methods=['GET', 'POST'])
