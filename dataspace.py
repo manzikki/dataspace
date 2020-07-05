@@ -558,7 +558,12 @@ def view(pfile=""):
     mymeta = MetaInfo(myfile)
     mymeta.read_from_file(app.config['SL'], myfile)
     fieldlist = mymeta.get_fieldlist()
-    with io.open(app.config['SL']+myfile, 'r', encoding='utf-8') as csv_file: #,'rU'
+
+    with open(app.config['SL']+myfile, 'rb') as f:
+        result = chardet.detect(f.readline())
+        encoding = result['encoding']
+
+    with io.open(app.config['SL']+myfile, 'r', encoding=encoding) as csv_file: #,'rU'
         #csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         delim = ','
         if myfile.upper().endswith("TSV"):

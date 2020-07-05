@@ -5,6 +5,7 @@ Installation of dependencies by python pip program:
 pip install flask
 pip install flask-wtf
 pip install pandas
+pip install chardet
 
 Running:
 python dataspace.py
