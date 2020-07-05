@@ -9,6 +9,7 @@ import io
 import codecs
 import hashlib
 import base64
+import chardet
 from shutil import move, copyfile
 from dateutil.parser import parse
 from flask import Flask, session, render_template, redirect, \
@@ -151,9 +152,11 @@ def file_not_ok(filename):
     myline = myf.readline()
     myf.close()
     #check that the line contains commas
-    if "," in str(myline):
+    if filename.upper().endswith("CSV") and "," in str(myline):
         return ""
-    return "First line of the file does not contain commas."
+    if filename.upper().endswith("TSV") and "\t" in str(myline):
+        return ""
+    return "First line of the file does not contain separator characters."
 
 def process_compressed_file(fname_no_path):
     """
@@ -284,7 +287,15 @@ def editmetasubmit():
     mymeta.write_to_file(app.config['S'], myfile)
     #NB: once editing field names is enabled, we must re-write the first line of the CSV file
     headerline = ','.join(fieldnames)
-    csvfile = io.open(app.config['SL']+myfile, encoding='utf-8')
+    #replace non-ascii
+    headerline = re.sub(r'[^\x00-\x7F]+','', headerline)
+
+    encoding = ""
+    with open(app.config['SL']+myfile, 'rb') as f:
+        result = chardet.detect(f.readline()) 
+        encoding = result['encoding']
+
+    csvfile = io.open(app.config['SL']+myfile, encoding=encoding)
     outfilen = app.config['SL']+myfile+".out"
     outfile = io.open(outfilen, 'w', encoding='utf-8')
     outfile.write(headerline+"\n")
@@ -304,7 +315,13 @@ def count_lines(filename):
     Returns the number of lines of a file.
     """
     count = 0
-    myfile = io.open(filename, 'r', encoding='utf-8')
+    encoding = ""
+    with open(filename, 'rb') as f:
+        result = chardet.detect(f.readline()) 
+        encoding = result['encoding']
+
+    myfile = io.open(filename, 'r', encoding=encoding)
+ 
     line = myfile.readline()
     while line:
         line = myfile.readline()
@@ -321,8 +338,13 @@ def build_fieldlist(filename):
     row = []
     row_sample = []
     fieldlist = []
+    encoding = ""
+    with open(filename, 'rb') as f:
+        result = chardet.detect(f.readline()) 
+        encoding = result['encoding']
+    
     #read the first line of file to get field names
-    with io.open(filename, 'r', encoding='utf-8') as csv_file: #,'rU'
+    with io.open(filename, 'r', encoding=encoding) as csv_file: #,'rU'
         reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
         rowno = 0
         for row in reader: #read only 1 line, containing headers
@@ -444,7 +466,8 @@ def upload():
             if fil.filename == "":
                 #empty form submit
                 return render_template('upload.html', form=form)
-            if '.CSV' in fil.filename.upper() or '.TAR.GZ' in fil.filename.upper():
+            if '.CSV' in fil.filename.upper() or '.TSV' in fil.filename.upper() or \
+                '.TAR.GZ' in fil.filename.upper():
                 pass
             else:
                 return "Sorry, only csv and tar.gz archives of csv files supported."
@@ -463,9 +486,9 @@ def upload():
             if ".TAR.GZ" in filename.upper():
                 process_compressed_file(filename)
                 filename = filename+".csv"
-                numlines = count_lines(app.config['SL']+filename)
-                fieldlist = build_fieldlist(app.config['SL']+filename)
-                return render_template('editmeta.html', file=filename, descr="",\
+            numlines = count_lines(app.config['SL']+filename)
+            fieldlist = build_fieldlist(app.config['SL']+filename)
+            return render_template('editmeta.html', file=filename, descr="",\
                                        fieldlist=fieldlist, numlines=numlines)
         else:
             #combine multiple files
