@@ -152,11 +152,15 @@ def file_not_ok(filename):
     myline = myf.readline()
     myf.close()
     #check that the line contains commas
+
     if filename.upper().endswith("CSV") and "," in str(myline):
         return ""
-    if filename.upper().endswith("TSV") and "\t" in str(myline):
+    if filename.upper().endswith("TSV"):
+        for ch in myline:
+            if ch == 9: #found a tab
+                return ""
         return ""
-    return "First line of the file does not contain separator characters."
+    return "The first line of the file does not contain separator characters."
 
 def process_compressed_file(fname_no_path):
     """
@@ -285,8 +289,11 @@ def editmetasubmit():
             if fieldunit:
                 mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent)
     mymeta.write_to_file(app.config['S'], myfile)
-    #NB: once editing field names is enabled, we must re-write the first line of the CSV file
-    headerline = ','.join(fieldnames)
+    #NB: since editing field names is enabled, we must re-write the first line of the CSV file
+    if myfile.upper().endswith("TSV"):
+        headerline = '\t'.join(fieldnames)
+    else:
+        headerline = ','.join(fieldnames)
     #replace non-ascii
     headerline = re.sub(r'[^\x00-\x7F]+','', headerline)
 
@@ -343,9 +350,12 @@ def build_fieldlist(filename):
         result = chardet.detect(f.readline()) 
         encoding = result['encoding']
     
+    delim = ','
+    if filename.upper().endswith("TSV"):
+        delim = '\t'
     #read the first line of file to get field names
     with io.open(filename, 'r', encoding=encoding) as csv_file: #,'rU'
-        reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
+        reader = UnicodeReader(csv_file, delimiter=delim, quotechar='"')
         rowno = 0
         for row in reader: #read only 1 line, containing headers
             #remove the BOM
@@ -486,6 +496,8 @@ def upload():
             if ".TAR.GZ" in filename.upper():
                 process_compressed_file(filename)
                 filename = filename+".csv"
+
+            #simple one file upload is here
             numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
@@ -548,7 +560,10 @@ def view(pfile=""):
     fieldlist = mymeta.get_fieldlist()
     with io.open(app.config['SL']+myfile, 'r', encoding='utf-8') as csv_file: #,'rU'
         #csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
-        csv_reader = UnicodeReader(csv_file, delimiter=',', quotechar='"')
+        delim = ','
+        if myfile.upper().endswith("TSV"):
+            delim = '\t'
+        csv_reader = UnicodeReader(csv_file, delimiter=delim, quotechar='"')
         line_no = 0
         for row in csv_reader:
             if line_no == 0:
