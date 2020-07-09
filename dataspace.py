@@ -326,7 +326,8 @@ def count_lines(filename):
     with open(filename, 'rb') as f:
         result = chardet.detect(f.readline()) 
         encoding = result['encoding']
-
+    if encoding == "ascii":
+        encoding="utf-8"
     myfile = io.open(filename, 'r', encoding=encoding)
  
     line = myfile.readline()
@@ -349,7 +350,8 @@ def build_fieldlist(filename):
     with open(filename, 'rb') as f:
         result = chardet.detect(f.readline()) 
         encoding = result['encoding']
-    
+    if encoding == "ascii":
+        encoding="utf-8"
     delim = ','
     if filename.upper().endswith("TSV"):
         delim = '\t'
