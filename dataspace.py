@@ -301,7 +301,9 @@ def editmetasubmit():
     with open(app.config['SL']+myfile, 'rb') as f:
         result = chardet.detect(f.readline()) 
         encoding = result['encoding']
-
+    if encoding == "ascii":
+        encoding="utf-8"
+    
     csvfile = io.open(app.config['SL']+myfile, encoding=encoding)
     outfilen = app.config['SL']+myfile+".out"
     outfile = io.open(outfilen, 'w', encoding='utf-8')
@@ -448,18 +450,21 @@ def new():
         #write the contents into a file and call meta edit
         #mydict = request.form
         csvtext = request.form.get('csvtext').replace("\r\n", "\n")
-        count = 0
-        checkfilename = "data"+str(count)+".csv"
+        #count number of lines
+        numlines = csvtext.count("\n")
+        #check next available filename
+        countn = 0
+        checkfilename = "data"+str(countn)+".csv"
         while os.path.isfile(app.config['SL']+checkfilename):
-            count += 1
-            checkfilename = "data"+str(count)+".csv"
+            countn += 1
+            checkfilename = "data"+str(countn)+".csv"
         myfile = io.open(app.config['SL']+checkfilename, 'w', encoding='utf-8')
 
         myfile.write(csvtext)
         myfile.close()
         fieldlist = build_fieldlist(app.config['SL']+checkfilename)
         return render_template('editmeta.html', file=checkfilename, descr="",\
-                                fieldlist=fieldlist) #editmeta will call editmetasubmit
+                                fieldlist=fieldlist, numlines=numlines) #editmeta will call editmetasubmit
     return render_template('new.html', form=form)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -565,6 +570,9 @@ def view(pfile=""):
         result = chardet.detect(f.readline())
         encoding = result['encoding']
 
+    if encoding == "ascii":
+        encoding="utf-8"
+    
     with io.open(app.config['SL']+myfile, 'r', encoding=encoding) as csv_file: #,'rU'
         #csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         delim = ','
