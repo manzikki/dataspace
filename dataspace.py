@@ -295,15 +295,15 @@ def editmetasubmit():
     else:
         headerline = ','.join(fieldnames)
     #replace non-ascii
-    headerline = re.sub(r'[^\x00-\x7F]+','', headerline)
+    headerline = re.sub(r'[^\x00-\x7F]+', '', headerline)
 
     encoding = ""
     with open(app.config['SL']+myfile, 'rb') as f:
-        result = chardet.detect(f.readline()) 
+        result = chardet.detect(f.readline())
         encoding = result['encoding']
     if encoding == "ascii":
-        encoding="utf-8"
-    
+        encoding = "utf-8"
+
     csvfile = io.open(app.config['SL']+myfile, encoding=encoding)
     outfilen = app.config['SL']+myfile+".out"
     outfile = io.open(outfilen, 'w', encoding='utf-8')
@@ -326,12 +326,12 @@ def count_lines(filename):
     count = 0
     encoding = ""
     with open(filename, 'rb') as f:
-        result = chardet.detect(f.readline()) 
+        result = chardet.detect(f.readline())
         encoding = result['encoding']
     if encoding == "ascii":
-        encoding="utf-8"
+        encoding = "utf-8"
     myfile = io.open(filename, 'r', encoding=encoding)
- 
+
     line = myfile.readline()
     while line:
         line = myfile.readline()
@@ -350,10 +350,10 @@ def build_fieldlist(filename):
     fieldlist = []
     encoding = ""
     with open(filename, 'rb') as f:
-        result = chardet.detect(f.readline()) 
+        result = chardet.detect(f.readline())
         encoding = result['encoding']
     if encoding == "ascii":
-        encoding="utf-8"
+        encoding = "utf-8"
     delim = ','
     if filename.upper().endswith("TSV"):
         delim = '\t'
@@ -464,7 +464,8 @@ def new():
         myfile.close()
         fieldlist = build_fieldlist(app.config['SL']+checkfilename)
         return render_template('editmeta.html', file=checkfilename, descr="",\
-                                fieldlist=fieldlist, numlines=numlines) #editmeta will call editmetasubmit
+                                fieldlist=fieldlist, numlines=numlines)
+                                #editmeta will call editmetasubmit
     return render_template('new.html', form=form)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -571,8 +572,8 @@ def view(pfile=""):
         encoding = result['encoding']
 
     if encoding == "ascii":
-        encoding="utf-8"
-    
+        encoding = "utf-8"
+
     with io.open(app.config['SL']+myfile, 'r', encoding=encoding) as csv_file: #,'rU'
         #csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         delim = ','
