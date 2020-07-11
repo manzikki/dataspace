@@ -1,6 +1,7 @@
 #Simple page loading tests using robobrowser.
 #pip install robobrowser
 import werkzeug
+import os
 werkzeug.cached_property = werkzeug.utils.cached_property
 from robobrowser import RoboBrowser
 
@@ -26,11 +27,19 @@ loginf = forms[0]
 loginf['username'] = 'admin'
 loginf['password'] = 'password'
 browser.submit_form(loginf)
+
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):
     print("login ok")
 
-#3: Access "editmeta" of the first data set
+#3: Read links
+links = browser.get_links()
+urls = [link.get("href") for link in links]
+#print(str(urls))
+if '/home/new' in urls:
+	print("link for new ok")
+#remove the file
+os.remove('../pw.md5')
 
 
 
