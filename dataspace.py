@@ -3,14 +3,15 @@ Simple dataspace management for CSV files. Marko Niinimaki niinimakim@webster.ac
 """
 import tarfile
 import re
+import bz2
 import os
 import csv
 import io
 import codecs
 import hashlib
 import base64
-import chardet
 from shutil import move, copyfile
+import chardet
 from dateutil.parser import parse
 from flask import Flask, session, render_template, redirect, \
                   url_for, request, flash, Response
@@ -35,6 +36,7 @@ ADMIN_PASSWORD_MD5 = "1db422179f1290ab1499f146972b2d82" #FpacNida986!
 MAX_SHOWN_LINES = 500 #max number of lines in view
 MAX_COUNTED_LINES = 10000
 MAX_COLNAME = 20 #max chars in collection
+CUBE_ROUND = 0
 
 @app.route("/")
 @app.route("/home")
@@ -44,6 +46,8 @@ def appmain():
     The functionality is explained in
     https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-The-main-page
     """
+    global CUBE_ROUND
+    CUBE_ROUND = 0
     global ADMIN_PASSWORD_MD5
     dir_path = os.path.dirname(os.path.realpath(__file__))
     #read admin password from a file if it exists
@@ -148,6 +152,9 @@ def file_not_ok(filename):
         return ""
     if ".zip" in filename:
         return "Sorry, not yet implemented."
+    if ".bz2" in filename:
+        #add checking here
+        return ""
     myf = io.open(app.config['SL']+filename, "rb")
     myline = myf.readline()
     myf.close()
@@ -164,8 +171,24 @@ def file_not_ok(filename):
 
 def process_compressed_file(fname_no_path):
     """
-    Puts together all the content of a tar.gz file so that the header appears on top.
+    Puts together all the content of a tar.gz file so that the header appears on top,
+    or: decompresses a bz2 file.
+    Return the name of the decompressed file.
     """
+    if fname_no_path.endswith("bz2") or fname_no_path.endswith("BZ2"):
+        #we support only one file inside a bz2 arhive, we should check
+        #if the contents is a tar file
+        inputfile = bz2.BZ2File(app.config['SL']+fname_no_path, 'rb')
+        outputf = open(app.config['SL']+fname_no_path+".tsv", "ab")
+        myline = inputfile.readline()
+        while myline:
+            outputf.write(myline)
+            myline = inputfile.readline()
+        outputf.close()
+        inputfile.close()
+        os.remove(app.config['SL']+fname_no_path)
+        return fname_no_path+".tsv"
+
     tarf = tarfile.open(app.config['SL']+fname_no_path, "r:gz")
     tarf.extractall(app.config['SL'])
     #outputf = open(app.config['SL']+fname_no_path+".csv", "a")
@@ -195,6 +218,7 @@ def process_compressed_file(fname_no_path):
     tarf.close()
     os.remove(app.config['SL']+fname_no_path)
     outputf.close()
+    return fname_no_path+".csv"
 
 @app.route("/editmeta", methods=['GET', 'POST'])
 @app.route("/home/editmeta", methods=['GET', 'POST'])
@@ -290,13 +314,16 @@ def editmetasubmit():
                 mymeta.addmeasure(fieldname, fieldunit, fieldscale, fieldevent)
     mymeta.write_to_file(app.config['S'], myfile)
     #NB: since editing field names is enabled, we must re-write the first line of the CSV file
+    #if the field names have changed
+    hlinewithquotes = ""
     if myfile.upper().endswith("TSV"):
         headerline = '\t'.join(fieldnames)
+        hlinewithquotes = '"\t"'.join(fieldnames)
     else:
         headerline = ','.join(fieldnames)
-    #replace non-ascii
-    headerline = re.sub(r'[^\x00-\x7F]+', '', headerline)
+        hlinewithquotes = '","'.join(fieldnames)
 
+    hlinewithquotes = '"'+hlinewithquotes+'"'
     encoding = ""
     with open(app.config['SL']+myfile, 'rb') as f:
         result = chardet.detect(f.readline())
@@ -305,6 +332,17 @@ def editmetasubmit():
         encoding = "utf-8"
 
     csvfile = io.open(app.config['SL']+myfile, encoding=encoding)
+    #read the first line to see if we need to change the file
+    hlinefromfile = csvfile.readline().strip()
+
+    if hlinefromfile == headerline or hlinefromfile == hlinewithquotes:
+        #print("No need to rewrite.")
+        csvfile.close()
+        return redirect(url_for('appmain'))
+        #print("Diff "+hlinefromfile+"\n"+headerline+" "+hlinewithquotes)
+    #replace non-ascii
+    headerline = re.sub(r'[^\x00-\x7F]+', '', headerline)
+
     outfilen = app.config['SL']+myfile+".out"
     outfile = io.open(outfilen, 'w', encoding='utf-8')
     outfile.write(headerline+"\n")
@@ -501,27 +539,28 @@ def upload():
                 flash(file_not_ok(filename))
                 return redirect(url_for('appmain'))
 
-            if ".TAR.GZ" in filename.upper():
-                process_compressed_file(filename)
-                filename = filename+".csv"
+            if ".TAR.GZ" in filename.upper() or ".BZ2" in filename.upper():
+                filename = process_compressed_file(filename)
 
             #simple one file upload is here
             numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
                                        fieldlist=fieldlist, numlines=numlines)
-        else:
+        if len(uploaded) > 1:
             #combine multiple files
             fileno = 0
             #process tar.gz's
             uncompressed = []
+            numlines = 0
             for fname in uploaded:
-                if ".TAR.GZ" in fname.upper():
+                if ".TAR.GZ" in fname.upper() or ".BZ2" in fname.upper():
                     bfname = os.path.basename(fname)
                     process_compressed_file(bfname)
                     uncompressed.append(bfname+".csv")
             if uncompressed:
                 uploaded = uncompressed
+            numlines = count_lines(app.config['SL']+uploaded[0])
             appendto = open(app.config['SL']+uploaded[0], 'a')
             for fname in uploaded:
                 if ".CSV" not in fname.upper():
@@ -532,16 +571,17 @@ def upload():
                         pass
                     else:
                         appendfrom = open(app.config['SL']+fname)
+                        #remove the first line of appendfrom
                         line = appendfrom.readline() #skip headers
                         while line:
                             line = appendfrom.readline()
+                            numlines += 1
                             appendto.write(line)
                         appendfrom.close()
                         #delete appendfrom
                         os.remove(app.config['SL']+fname)
             appendto.close()
             filename = uploaded[0]
-            numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
                                        fieldlist=fieldlist, numlines=numlines)
@@ -938,7 +978,6 @@ def renamesubmit():
 TMPCUBENAME = "tmpcube.csv"
 cubefields = []
 cubefiles = []
-cube_round = 0
 pdcube = pd.DataFrame()
 
 # route for handling "cube". Renders the cube construction pages.
@@ -952,11 +991,11 @@ def cube():
     global cubefields
     global cubefiles
     global pdcube
-    global cube_round
+    global CUBE_ROUND
     # 0 cancel
     if 'cancel' in request.args:
         #print("Cancel")
-        cube_round = 0 #reset
+        CUBE_ROUND = 0 #reset
         return redirect(url_for('appmain'))
     # 1 Starting point: The user will first select 2 files.
     username = ''
@@ -1029,7 +1068,7 @@ def cube():
                 else:
                     file2 = ar
                     field2 = request.args[ar].split(":")[0]
-        if cube_round > 0:
+        if CUBE_ROUND > 0:
             #we are adding stuff to existing cube
             in_cube_field = request.args.get('cube')
             #print("in cube: "+in_cube_field)
@@ -1108,11 +1147,11 @@ def cube():
         cubefields.append(field1)
         cubefields.append(field2)
         #make numpy/pandas cube
-        if cube_round == 0:
+        if CUBE_ROUND == 0:
             f1pd = pd.read_csv(app.config['SL']+file1)
             f2pd = pd.read_csv(app.config['SL']+file2)
             pdcube = pd.merge(f1pd, f2pd, left_on=field1, right_on=field2)
-            cube_round = 1
+            CUBE_ROUND = 1
             #print(pdcube)
         else:
             fpd = pd.read_csv(app.config['SL']+add_to_cube_file)
@@ -1137,7 +1176,7 @@ def cube():
     if 'generatecube' in request.args:
         #write it into a file
         pdcube.to_csv(app.config['SL']+TMPCUBENAME, encoding='utf-8', index=False)
-        cube_round = 0 #reset
+        CUBE_ROUND = 0 #reset
         return render_template('rcubegen.html', cubefiles=cubefiles, baseurl=request.base_url)
 
     #default if nothing matched
