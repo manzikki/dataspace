@@ -21,26 +21,31 @@
 <table id="fields" border="0" class="table">
 <tr>
 <thead class="thead-light">
-<th>Field name</th> <th>Description</th>  <th> Sample </th> <th> </th> <th>Measure properties</th>
+<th>Field name</th> <th>Description</th>  <th> Sample </th> <th> </th> <th>Measure properties</th> <th> </th>
 </thead>
 </tr>
     {% for f in fieldlist %}
 <tr>
      <td width="7%"> <input type="text" id="n{{loop.index}}" name="{{loop.index}}-{{ f.name }}=name" value="{{ f.name }}" size="20" required> </td><td width="10%"> <input type="text" size="20" name="{{loop.index}}-{{ f.name }}=descr" value="{{ f.descr }}" required> </td>
-     <td width="7%"> {{ f.sample }} </td> <td > </td> <td width="45%"> Unit: <input type="text" size="10" name="{{loop.index}}-{{ f.name }}=unit" value="{{ f.unit }}"/> 
-     Scale:
-     <select name="{{loop.index}}-{{f.name}}=scale"><option></option><option value="nominal" {% if f.scale == "nominal" %}selected{% endif %}>Nominal</option>
-                         </option><option value="nominal" {% if f.scale == "ordinal" %}selected{% endif %}>Ordinal</option>
-                         </option><option value="interval" {% if f.scale == "interval" %}selected{% endif %}>Interval</option>
-                         </option><option {% if f.scale == "ratio" %}selected{% endif %} value="ratio">Ratio</option>
-                      </select>
-
+     <td width="7%"> {{ f.sample }} </td> <td > </td> <td width="45%"> Unit: 
+      <input type="text" size="10" name="{{loop.index}}-{{ f.name }}=unit" value="{{ f.unit }}"/>
+     Scale: 
+     <select name="{{loop.index}}-{{f.name}}=scale">
+      <option></option>
+      <option value="nominal" {% if f.scale == "nominal" %}selected{% endif %}>Nominal</option>
+      <option value="ordinal" {% if f.scale == "ordinal" %}selected{% endif %}>Ordinal</option>
+      <option value="interval" {% if f.scale == "interval" %}selected{% endif %}>Interval</option>
+      <option {% if f.scale == "ratio" %}selected{% endif %} value="ratio">Ratio</option>
+    </select>
      E-ness:
-     <select name="{{loop.index}}-{{f.name}}=eventness"><option></option><option value="tally" {% if f.eventness == "tally" %}selected{% endif %}>Tally</option>
-                         </option><option value="reckoning" {% if f.eventness == "reckoning" %}selected{% endif %}>Reckoning</option>
-                         </option><option value="snapshot" {% if f.eventness == "snapshot" %}selected{% endif %}>Snapshot</option>
-                      </select>
-     </td>
+     <select name="{{loop.index}}-{{f.name}}=eventness"><option></option>
+      <option value="tally" {% if f.eventness == "tally" %}selected{% endif %}>Tally</option>
+      <option value="reckoning" {% if f.eventness == "reckoning" %}selected{% endif %}>Reckoning</option>
+      <option value="snapshot" {% if f.eventness == "snapshot" %}selected{% endif %}>Snapshot</option>
+      </select>
+
+    </td>
+
 </tr>
 <td>Data type:</td><td><select name="{{loop.index}}-{{f.name}}=datatype"><option></option>
     <option value="integer" {% if f.datatype == "integer" %}selected{% endif %} >Integer</option>
@@ -83,7 +88,7 @@
     {% endfor %}
     <br/>
 <tr>
-  <td><button class="btn btn-default" type="submit">Submit</button></td></form>
+  <td><button class="btn btn-default" type="submit">Submit</button></td>
   <td><button class="btn btn-default"><a style="color:black" href="{{ url_for('appmain')}}">Cancel</a></button></td>
 </tr>
 
