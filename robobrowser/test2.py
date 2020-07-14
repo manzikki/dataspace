@@ -42,7 +42,7 @@ urls = [link.get("href") for link in links]
 linkn = 0
 for url in urls:
 	if url == '/home/new':
-	    print("link for new ok "+str(linkn))
+	    print("link "+str(linkn)+"for new ok")
 	    break
 	linkn += 1
 
@@ -71,7 +71,7 @@ if linkn:
         metaforms = browser.get_forms()
         if metaforms:
             metaform = metaforms[0]
-            print(str(metaform))
+            #print(str(metaform))
             metaform['descr'] = "demo"
             browser.submit_form(metaform)
             time.sleep(1)
@@ -82,8 +82,8 @@ if linkn:
         if os.path.exists("../static/"+fname):
             os.remove("../static/"+fname)
         if os.path.exists("../static/"+fname+".jmeta"):
-        	print("entering metadata for a file ok")
-            os.remove("../static/"+fname)
+            print("entering metadata for a file ok")
+            os.remove("../static/"+fname+".jmeta")
 
 #remove the pw file
 os.remove('../pw.md5')
