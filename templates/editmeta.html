@@ -12,7 +12,7 @@
   <div class="container">
     {{ file }}
     <br/>
-    <form method="post" action=" {{ url_for('editmetasubmit') }} ">
+    <form method="post" action="{{ url_for('editmetasubmit') }}">
     <input type="hidden" name="numlines" value="{{numlines}}"/>  
     <input type="hidden" name="file" value="{{file}}"/>
     <input size="70" name="descr" value="{{descr}}" required/>
