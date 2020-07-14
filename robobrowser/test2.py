@@ -2,6 +2,7 @@
 #pip install robobrowser
 import werkzeug
 import os
+import time
 werkzeug.cached_property = werkzeug.utils.cached_property
 from robobrowser import RoboBrowser
 
@@ -27,6 +28,7 @@ loginf = forms[0]
 loginf['username'] = 'admin'
 loginf['password'] = 'password'
 browser.submit_form(loginf)
+time.sleep(2)
 
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):
@@ -50,7 +52,7 @@ if linkn:
     if forms:
         newform = forms[0]
         newform['csvtext'] = "id,name\n1,andy\n2,betty"
-        browser.submit_form(newform)        
+        browser.submit_form(newform)
         #print(str(browser.parsed))
         fnamef = str(browser.find("input", {"name": "file"}))
         #print(fnamef)

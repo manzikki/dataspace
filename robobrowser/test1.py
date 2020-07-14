@@ -2,6 +2,7 @@
 #pip install robobrowser
 import werkzeug
 import os
+import time
 werkzeug.cached_property = werkzeug.utils.cached_property
 from robobrowser import RoboBrowser
 
@@ -27,6 +28,7 @@ loginf = forms[0]
 loginf['username'] = 'admin'
 loginf['password'] = 'password'
 browser.submit_form(loginf)
+time.sleep(2)
 
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):
