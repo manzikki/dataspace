@@ -58,7 +58,9 @@ class MetaInfo:
     descr = ""
     formatted_fields = ""
     fsize = 0
+    fsizef = "" #nicely formatted number
     lines = 0
+    linesf = "" #nicely formatted number
     name = ""
     tags = []
     fields = [] #list of fieldname->fielddesc
@@ -76,6 +78,7 @@ class MetaInfo:
         self.measures = []
         self.formatted_fields = ""
         self.lines = 0
+        self.linesf = ""
         self.name = filename.replace('.jmeta', '')
 
     def setdescr(self, descr):
@@ -228,6 +231,8 @@ class MetaInfo:
         Reads the meta info from a file. Gets fsize from the real file.
         """
         nometa = filen.replace(".jmeta", "")
+        if not os.path.exists(directory+"/"+nometa+".jmeta"):
+            return False
         jsonfile = open(directory+"/"+nometa+".jmeta")
         jsonstr = jsonfile.readline()
         jsonfile.close()
@@ -236,8 +241,15 @@ class MetaInfo:
         self.__dict__ = json.loads(jsonstr)
         if os.path.isfile(directory+"/"+nometa):
             self.fsize = os.path.getsize(directory+"/"+nometa)
-
+            self.fsizef = '{0:,}'.format(self.fsize)
+        if self.lines:
+            try:
+                linesf = int(self.lines)
+                self.linesf = '{0:,}'.format(linesf)
+            except:
+                pass
         self.set_formatted_fields()
+        return True
 
     def write_to_file(self, directory, filen):
         """

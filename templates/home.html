@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
-Collections: 
+Collections:
 {% if curdir == "" %}
     {% if username != "" %}
     <a href="renamecollection"><button class="btn btn-default">Rename collection</button> </a>
@@ -22,7 +22,7 @@ Collections:
 </tr>
 {% for entry in metas %}
 <tr>
-<td>  {{ entry.name }} ({{ entry.fsize }} b) {% if entry.lines != 0 %} {{ entry.lines }} lines {% endif %} <br/>
+<td>  {{ entry.name }} ({{ entry.fsizef }} B) {% if entry.lines != 0 %} {{ entry.linesf }} lines {% endif %} <br/>
 	  <table id="pair" border="0">
 	  <tr>
 	  <td>
@@ -74,7 +74,7 @@ Collections:
         <h4 class="modal-title">Really delete .. </h4>
       </div>
       <div class="modal-body">
-        <p><div id="delf1"></div>?</p>
+        <p><span id="delf1"></span>?</p>
       </div>
       <div class="modal-footer">
         <button type="button" 

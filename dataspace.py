@@ -27,6 +27,7 @@ app.config['SECRET_KEY'] = '5791628bb0b13'
 app.config['S'] = ''  #put the path to 'static' in it in appmain
 app.config['SL'] = '' #same but with "/" at the end
 app.config['U'] = ''  #url base like "/" or "/home"
+app.config['UP'] = '' #for uploads
 app.config['COLLIST'] = []
 app.config['NEWCSVFIEDLS'] = [] #used by the 'new' function
 
@@ -59,6 +60,7 @@ def appmain():
         pass
     app.config['S'] = os.path.join(dir_path, "static")
     app.config['SL'] = dir_path+"/static/"
+    app.config['UP'] = dir_path+"/upload/"
     app.config['COMPAT'] = dir_path+"/static/compat.file" #contains compatibility info
     if not app.config['U']:
         app.config['U'] = request.base_url
@@ -75,6 +77,10 @@ def appmain():
     #check that we can write to the static directory
     if not os.access(app.config['S'], os.W_OK):
         return "Directory "+app.config['S']+" is not writable. \
+         Please follow the installation instructions."
+    #and upload
+    if not os.access(app.config['UP'], os.W_OK):
+        return "Directory "+app.config['UP']+" is not writable. \
          Please follow the installation instructions."
     currentcoldir = "static"
     if app.config['COLLIST'].getcurrent():
@@ -242,7 +248,7 @@ def editmeta():
     fields = mymeta.get_fieldlist(samples)
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
     return render_template('editmeta.html', file=myfile, descr=mymeta.descr,
-                           fieldlist=fields, numlines=numlines)
+                           fieldlist=fields, numlines='{0:,}'.format(numlines))
 
 def natural_sort(mylist):
     """
@@ -502,7 +508,7 @@ def new():
         myfile.close()
         fieldlist = build_fieldlist(app.config['SL']+checkfilename)
         return render_template('editmeta.html', file=checkfilename, descr="",\
-                                fieldlist=fieldlist, numlines=numlines)
+                                fieldlist=fieldlist, numlines='{0:,}'.format(numlines))
                                 #editmeta will call editmetasubmit
     return render_template('new.html', form=form)
 
@@ -529,10 +535,16 @@ def upload():
                 return "Sorry, only csv and tar.gz archives of csv files supported."
             filename = secure_filename(fil.filename)
             uploaded.append(filename)
+            #upload to app.config['UP'], check if ok to overwrite
             fil.save(os.path.join(
-                app.config['SL'], filename
+                app.config['UP'], filename
             ))
+
         if len(uploaded) == 1:
+            if os.path.exists(app.config['SL']+filename):
+                return render_template('confirm_overwrite.html', file=filename)
+            #it did not exist, so move it
+            move(app.config['UP']+filename, app.config['SL']+filename)
             #just one file: go to meta edit
             #if the file is ok, prepare the fields for the dialog
             if file_not_ok(filename):
@@ -546,8 +558,13 @@ def upload():
             numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist, numlines=numlines)
+                                       fieldlist=fieldlist, numlines='{0:,}'.format(numlines))
+
+        #TBD: Check here if files with same names exist here too. Show a template with yes/no.
         if len(uploaded) > 1:
+            #move the files to static
+            for upl in uploaded:
+                move(app.config['UP']+upl, app.config['SL']+upl)
             #combine multiple files
             fileno = 0
             #process tar.gz's
@@ -584,8 +601,38 @@ def upload():
             filename = uploaded[0]
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist, numlines=numlines)
+                                       fieldlist=fieldlist, numlines='{0:,}'.format(numlines))
     return render_template('upload.html', form=form)
+
+@app.route('/confirm_overwrite', methods=['GET', 'POST'])
+@app.route('/home/confirm_overwrite', methods=['GET', 'POST'])
+#file upload with a file whose name is the same as an existing file
+def confirm_overwrite():
+    """
+    Processes the response from "ok to overwrite?" If yes, do things, otherwise delete uploaded.
+    """
+    mydict = request.form
+    #print(str(mydict))
+    filename = mydict['file']
+    if "yes" in mydict:
+        #move the file:
+        os.move(app.config['UP']+filename, app.config['SL']+filename)
+        #do the rest
+        if file_not_ok(filename):
+            flash(file_not_ok(filename))
+            return redirect(url_for('appmain'))
+
+        if ".TAR.GZ" in filename.upper() or ".BZ2" in filename.upper():
+            filename = process_compressed_file(filename)
+
+        #simple one file upload is here
+        numlines = count_lines(app.config['SL']+filename)
+        fieldlist = build_fieldlist(app.config['SL']+filename)
+        return render_template('editmeta.html', file=filename, descr="",\
+                                fieldlist=fieldlist, numlines='{0:,}'.format(numlines))
+    #else: remove the uploaded
+    os.remove(app.config['UP']+filename)
+    return redirect(url_for('appmain'))
 
 @app.route("/view", methods=['GET', 'POST'])
 @app.route("/home/view", methods=['GET', 'POST'])
@@ -604,8 +651,9 @@ def view(pfile=""):
     headers = []
     #Get the metadata so that we know the min/max values
     mymeta = MetaInfo(myfile)
-    mymeta.read_from_file(app.config['SL'], myfile)
-    fieldlist = mymeta.get_fieldlist()
+    fieldlist = []
+    if mymeta.read_from_file(app.config['SL'], myfile):
+        fieldlist = mymeta.get_fieldlist()
 
     with open(app.config['SL']+myfile, 'rb') as f:
         result = chardet.detect(f.readline())
