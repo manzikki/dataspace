@@ -42,7 +42,7 @@ urls = [link.get("href") for link in links]
 linkn = 0
 for url in urls:
 	if url == '/home/new':
-	    print("link "+str(linkn)+"for new ok")
+	    print("link "+str(linkn)+" for new ok")
 	    break
 	linkn += 1
 

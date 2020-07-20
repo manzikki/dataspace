@@ -61,6 +61,8 @@
               {% for category, message in messages %}
                 <div class="alert alert-{{ category }}">
                   {{ message }}
+                  <a href="#current-pane" 
+                       class="close" data-dismiss="alert" aria-label="close" id="hide">&times;</a>
                 </div>
               {% endfor %}
             {% endif %}
