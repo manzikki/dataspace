@@ -10,6 +10,7 @@
     Download the cube <a href="{{ url_for('static', filename='tmpcube.csv') }}">here</a>.
     <br/>
        <form method="post" action="{{ url_for('view') }}"> <input name="file" type="hidden" value="tmpcube.csv">
+        <input name="noedit" type="hidden" value="yes">
        <button class="btn btn-secondary" type="submit">View</button></form>
     <br/>
     <br/>
