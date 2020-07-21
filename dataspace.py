@@ -1209,7 +1209,11 @@ def cube():
         if CUBE_ROUND == 0:
             f1pd = pd.read_csv(app.config['SL']+file1)
             f2pd = pd.read_csv(app.config['SL']+file2)
-            pdcube = pd.merge(f1pd, f2pd, left_on=field1, right_on=field2)
+            try:
+                pdcube = pd.merge(f1pd, f2pd, left_on=field1, right_on=field2)
+            except:
+                flash("These types cannot be joined")
+                return redirect(url_for('appmain'))
             CUBE_ROUND = 1
             #print(pdcube)
         else:
