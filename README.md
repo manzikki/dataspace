@@ -12,6 +12,7 @@ User authorization: "admin" can upload, edit and build cubes.
 Language: Python. Libraries used: flask, flask-wtf, chardet, pandas. See install.txt.
 
 # Relase notes:
+# 0.95 July 2020, bug fixes
 # 0.94 July 2020, bug fixes, tests by robobrowser added
 # 0.93 July 2020, upload multiple files, min/max values
 # 0.92 June 2020, basic CSV edit, bug fixes, data types, meta data changed to JSON
