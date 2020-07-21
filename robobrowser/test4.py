@@ -12,19 +12,20 @@ if os.path.exists("../static/1901.tar.gz.csv"):
     print("File already exists!")
     os.exit(1)
 
-#1: Just check that the page appears.
+#rewrite the password file so that the robot can log in as admin
+mypw = "5f4dcc3b5aa765d61d8327deb882cf99" #password
+pwfile = open('../pw.md5','w')
+pwfile.write(mypw)
+pwfile.close()
+time.sleep(1)
 
+#1: Just check that the page appears.
 browser = RoboBrowser(history=True, parser='html.parser')
 browser.open("http://localhost:5000")
 title = browser.find("title")
 assert "Dataspace" in str(title)
 print("page ok")
 
-#rewrite the password file so that the robot can log in as admin
-mypw = "5f4dcc3b5aa765d61d8327deb882cf99" #password
-pwfile = open('../pw.md5','w')
-pwfile.write(mypw)
-pwfile.close()
 
 #2: Log in
 browser.open("http://localhost:5000/login")
