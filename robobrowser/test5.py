@@ -51,5 +51,13 @@ browser.open("http://localhost:5000/home/cube?generatecube=x")
 if "Download the cube" in str(browser.parsed):
     print("cube built ok")
 
+#6: get form to view
+forms = browser.get_forms()
+vform = forms[0]
+print(str(vform))
+browser.submit_form(vform)
+if "Angola,AGO,Africa,Angola,AGO,34168.4027" in str(browser.parsed):
+    print("view ok")
+
 #remove the pw file
 os.remove('../pw.md5')

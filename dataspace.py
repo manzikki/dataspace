@@ -39,14 +39,19 @@ MAX_COUNTED_LINES = 10000
 MAX_COLNAME = 20 #max chars in collection
 CUBE_ROUND = 0
 
-@app.route("/")
-@app.route("/home")
+@app.route("/", methods=['GET', 'POST'])
+@app.route("/home", methods=['GET', 'POST'])
 def appmain():
     """
     Main route, shows the main page.
     The functionality is explained in
     https://github.com/manzikki/dataspace/wiki/Dataspace-application-technical-documentation#Program-flow-example-The-main-page
     """
+    #we may receive a search request
+    mydict = request.form
+    if 'search' in mydict:
+        print("s "+mydict['search'])
+        flash("Sorry, the search functionality is not yet implemented.")
     global CUBE_ROUND
     CUBE_ROUND = 0
     global ADMIN_PASSWORD_MD5
@@ -248,7 +253,7 @@ def editmeta():
     fields = mymeta.get_fieldlist(samples)
     #we need to generate the fields dynamically so it's easier to use direct templating, not WTF
     return render_template('editmeta.html', file=myfile, descr=mymeta.descr,
-                           fieldlist=fields, numlines='{0:,}'.format(numlines))
+                           fieldlist=fields, numlines=numlines)
 
 def natural_sort(mylist):
     """
@@ -508,7 +513,7 @@ def new():
         myfile.close()
         fieldlist = build_fieldlist(app.config['SL']+checkfilename)
         return render_template('editmeta.html', file=checkfilename, descr="",\
-                                fieldlist=fieldlist, numlines='{0:,}'.format(numlines))
+                                fieldlist=fieldlist, numlines=numlines)
                                 #editmeta will call editmetasubmit
     return render_template('new.html', form=form)
 
@@ -558,7 +563,7 @@ def upload():
             numlines = count_lines(app.config['SL']+filename)
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist, numlines='{0:,}'.format(numlines))
+                                       fieldlist=fieldlist, numlines=numlines)
 
         #TBD: Check here if files with same names exist here too. Show a template with yes/no.
         if len(uploaded) > 1:
@@ -601,7 +606,7 @@ def upload():
             filename = uploaded[0]
             fieldlist = build_fieldlist(app.config['SL']+filename)
             return render_template('editmeta.html', file=filename, descr="",\
-                                       fieldlist=fieldlist, numlines='{0:,}'.format(numlines))
+                                       fieldlist=fieldlist, numlines=numlines)
     return render_template('upload.html', form=form)
 
 @app.route('/confirm_overwrite', methods=['GET', 'POST'])
@@ -629,7 +634,7 @@ def confirm_overwrite():
         numlines = count_lines(app.config['SL']+filename)
         fieldlist = build_fieldlist(app.config['SL']+filename)
         return render_template('editmeta.html', file=filename, descr="",\
-                                fieldlist=fieldlist, numlines='{0:,}'.format(numlines))
+                                fieldlist=fieldlist, numlines=numlines)
     #else: remove the uploaded
     os.remove(app.config['UP']+filename)
     return redirect(url_for('appmain'))
@@ -647,6 +652,9 @@ def view(pfile=""):
         myfile = pfile
     else:
         myfile = mydict['file']
+    noedit = 0
+    if 'noedit' in mydict:
+        noedit = 1
     rows = []
     headers = []
     #Get the metadata so that we know the min/max values
@@ -681,7 +689,7 @@ def view(pfile=""):
     shownum = str(line_no) + " lines."
     if line_no > MAX_COUNTED_LINES:
         shownum = "More than " + str(MAX_COUNTED_LINES) + " lines (too large to edit)."
-    if 'username' not in session or line_no > MAX_SHOWN_LINES:
+    if 'username' not in session or line_no > MAX_SHOWN_LINES or noedit:
         return render_template('view.html', file=myfile, num=shownum, headers=headers, rows=rows,
                                fields=fieldlist)
     return render_template('edit.html', file=myfile, num=shownum, headers=headers, rows=rows,
@@ -1040,6 +1048,9 @@ def cube():
     global cubefiles
     global pdcube
     global CUBE_ROUND
+    if 'username' not in session:
+        flash("Not authenticated.")
+        return redirect(url_for('appmain'))
     # 0 cancel
     if 'cancel' in request.args:
         #print("Cancel")
