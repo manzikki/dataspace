@@ -40,6 +40,7 @@ time.sleep(2)
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):
     print("login ok")
+ok=2
 
 #3: Follow the link to "upload"
 links = browser.get_links()
@@ -47,10 +48,11 @@ urls = [link.get("href") for link in links]
 
 linkn = 0
 for url in urls:
-	if url == '/home/upload':
-	    print("link "+str(linkn)+" for upload ok")
-	    break
-	linkn += 1
+    if url == '/home/upload':
+        print("link "+str(linkn)+" for upload ok")
+        ok+=1
+        break
+    linkn += 1
 
 #4: Post test contents
 if linkn:
@@ -71,7 +73,7 @@ if linkn:
     
     if fnamef:
         print("uploading file ok")
-
+        ok+=1
         #get the form
         metaforms = browser.get_forms()
         if metaforms:
@@ -88,7 +90,9 @@ if linkn:
             os.remove("../static/"+fname)
         if os.path.exists("../static/"+fname+".jmeta"):
             print("entering metadata for a file ok")
+            ok+=1
             os.remove("../static/"+fname+".jmeta")
 
 #remove the pw file
 os.remove('../pw.md5')
+print(str(ok)+" of 5 ok")

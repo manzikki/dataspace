@@ -12,7 +12,7 @@ pwfile = open('../pw.md5','w')
 pwfile.write(mypw)
 pwfile.close()
 time.sleep(1)
-
+ok=0
 #1: Just check that the page appears.
 
 browser = RoboBrowser(history=True, parser='html.parser')
@@ -20,7 +20,7 @@ browser.open("http://localhost:5000")
 title = browser.find("title")
 assert "Dataspace" in str(title)
 print("page ok")
-
+ok=1
 
 #2: Log in
 browser.open("http://localhost:5000/login")
@@ -35,16 +35,18 @@ time.sleep(2)
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):
     print("login ok")
+    ok+=1
 
 #3: Read links
 links = browser.get_links()
 urls = [link.get("href") for link in links]
 #print(str(urls))
 if '/home/new' in urls:
-	print("link for new ok")
+    print("link for new ok")
+    ok+=1
 #remove the file
 os.remove('../pw.md5')
-
+print(str(ok)+" of 3 ok")
 
 
 
