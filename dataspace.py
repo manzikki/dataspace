@@ -621,7 +621,7 @@ def confirm_overwrite():
     filename = mydict['file']
     if "yes" in mydict:
         #move the file:
-        os.move(app.config['UP']+filename, app.config['SL']+filename)
+        move(app.config['UP']+filename, app.config['SL']+filename)
         #do the rest
         if file_not_ok(filename):
             flash(file_not_ok(filename))
