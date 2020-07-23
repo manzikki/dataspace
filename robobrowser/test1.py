@@ -25,12 +25,12 @@ ok=1
 #2: Log in
 browser.open("http://localhost:5000/login")
 forms = browser.get_forms()
-#print(str(forms))
-loginf = forms[0]
-loginf['username'] = 'admin'
-loginf['password'] = 'password'
-browser.submit_form(loginf)
-time.sleep(2)
+for loginf in forms:
+    if 'username' in loginf.keys():
+        loginf['username'] = 'admin'
+        loginf['password'] = 'password'
+        browser.submit_form(loginf)
+        time.sleep(2)
 
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):

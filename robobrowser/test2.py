@@ -26,12 +26,12 @@ ok = 1
 #2: Log in
 browser.open("http://localhost:5000/login")
 forms = browser.get_forms()
-#print(str(forms))
-loginf = forms[0]
-loginf['username'] = 'admin'
-loginf['password'] = 'password'
-browser.submit_form(loginf)
-time.sleep(2)
+for loginf in forms:
+    if 'username' in loginf.keys():
+        loginf['username'] = 'admin'
+        loginf['password'] = 'password'
+        browser.submit_form(loginf)
+        time.sleep(2)
 
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):
@@ -53,35 +53,34 @@ for url in urls:
 if not linkn:
     print("error: /home/new not found "+str(urls))
 #4: Post test contents
+fnamef = ""
 if linkn:
     browser.follow_link(links[linkn])
     forms = browser.get_forms()
     time.sleep(2)
     if forms:
-        newform = forms[0]
-        #if not 'csvtext' in newform:
-        #	sys.exit("Field csvtext missing. This can happen if the form submit is too fast. Please re-run")
-        try:
-            newform['csvtext'] = "id,name\r\n1,andy\r\n2,betty\r\n3,carol"
-        except:
-            sys.exit("Sorry, please run again.")
-        time.sleep(1)
-        browser.submit_form(newform)
-        #print(str(browser.parsed))
-        time.sleep(1)
-        fnamef = str(browser.find("input", {"name": "file"}))
-        #we found the field, thus we are at the meta data editor
-        print("creating new file ok")
-        ok += 1
-        #get the form
+        for newform in forms:
+            if 'csvtext' in newform.keys():
+                newform['csvtext'] = "id,name\r\n1,andy\r\n2,betty\r\n3,carol"
+                time.sleep(1)
+                browser.submit_form(newform)
+                #print(str(browser.parsed))
+                time.sleep(1)
+                fnamef = str(browser.find("input", {"name": "file"}))
+                #we found the field, thus we are at the meta data editor
 
-        metaforms = browser.get_forms()
-        if metaforms:
-            metaform = metaforms[0]
-            #print(str(metaform))
-            metaform['descr'] = "demo"
-            browser.submit_form(metaform)
-            time.sleep(1)
+if fnamef:
+    print("creating new file ok")
+    ok += 1
+    #get the form
+
+    metaforms = browser.get_forms()
+    if metaforms:
+        metaform = metaforms[0]
+        #print(str(metaform))
+        metaform['descr'] = "demo"
+        browser.submit_form(metaform)
+        time.sleep(1)
         
         #print(fnamef)
         fnameparts = fnamef.split('"')
