@@ -49,9 +49,6 @@ def appmain():
     """
     #we may receive a search request
     mydict = request.form
-    if 'search' in mydict:
-        print("s "+mydict['search'])
-        flash("Sorry, the search functionality is not yet implemented.")
     global CUBE_ROUND
     CUBE_ROUND = 0
     global ADMIN_PASSWORD_MD5
@@ -88,11 +85,38 @@ def appmain():
         return "Directory "+app.config['UP']+" is not writable. \
          Please follow the installation instructions."
     currentcoldir = "static"
+    metas = mymetas.get()
+    sterm = ""
+    if 'search' in mydict and mydict['search']:
+        sterm = mydict['search'].split()[0]
+        if len(sterm) < 3:
+            flash("Sorry, the search term should contain at least 3 characters.")
+        else:
+            newmetas = []
+            for meta in metas:
+                descr = meta.get_descr()
+                if sterm.lower() in descr.lower():
+                    newmetas.append(meta)
+                fieldnames = meta.getfieldnames()
+                for fieldn in fieldnames:
+                    if sterm.lower() in fieldn.lower():
+                        if not meta in newmetas:
+                            newmetas.append(meta)
+                flist = meta.get_fieldlist()
+                for finfo in flist:
+                    if sterm.lower() in finfo['descr'].lower():
+                        if not meta in newmetas:
+                            newmetas.append(meta)
+            metas = newmetas
+            if metas:
+                flash("Showing meta data with description or fields containing \""+sterm+"\".")
+            else:
+                flash("Could not find meta data with description or fields containing \""+sterm+"\".")
     if app.config['COLLIST'].getcurrent():
         currentcoldir = "static/"+app.config['COLLIST'].getcurrent()
     return render_template('home.html', username=username,
                            currentcoldir=currentcoldir,
-                           metas=mymetas.get(),
+                           metas=metas, sterm=sterm,
                            coldirs=app.config['COLLIST'].get(),
                            curdir=app.config['COLLIST'].getcurrent())
 
@@ -621,7 +645,7 @@ def confirm_overwrite():
     filename = mydict['file']
     if "yes" in mydict:
         #move the file:
-        os.move(app.config['UP']+filename, app.config['SL']+filename)
+        move(app.config['UP']+filename, app.config['SL']+filename)
         #do the rest
         if file_not_ok(filename):
             flash(file_not_ok(filename))

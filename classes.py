@@ -191,7 +191,7 @@ class MetaInfo:
             for mykey, myval in mydict.items():
                 if mykey == fieldname:
                     return myval
-        return ""            
+        return ""
 
     def get_max(self, fieldname):
         """
@@ -202,10 +202,13 @@ class MetaInfo:
             for mykey, myval in mydict.items():
                 if mykey == fieldname:
                     return myval
-        return ""        
+        return ""
 
     def get_lines(self):
         return self.lines
+
+    def get_descr(self):
+        return self.descr
 
     def set_formatted_fields(self):
         """
