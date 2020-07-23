@@ -30,12 +30,12 @@ ok=1
 #2: Log in
 browser.open("http://localhost:5000/login")
 forms = browser.get_forms()
-#print(str(forms))
-loginf = forms[0]
-loginf['username'] = 'admin'
-loginf['password'] = 'password'
-browser.submit_form(loginf)
-time.sleep(2)
+for loginf in forms:
+    if 'username' in loginf.keys():
+        loginf['username'] = 'admin'
+        loginf['password'] = 'password'
+        browser.submit_form(loginf)
+        time.sleep(2)
 
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):
@@ -60,15 +60,15 @@ if linkn:
     #print(str(forms))
     time.sleep(2)
     fnamef = ""
-    if forms:
-        upform = forms[0]
-        upform['CSVfiles'].value = open("countryname-iso3-continent.csv",'rb')
-        time.sleep(1)
-        browser.submit_form(upform)
-        #print(str(browser.parsed))
-        if "Do you want to overwrite it" in str(browser.parsed):
-            print("Overwrite check ok")
-            ok+=1
+    for upform in forms:
+        if 'CSVfiles' in upform.keys():
+            upform['CSVfiles'].value = open("countryname-iso3-continent.csv",'rb')
+            time.sleep(1)
+            browser.submit_form(upform)
+            #print(str(browser.parsed))
+            if "Do you want to overwrite it" in str(browser.parsed):
+                print("Overwrite check ok")
+                ok+=1
             if os.path.exists("../upload/countryname-iso3-continent.csv"):
                 os.remove("../upload/countryname-iso3-continent.csv")
 
