@@ -30,12 +30,12 @@ print("page ok")
 #2: Log in
 browser.open("http://localhost:5000/login")
 forms = browser.get_forms()
-#print(str(forms))
-loginf = forms[0]
-loginf['username'] = 'admin'
-loginf['password'] = 'password'
-browser.submit_form(loginf)
-time.sleep(2)
+for loginf in forms:
+    if 'username' in loginf.keys():
+        loginf['username'] = 'admin'
+        loginf['password'] = 'password'
+        browser.submit_form(loginf)
+        time.sleep(2)
 
 #login was ok?  there should be "admin" in span "user"
 if "admin</span>" in str(browser.parsed):
@@ -58,22 +58,22 @@ for url in urls:
 if linkn:
     browser.follow_link(links[linkn])
     forms = browser.get_forms()
-    #print(str(forms))
     time.sleep(2)
     fnamef = ""
     if forms:
-        upform = forms[0]
-        upform['CSVfiles'].value = open("1901.tar.gz",'rb')
-        time.sleep(1)
-        browser.submit_form(upform)
-        #print(str(browser.parsed))
-        time.sleep(1)
-        fnamef = str(browser.find("input", {"name": "file"}))
-        #we found the field, thus we are at the meta data editor
+        for upform in forms:
+            if 'CSVfiles' in upform.keys():
+                upform['CSVfiles'].value = open("1901.tar.gz",'rw')
+                time.sleep(1)
+                browser.submit_form(upform)
+                #print(str(browser.parsed))
+                time.sleep(1)
+                fnamef = str(browser.find("input", {"name": "file"}))
+                #we found the field, thus we are at the meta data editor
     
     if fnamef:
         print("uploading file ok")
-        ok+=1
+        ok += 1
         #get the form
         metaforms = browser.get_forms()
         if metaforms:
@@ -90,7 +90,7 @@ if linkn:
             os.remove("../static/"+fname)
         if os.path.exists("../static/"+fname+".jmeta"):
             print("entering metadata for a file ok")
-            ok+=1
+            ok += 1
             os.remove("../static/"+fname+".jmeta")
 
 #remove the pw file
