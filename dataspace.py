@@ -1081,17 +1081,11 @@ def cube():
         CUBE_ROUND = 0 #reset
         return redirect(url_for('appmain'))
     # 1 Starting point: The user will first select 2 files.
-    username = ''
-    if 'username' in session:
-        username = session['username']
     mymetalist = MetaList(app.config['S'])
     #print(mymetalist.get_as_string())
     if 'start' in request.args:
-        #Return to login page if user is not admin.
-        if username == ADMIN_USERNAME:
-            return render_template('rcube.html', username=username, entries=mymetalist.get())
-        else:
-            return redirect(url_for('appmain'))
+        return render_template('rcube.html', entries=mymetalist.get())
+
     selfiles = request.args.getlist('fileselect')
 
     # 2: User has selected files, show their fields
@@ -1139,18 +1133,18 @@ def cube():
         add_to_cube_file = ""
         add_to_cube_field = ""
         #check here if the fields are compatible: use file1, file1, field1, field2
-        for ar in request.args:
-            if ar != "fieldsubmit":
-                if ar != "cube":
-                    add_to_cube_file = ar
-                    add_to_cube_field = request.args.get(ar).split(":")[0]
+        for arg in request.args:
+            if arg != "fieldsubmit":
+                if arg != "cube":
+                    add_to_cube_file = arg
+                    add_to_cube_field = request.args.get(arg).split(":")[0]
                 if mround == 1:
-                    file1 = ar
-                    field1 = request.args[ar].split(":")[0]
+                    file1 = arg
+                    field1 = request.args[arg].split(":")[0]
                     mround = 2
                 else:
-                    file2 = ar
-                    field2 = request.args[ar].split(":")[0]
+                    file2 = arg
+                    field2 = request.args[arg].split(":")[0]
         if CUBE_ROUND > 0:
             #we are adding stuff to existing cube
             in_cube_field = request.args.get('cube')
