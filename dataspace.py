@@ -111,7 +111,8 @@ def appmain():
             if metas:
                 flash("Showing meta data with description or fields containing \""+sterm+"\".")
             else:
-                flash("Could not find meta data with description or fields containing \""+sterm+"\".")
+                flash("Could not find meta data with description or fields\
+                       containing \""+sterm+"\".")
     if app.config['COLLIST'].getcurrent():
         currentcoldir = "static/"+app.config['COLLIST'].getcurrent()
     return render_template('home.html', username=username,
@@ -198,8 +199,8 @@ def file_not_ok(filename):
     if filename.upper().endswith("CSV") and "," in str(myline):
         return ""
     if filename.upper().endswith("TSV"):
-        for ch in myline:
-            if ch == 9: #found a tab
+        for cha in myline:
+            if cha == 9: #found a tab
                 return ""
         return ""
     return "The first line of the file does not contain separator characters."
@@ -360,8 +361,8 @@ def editmetasubmit():
 
     hlinewithquotes = '"'+hlinewithquotes+'"'
     encoding = ""
-    with open(app.config['SL']+myfile, 'rb') as f:
-        result = chardet.detect(f.readline())
+    with open(app.config['SL']+myfile, 'rb') as fil:
+        result = chardet.detect(fil.readline())
         encoding = result['encoding']
     if encoding == "ascii":
         encoding = "utf-8"
@@ -398,8 +399,8 @@ def count_lines(filename):
     """
     count = 0
     encoding = ""
-    with open(filename, 'rb') as f:
-        result = chardet.detect(f.readline())
+    with open(filename, 'rb') as fil:
+        result = chardet.detect(fil.readline())
         encoding = result['encoding']
     if encoding == "ascii":
         encoding = "utf-8"
@@ -422,8 +423,8 @@ def build_fieldlist(filename):
     row_sample = []
     fieldlist = []
     encoding = ""
-    with open(filename, 'rb') as f:
-        result = chardet.detect(f.readline())
+    with open(filename, 'rb') as fil:
+        result = chardet.detect(fil.readline())
         encoding = result['encoding']
     if encoding == "ascii":
         encoding = "utf-8"
@@ -687,8 +688,8 @@ def view(pfile=""):
     if mymeta.read_from_file(app.config['SL'], myfile):
         fieldlist = mymeta.get_fieldlist()
 
-    with open(app.config['SL']+myfile, 'rb') as f:
-        result = chardet.detect(f.readline())
+    with open(app.config['SL']+myfile, 'rb') as fil:
+        result = chardet.detect(fil.readline())
         encoding = result['encoding']
 
     if encoding == "ascii":
@@ -737,11 +738,11 @@ def editsave():
     #if the user wanted a new line at the end, just append a new file with commas
     if 'addrow' in mydict:
         numcommas = int(mydict['numcols'])-1
-        f = io.open(app.config['SL']+fname, 'a+')
+        fil = io.open(app.config['SL']+fname, 'a+')
         for _ in range(numcommas):
-            f.write(",")
-        f.write("\n")
-        f.close()
+            fil.write(",")
+        fil.write("\n")
+        fil.close()
         return view(pfile=fname)
     row = 0
     for key in mydict:
@@ -755,16 +756,16 @@ def editsave():
     #copy the file to a temporary file up to row-1
     #print(str(row))
     #print(str(col))
-    f = io.open(app.config['SL']+fname, 'r')
-    fw = io.open(app.config['SL']+fname+"tmp", 'w')
+    fil = io.open(app.config['SL']+fname, 'r')
+    filw = io.open(app.config['SL']+fname+"tmp", 'w')
     if not os.access(app.config['SL']+fname+"tmp", os.W_OK):
         return "Could not open a temporary file for writing!"
     rowr = 0
     while rowr < row:
         rowr += 1
-        line = f.readline()
+        line = fil.readline()
         #print(line, end='')
-        fw.write(line)
+        filw.write(line)
     #print the changed line
     changed = ""
     for key in mydict:
@@ -775,18 +776,18 @@ def editsave():
                 changed += mydict[key]+","
         #print(key+" "+mydict[key])
     changed = changed[:-1] #remove the last comma
-    fw.write(changed+"\n")
+    filw.write(changed+"\n")
     #copy the rest
-    f.readline()
+    fil.readline()
     while True:
-        line = f.readline()
+        line = fil.readline()
         if not line:
             break
         #print(line, end='')
-        fw.write(line)
-    f.close()
+        filw.write(line)
+    fil.close()
     #move the temp file to orig file
-    fw.close()
+    filw.close()
     move(app.config['SL']+fname+"tmp", app.config['SL']+fname)
     return view(pfile=fname)
 
@@ -1059,6 +1060,134 @@ TMPCUBENAME = "tmpcube.csv"
 cubefields = []
 cubefiles = []
 pdcube = pd.DataFrame()
+def handle_fieldsubmit(req):
+    """
+    Handles cube building when the user has submitted information about files and fields
+    to be integrated.
+    Returns a message about field values.
+    """
+    global cubefields
+    global cubefiles
+    global pdcube
+    global CUBE_ROUND
+    file1 = ""
+    file2 = ""
+    field1 = ""
+    field2 = ""
+    mround = 1
+    add_to_cube_file = ""
+    add_to_cube_field = ""
+
+    mymetalist = MetaList(app.config['S'])
+
+    #check here if the fields are compatible: use file1, file1, field1, field2
+    for arg in req.args:
+        if arg != "fieldsubmit":
+            if arg != "cube":
+                add_to_cube_file = arg
+                add_to_cube_field = request.args.get(arg).split(":")[0]
+            if mround == 1:
+                file1 = arg
+                field1 = request.args[arg].split(":")[0]
+                mround = 2
+            else:
+                file2 = arg
+                field2 = request.args[arg].split(":")[0]
+    if CUBE_ROUND > 0:
+        #we are adding stuff to existing cube
+        in_cube_field = request.args.get('cube')
+        #print("in cube: "+in_cube_field)
+        #print("to add file "+add_to_cube_file+" field "+add_to_cube_field)
+
+        #open the files and analyze the fields
+        #print "Looking for field "+field1+" or "+field2
+        #print "from "+file1+" "+file2
+        #print "cube has "+str(cubefiles)
+
+    if file1 == "cube" or file2 == "cube":
+        #print(str(ok_files))
+        #find out which file in cube has this field
+        if file1 == "cube":
+            #we need to get field1's real file to file1
+            for fname in cubefiles:
+                meta = mymetalist.get_meta_by_name(fname)
+                for fie in meta.getfieldnames():
+                    #print fname+" "+fie
+                    if fie == field1:
+                        #print "Found field "+field1+" in "+fname
+                        file1 = fname
+        else:
+            #we need to get field2's real file to file2
+            for fname in cubefiles:
+                meta = mymetalist.get_meta_by_name(fname)
+                for fie in meta.getfieldnames():
+                    #print fname+" "+fie
+                    if fie == field2:
+                        #print "Found field "+field2+" in "+fname
+                        file2 = fname
+    fxpd = pd.read_csv(app.config['SL']+file1)
+    f1uniques = fxpd[field1].unique()
+    fxpd = pd.read_csv(app.config['SL']+file2)
+    f2uniques = fxpd[field2].unique()
+
+    notexample = ""
+    msg = " Field "+field1+" in "+file1+" has "+str(len(f1uniques))+" unique values."
+    notinuf2 = 0
+    for f1u in f1uniques:
+        if f1u not in f2uniques:
+            notinuf2 += 1
+            notexample = str(f1u)
+
+    if notinuf2:
+        msg += " "+str(notinuf2)+" of them are not in "+field2+". "
+    else:
+        msg += " All of them are in "+field2+". "
+        notexample = ""
+
+    if notexample:
+        msg += "Example: "+notexample+". "
+    msg += "<br/>"
+    msg += "Field "+field2+" in "+file2+" has "+str(len(f2uniques))+" unique values. "
+
+    notexample = ""
+    notinuf1 = 0
+    for f2u in f2uniques:
+        if f2u not in f1uniques:
+            notinuf1 += 1
+            notexample = str(f2u)
+
+    if notinuf1:
+        msg += " "+str(notinuf1)+" of them are not in "+field1+". "
+    else:
+        msg += " All of them are in "+field1+". "
+        notexample = ""
+
+    if notexample:
+        msg += "Example: "+notexample+". "
+        #put the selected files and fields in the session
+        #print("adding "+file1+" etc in cube")
+        #print(str(cubefiles))
+
+    cubefiles.append(file1)
+    cubefiles.append(file2)
+
+    cubefields.append(field1)
+    cubefields.append(field2)
+    #make numpy/pandas cube
+    if CUBE_ROUND == 0:
+        f1pd = pd.read_csv(app.config['SL']+file1)
+        f2pd = pd.read_csv(app.config['SL']+file2)
+        try:
+            pdcube = pd.merge(f1pd, f2pd, left_on=field1, right_on=field2)
+        except:
+            flash("These types cannot be joined")
+            return redirect(url_for('appmain'))
+        CUBE_ROUND = 1
+
+    else:
+        fpd = pd.read_csv(app.config['SL']+add_to_cube_file)
+        pdcube = pd.merge(pdcube, fpd, left_on=in_cube_field, right_on=add_to_cube_field)
+    return msg
 
 # route for handling "cube". Renders the cube construction pages.
 # This horrible function should be re-written.
@@ -1118,125 +1247,15 @@ def cube():
 
             shown_files.append(cubemeta)
 
-            for s in selfiles:
-                meta = mymetalist.get_meta_by_name(s)
+            for sel in selfiles:
+                meta = mymetalist.get_meta_by_name(sel)
                 shown_files.append(meta)
             return render_template('rcubefields.html', entries=shown_files)
         return render_template('rcube.html', error="Please select 1 file")
-# 4 User has selected fields from one more
+
+    # 4 User has selected fields from one more
     if 'fieldsubmit' in request.args:
-        file1 = ""
-        file2 = ""
-        field1 = ""
-        field2 = ""
-        mround = 1
-        add_to_cube_file = ""
-        add_to_cube_field = ""
-        #check here if the fields are compatible: use file1, file1, field1, field2
-        for arg in request.args:
-            if arg != "fieldsubmit":
-                if arg != "cube":
-                    add_to_cube_file = arg
-                    add_to_cube_field = request.args.get(arg).split(":")[0]
-                if mround == 1:
-                    file1 = arg
-                    field1 = request.args[arg].split(":")[0]
-                    mround = 2
-                else:
-                    file2 = arg
-                    field2 = request.args[arg].split(":")[0]
-        if CUBE_ROUND > 0:
-            #we are adding stuff to existing cube
-            in_cube_field = request.args.get('cube')
-            #print("in cube: "+in_cube_field)
-            #print("to add file "+add_to_cube_file+" field "+add_to_cube_field)
-
-        #open the files and analyze the fields
-        #print "Looking for field "+field1+" or "+field2
-        #print "from "+file1+" "+file2
-        #print "cube has "+str(cubefiles)
-
-        if file1 == "cube" or file2 == "cube":
-            #print(str(ok_files))
-            #find out which file in cube has this field
-            if file1 == "cube":
-                #we need to get field1's real file to file1
-                for fname in cubefiles:
-                    meta = mymetalist.get_meta_by_name(fname)
-                    for fie in meta.getfieldnames():
-                        #print fname+" "+fie
-                        if fie == field1:
-                            #print "Found field "+field1+" in "+fname
-                            file1 = fname
-            else:
-                #we need to get field2's real file to file2
-                for fname in cubefiles:
-                    meta = mymetalist.get_meta_by_name(fname)
-                    for fie in meta.getfieldnames():
-                        #print fname+" "+fie
-                        if fie == field2:
-                            #print "Found field "+field2+" in "+fname
-                            file2 = fname
-        fxpd = pd.read_csv(app.config['SL']+file1) #faster than csv.DictReader
-        f1uniques = fxpd[field1].unique()
-        fxpd = pd.read_csv(app.config['SL']+file2)
-        f2uniques = fxpd[field2].unique()
-
-        notexample = ""
-        msg = " Field "+field1+" in "+file1+" has "+str(len(f1uniques))+" unique values."
-        notinuf2 = 0
-        for f1u in f1uniques:
-            if f1u not in f2uniques:
-                notinuf2 += 1
-                notexample = str(f1u)
-
-        if notinuf2:
-            msg += " "+str(notinuf2)+" of them are not in "+field2+". "
-        else:
-            msg += " All of them are in "+field2+". "
-            notexample = ""
-
-        if notexample:
-            msg += "Example: "+notexample+". "
-        msg += "<br/>"
-        msg += "Field "+field2+" in "+file2+" has "+str(len(f2uniques))+" unique values. "
-        notexample = ""
-        notinuf1 = 0
-        for f2u in f2uniques:
-            if f2u not in f1uniques:
-                notinuf1 += 1
-                notexample = str(f2u)
-
-        if notinuf1:
-            msg += " "+str(notinuf1)+" of them are not in "+field1+". "
-        else:
-            msg += " All of them are in "+field1+". "
-            notexample = ""
-
-        if notexample:
-            msg += "Example: "+notexample+". "
-        #put the selected files and fields in the session
-        #print("adding "+file1+" etc in cube")
-        #print(str(cubefiles))
-        cubefiles.append(file1)
-        cubefiles.append(file2)
-
-        cubefields.append(field1)
-        cubefields.append(field2)
-        #make numpy/pandas cube
-        if CUBE_ROUND == 0:
-            f1pd = pd.read_csv(app.config['SL']+file1)
-            f2pd = pd.read_csv(app.config['SL']+file2)
-            try:
-                pdcube = pd.merge(f1pd, f2pd, left_on=field1, right_on=field2)
-            except:
-                flash("These types cannot be joined")
-                return redirect(url_for('appmain'))
-            CUBE_ROUND = 1
-            #print(pdcube)
-        else:
-            fpd = pd.read_csv(app.config['SL']+add_to_cube_file)
-            pdcube = pd.merge(pdcube, fpd, left_on=in_cube_field, right_on=add_to_cube_field)
+        msg = handle_fieldsubmit(request)
 
         return render_template('rcubecontinue.html', msg=msg, csize=pdcube.shape[0],
                                cubefiles=cubefiles)
