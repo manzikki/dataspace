@@ -19,7 +19,7 @@ from werkzeug.utils import secure_filename
 import numpy
 import pandas as pd
 from forms import LoginForm, UploadForm, PastedTextForm
-from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList
+from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList, Cube
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13'
@@ -37,7 +37,8 @@ ADMIN_PASSWORD_MD5 = "1db422179f1290ab1499f146972b2d82" #FpacNida986!
 MAX_SHOWN_LINES = 500 #max number of lines in view
 MAX_COUNTED_LINES = 10000
 MAX_COLNAME = 20 #max chars in collection
-CUBE_ROUND = 0
+TMPCUBENAME = "tmpcube.csv"
+MYCUBE = Cube()
 
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/home", methods=['GET', 'POST'])
@@ -49,8 +50,10 @@ def appmain():
     """
     #we may receive a search request
     mydict = request.form
-    global CUBE_ROUND
-    CUBE_ROUND = 0
+    #reset cube if the user abandons cube building
+    global MYCUBE
+    MYCUBE.reset()
+
     global ADMIN_PASSWORD_MD5
     dir_path = os.path.dirname(os.path.realpath(__file__))
     #read admin password from a file if it exists
@@ -795,13 +798,16 @@ def editsave():
 @app.route('/home/saveasfile', methods=['GET', 'POST'])
 #save the generated cube as a CSV file. Admin only.
 def saveasfile():
+    """
+    Saves the tmpcube as file.
+    """
     if 'username' not in session:
         return redirect(url_for('appmain'))
     mydict = request.form
     if 'savefilename' not in mydict:
         return "Required parameter (savefilename) missing."
     myfile = mydict['savefilename']
-    move(app.config['SL']+"tmpcube.csv", app.config['SL']+myfile)
+    move(app.config['SL']+TMPCUBENAME, app.config['SL']+myfile)
     #Reconstruct field names from the cubefile- request params and build the jmeta.
     metafieldhashes = []
     for key in mydict:
@@ -986,6 +992,7 @@ def exportrdf():
     if myfile:
         return Response(generate(myfile), mimetype='text/plain',
                         headers={"Content-Disposition": "attachment;filename=export.rdf"})
+    return ""
 
 @app.route('/changecollection', methods=['GET', 'POST'])
 @app.route('/home/changecollection', methods=['GET', 'POST'])
@@ -1056,20 +1063,13 @@ def renamesubmit():
     app.config['COLLIST'].reinit()
     return redirect(url_for('appmain'))
 
-TMPCUBENAME = "tmpcube.csv"
-cubefields = []
-cubefiles = []
-pdcube = pd.DataFrame()
 def handle_fieldsubmit(req):
     """
     Handles cube building when the user has submitted information about files and fields
     to be integrated.
     Returns a message about field values.
     """
-    global cubefields
-    global cubefiles
-    global pdcube
-    global CUBE_ROUND
+    global MYCUBE
     file1 = ""
     file2 = ""
     field1 = ""
@@ -1093,7 +1093,7 @@ def handle_fieldsubmit(req):
             else:
                 file2 = arg
                 field2 = request.args[arg].split(":")[0]
-    if CUBE_ROUND > 0:
+    if MYCUBE.get_cube_round() > 0:
         #we are adding stuff to existing cube
         in_cube_field = request.args.get('cube')
         #print("in cube: "+in_cube_field)
@@ -1109,7 +1109,7 @@ def handle_fieldsubmit(req):
         #find out which file in cube has this field
         if file1 == "cube":
             #we need to get field1's real file to file1
-            for fname in cubefiles:
+            for fname in MYCUBE.get_cube_files():
                 meta = mymetalist.get_meta_by_name(fname)
                 for fie in meta.getfieldnames():
                     #print fname+" "+fie
@@ -1118,7 +1118,7 @@ def handle_fieldsubmit(req):
                         file1 = fname
         else:
             #we need to get field2's real file to file2
-            for fname in cubefiles:
+            for fname in MYCUBE.get_cube_files():
                 meta = mymetalist.get_meta_by_name(fname)
                 for fie in meta.getfieldnames():
                     #print fname+" "+fie
@@ -1168,25 +1168,29 @@ def handle_fieldsubmit(req):
         #print("adding "+file1+" etc in cube")
         #print(str(cubefiles))
 
-    cubefiles.append(file1)
-    cubefiles.append(file2)
+    MYCUBE.add_cube_file(file1)
+    MYCUBE.add_cube_file(file2)
 
-    cubefields.append(field1)
-    cubefields.append(field2)
+    MYCUBE.add_cube_field(field1)
+    MYCUBE.add_cube_field(field2)
+
     #make numpy/pandas cube
-    if CUBE_ROUND == 0:
+    if MYCUBE.get_cube_round() == 0:
         f1pd = pd.read_csv(app.config['SL']+file1)
         f2pd = pd.read_csv(app.config['SL']+file2)
         try:
             pdcube = pd.merge(f1pd, f2pd, left_on=field1, right_on=field2)
+            MYCUBE.set_pdcube(pdcube)
         except:
             flash("These types cannot be joined")
             return redirect(url_for('appmain'))
-        CUBE_ROUND = 1
+        MYCUBE.set_cube_round(1)
 
     else:
         fpd = pd.read_csv(app.config['SL']+add_to_cube_file)
-        pdcube = pd.merge(pdcube, fpd, left_on=in_cube_field, right_on=add_to_cube_field)
+        pdcube = pd.merge(MYCUBE.get_pdcube(), fpd, left_on=in_cube_field, \
+                          right_on=add_to_cube_field)
+        MYCUBE.set_pdcube(pdcube)
     return msg
 
 # route for handling "cube". Renders the cube construction pages.
@@ -1197,17 +1201,13 @@ def cube():
     """
     Handle the cube construction.
     """
-    global cubefields
-    global cubefiles
-    global pdcube
-    global CUBE_ROUND
+    global MYCUBE
     if 'username' not in session:
         flash("Not authenticated.")
         return redirect(url_for('appmain'))
     # 0 cancel
     if 'cancel' in request.args:
         #print("Cancel")
-        CUBE_ROUND = 0 #reset
         return redirect(url_for('appmain'))
     # 1 Starting point: The user will first select 2 files.
     mymetalist = MetaList(app.config['S'])
@@ -1222,8 +1222,8 @@ def cube():
         if len(selfiles) == 2:
             #generate select boxes for joining files by fields
             shown_files = []
-            for s in selfiles:
-                meta = mymetalist.get_meta_by_name(s)
+            for sel in selfiles:
+                meta = mymetalist.get_meta_by_name(sel)
                 shown_files.append(meta)
             return render_template('rcubefields.html', entries=shown_files) #note: the action is
                                                                             #"fieldsubmit", see 4
@@ -1232,15 +1232,13 @@ def cube():
                                                     entries=mymetalist.get())
 
     # 3: the user has built the initial cube, now add stuff from one more
-
     if 'oneselect' in request.args:
         if len(selfiles) == 1:
             #generate select boxes for joining files by fields.
             shown_files = []
             #get the files that are used in the cube and all the fields in those files
-
             cubemeta = MetaInfo("cube")
-            for cubef in cubefiles:
+            for cubef in MYCUBE.get_cube_files():
                 meta = mymetalist.get_meta_by_name(cubef)
                 for fie in meta.getfieldnames():
                     cubemeta.addfield(fie, "")
@@ -1257,13 +1255,15 @@ def cube():
     if 'fieldsubmit' in request.args:
         msg = handle_fieldsubmit(request)
 
-        return render_template('rcubecontinue.html', msg=msg, csize=pdcube.shape[0],
-                               cubefiles=cubefiles)
+        return render_template('rcubecontinue.html', msg=msg, csize=MYCUBE.get_pdcube().shape[0],
+                               cubefiles=MYCUBE.get_cube_files())
 
     # 4 there is some integration stuff already and we continue
     if 'more' in request.args:
         #put information about what's already there in msg
         msg = ""
+        cubefiles = MYCUBE.get_cube_files()
+        cubefields = MYCUBE.get_cube_fields()
         for i in range(0, len(cubefiles)-1):
             if i % 2 == 0:
                 msg += cubefiles[i] + ":" + cubefields[i] + " &rarr; " + \
@@ -1275,8 +1275,9 @@ def cube():
     # 5 The user wants the cube
     if 'generatecube' in request.args:
         #write it into a file
+        pdcube = MYCUBE.get_pdcube()
+        cubefiles = MYCUBE.get_cube_files()
         pdcube.to_csv(app.config['SL']+TMPCUBENAME, encoding='utf-8', index=False)
-        CUBE_ROUND = 0 #reset
         return render_template('rcubegen.html', cubefiles=cubefiles, baseurl=request.base_url)
 
     #default if nothing matched

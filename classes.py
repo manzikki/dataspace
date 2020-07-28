@@ -4,9 +4,7 @@ Classes for simple dataspace manager. Marko Niinimaki, niinimakim@webster.ac.th,
 import os
 import csv
 import codecs
-import sys
 import json
-
 
 class UTF8Recoder:
     """
@@ -281,7 +279,7 @@ class MetaInfo:
         s = s + "\n"
         return s
 
-    def get_fieldlist(self, samplehash = {}):
+    def get_fieldlist(self, samplehash={}):
         """
         Returns a list of hashes as follows
         f['name'] = fieldname, f['decr'] = description, f['scale'] = nominal, ..
@@ -437,3 +435,72 @@ class CollectionList:
         Gets the current collection.
         """
         return self.current
+
+class Cube:
+    """
+    Represents the cube that is used for data integration.
+    """
+    cubefields = []
+    cubefiles = []
+    pdcube = None #pandas
+    cube_round = 0 #are we building the original cube or adding into it?
+
+    def __init__(self):
+        """
+        Constructor.
+        """
+        self.cube_round = 0
+
+    def add_cube_file(self, filename):
+        """
+        Adds a file in the list of cube files.
+        """
+        self.cubefiles.append(filename)
+
+    def get_cube_files(self):
+        """
+        Get cube files.
+        """
+        return self.cubefiles
+
+    def add_cube_field(self, fieldname):
+        """
+        Adds a field in the list of cube fields.
+        """
+        self.cubefields.append(fieldname)
+
+    def get_cube_fields(self):
+        """
+        Get cube fields.
+        """
+        return self.cubefields
+
+    def set_pdcube(self, mypdcube):
+        """
+        Insert the Pandas cube.
+        """
+        self.pdcube = mypdcube
+
+    def get_pdcube(self):
+        """
+        Get Pandas cube.
+        """
+        return self.pdcube
+
+    def reset(self):
+        """
+        Reset cube rounds.
+        """
+        self.cube_round = 0
+
+    def set_cube_round(self, cround):
+        """
+        Set cube rounds.
+        """
+        self.cube_round = cround
+
+    def get_cube_round(self):
+        """
+        Get cube rounds.
+        """
+        return self.cube_round
