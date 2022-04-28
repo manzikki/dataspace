@@ -1,5 +1,5 @@
 """
-Simple dataspace management for CSV files. Marko Niinimaki niinimakim@webster.ac.th 2017-2020
+Simple dataspace management for CSV files. Marko Niinimaki marko.niinimaki@protonmail.com 2017-2022
 """
 import tarfile
 import re
