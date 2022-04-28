@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+
+{% block content %}
+    <div class="content-section">
+
+
+  <form action="{{ url_for('fromwiki') }}" method="post">
+    {{ form.csrf_token }}
+    Please enter the Wikipedia article URL:
+    <input name="wikiurl" type="text" required/>
+    <button class="btn btn-sm btn-success" type="submit">Go</button>
+  </form>
+
+
+{% endblock content %}

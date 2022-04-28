@@ -18,7 +18,7 @@ from flask import Flask, session, render_template, redirect, \
 from werkzeug.utils import secure_filename
 import numpy
 import pandas as pd
-from forms import LoginForm, UploadForm, PastedTextForm
+from forms import LoginForm, UploadForm, PastedTextForm, WikiForm
 from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList, Cube
 
 app = Flask(__name__)
@@ -544,6 +544,19 @@ def new():
                                 fieldlist=fieldlist, numlines=numlines)
                                 #editmeta will call editmetasubmit
     return render_template('new.html', form=form)
+
+@app.route('/fromwiki', methods=['GET', 'POST'])
+@app.route('/home/fromwiki', methods=['GET', 'POST'])
+#get a table from wikipedia. Available to admin only. Not finished.
+def fromwiki():
+    """
+    Show a dialog that lets the user copy-paste a link to a wikipedia article. For admin only.
+    """
+    if 'username' not in session:
+        return redirect(url_for('appmain'))
+    #check the URL from the form here
+    form = WikiForm()
+    return render_template('fromwiki.html', form=form)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])

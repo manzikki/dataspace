@@ -18,3 +18,6 @@ class UploadForm(FlaskForm):
 class PastedTextForm(FlaskForm):
     csvtext = TextAreaField('CSVText', validators=[DataRequired()], widget=TextArea() )
     submit = SubmitField('Submit')
+
+class WikiForm(FlaskForm):
+    name = StringField('name', validators=[DataRequired()])
