@@ -6,6 +6,7 @@ pip install flask
 pip install flask-wtf
 pip install pandas
 pip install chardet
+pip install markupsafe==2.0.1
 
 Running:
 python dataspace.py
