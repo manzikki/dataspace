@@ -593,7 +593,13 @@ def fromwiki():
                 return render_template('editmeta.html', file=checkfilename, descr="",\
                                 fieldlist=fieldlist, numlines=numlines)
             else:
-                return("The article contains multiple tables. Please select .. TBD")
+                rettables = []
+                for table in tables:
+                    dataf = pd.read_html(str(table))
+                    dataf = pd.DataFrame(dataf[0])
+                    snippet = str(dataf.head())
+                    rettables.append(snippet)
+                return render_template('select_which_table.html', rettables = rettables)
     return render_template('fromwiki.html', form=form, error=error)
 
 @app.route('/upload', methods=['GET', 'POST'])
