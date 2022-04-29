@@ -7,16 +7,15 @@ pip3 install flask-wtf
 pip3 install pandas
 pip3 install chardet
 pip3 install markupsafe==2.0.1
+pip3 install requests
+pip3 install bs4
+pip3 install lxml
 
 Running:
-python dataspace.py
+python3 dataspace.py
 Direct your browser to localhost:5000
-Check dataspace.py for admin password.
+Check dataspace.py for admin password. You can change it later within the application.
 
-For future development (not needed now)
- pip3 install requests
- pip3 install bs4
- pip3 install lxml
 
 OPTIONAL:
 

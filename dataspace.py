@@ -444,9 +444,10 @@ def build_fieldlist(filename):
             #remove the BOM
             if row:
                 r1first = row[0]
-                while  ord(r1first[0]) > 123:
-                    r1first = r1first[1:]
-                row[0] = r1first
+                if len(r1first) > 0:
+                    while  ord(r1first[0]) > 123:
+                        r1first = r1first[1:]
+                    row[0] = r1first
                 break
         for row_sample in reader: #read the second line only
             rowno += 1
@@ -560,7 +561,7 @@ def fromwiki():
     form = WikiForm()
     error = ""
     if form.validate_on_submit():
-        wikiurl = form.wikiurl.data
+        wikiurl = form.wikiurl.data #article URL from the form
         #read the article
         tables = []
         table_class = "wikitable sortable jquery-tablesorter"
@@ -576,7 +577,21 @@ def fromwiki():
             #we have an article and it contains tables
             if len(tables) == 1:
                 #just read it
-                return("ok .. TBD")
+                table = tables[0]
+                dataf = pd.read_html(str(table))
+                dataf = pd.DataFrame(dataf[0])
+                #now we have the contents in a dataframe. Let's write it to a file
+                #find next available file
+                countn = 0
+                checkfilename = "data"+str(countn)+".csv"
+                while os.path.isfile(app.config['SL']+checkfilename):
+                    countn += 1
+                    checkfilename = "data"+str(countn)+".csv"
+                dataf.to_csv(app.config['SL']+checkfilename)
+                numlines = dataf.shape[0]
+                fieldlist = build_fieldlist(app.config['SL']+checkfilename)
+                return render_template('editmeta.html', file=checkfilename, descr="",\
+                                fieldlist=fieldlist, numlines=numlines)
             else:
                 return("The article contains multiple tables. Please select .. TBD")
     return render_template('fromwiki.html', form=form, error=error)
