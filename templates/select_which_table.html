@@ -15,11 +15,15 @@
     <div class="content-section">
 
  {% for table in rettables %}
- <button><input class="btn btn-default" type="submit" name="oneselect" value="Select the table below"></button>
-
- <pre>
- {{ table }}
- </pre>
+  <form action="{{ url_for('fromwikimany') }}" method="post">
+  <input type="hidden" name="url"  value="{{ wikiurl }}" />
+  <input type="hidden" name="num" value=" {{ loop.index }} " />
+  <button><input class="btn btn-default" type="submit" name="oneselect" value="Select the table below"></button>
+  </form>
+ 
+  <pre>
+  {{ table }}
+  </pre>
 
  {% endfor %}
 

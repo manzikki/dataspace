@@ -550,13 +550,16 @@ def new():
 
 @app.route('/fromwiki', methods=['GET', 'POST'])
 @app.route('/home/fromwiki', methods=['GET', 'POST'])
-#get a table from wikipedia. Available to admin only. Not finished.
+#get a table from wikipedia. Available to admin only.
 def fromwiki():
     """
     Show a dialog that lets the user copy-paste a link to a wikipedia article. For admin only.
+    If the URL is correct and contains one table write the table into a file and go to metaedit.
+    If it contains many tables, go to select_which_table that sends the data to /fromwikimany
     """
     if 'username' not in session:
         return redirect(url_for('appmain'))
+
     #check the URL from the form here
     form = WikiForm()
     error = ""
@@ -599,8 +602,16 @@ def fromwiki():
                     dataf = pd.DataFrame(dataf[0])
                     snippet = str(dataf.head())
                     rettables.append(snippet)
-                return render_template('select_which_table.html', rettables = rettables)
-    return render_template('fromwiki.html', form=form, error=error)
+                return render_template('select_which_table.html', rettables = rettables, wikiurl = wikiurl)
+    return render_template('fromwiki.html', form = form, error = error)
+
+@app.route('/fromwikimany', methods=['GET', 'POST'])
+@app.route('/home/fromwikimany', methods=['GET', 'POST'])
+#get a table from wikipedia. Available to admin only.
+def fromwikimany():
+    if 'username' not in session:
+        return redirect(url_for('appmain'))
+    return 'ok'
 
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
