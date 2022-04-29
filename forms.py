@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, MultipleFileField
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, URL, Regexp
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.widgets import TextArea
 
@@ -20,4 +20,5 @@ class PastedTextForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class WikiForm(FlaskForm):
-    name = StringField('name', validators=[DataRequired()])
+    wikiurl = StringField('wikiurl', validators=[URL(), Regexp(".*wikipedia.org/wiki/.*",0,"Wikipedia article URL")])
+    submit = SubmitField('Submit') 

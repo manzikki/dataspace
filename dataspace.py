@@ -10,6 +10,7 @@ import io
 import codecs
 import hashlib
 import base64
+import requests
 from shutil import move, copyfile
 import chardet
 from dateutil.parser import parse
@@ -18,6 +19,7 @@ from flask import Flask, session, render_template, redirect, \
 from werkzeug.utils import secure_filename
 import numpy
 import pandas as pd
+from bs4 import BeautifulSoup
 from forms import LoginForm, UploadForm, PastedTextForm, WikiForm
 from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList, Cube
 
@@ -556,7 +558,28 @@ def fromwiki():
         return redirect(url_for('appmain'))
     #check the URL from the form here
     form = WikiForm()
-    return render_template('fromwiki.html', form=form)
+    error = ""
+    if form.validate_on_submit():
+        wikiurl = form.wikiurl.data
+        #read the article
+        tables = []
+        table_class = "wikitable sortable jquery-tablesorter"
+        response = requests.get(wikiurl)
+        if (response.status_code != 200):
+            error = "Could not read the article."
+        else:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            tables = soup.find_all('table',{'class':"wikitable"})
+            if len(tables) == 0:
+                error = "The article does not contain tables."
+        if (error == ""):
+            #we have an article and it contains tables
+            if len(tables) == 1:
+                #just read it
+                return("ok .. TBD")
+            else:
+                return("The article contains multiple tables. Please select .. TBD")
+    return render_template('fromwiki.html', form=form, error=error)
 
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
