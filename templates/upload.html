@@ -4,6 +4,8 @@
 {% block content %}
     <div class="content-section">
 
+<a href= "{{ url_for('fromwiki') }}">Upload data from Wikipedia</a><br/>
+or
 
 <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
     {{ form.csrf_token }}

@@ -607,11 +607,38 @@ def fromwiki():
 
 @app.route('/fromwikimany', methods=['GET', 'POST'])
 @app.route('/home/fromwikimany', methods=['GET', 'POST'])
-#get a table from wikipedia. Available to admin only.
+#get table #n from a wikipedia article. Available to admin only.
 def fromwikimany():
     if 'username' not in session:
         return redirect(url_for('appmain'))
-    return 'ok'
+    mydict = request.form
+    wikiurl = mydict['url']
+    num = int(mydict['num'])
+    #now we know which table to get from the page
+    tables = []
+    table_class = "wikitable sortable jquery-tablesorter"
+    response = requests.get(wikiurl)
+    if (response.status_code != 200):
+        return("Could not read the article.")
+    soup = BeautifulSoup(response.text, 'html.parser')
+    tables = soup.find_all('table',{'class':"wikitable"})
+    #oddly, the index numbers in template start from 1 not 0
+    table = tables[num - 1]
+    dataf = pd.read_html(str(table))
+    dataf = pd.DataFrame(dataf[0])
+    #now we have the contents in a dataframe. Let's write it to a file
+    #find next available file
+    countn = 0
+    checkfilename = "data"+str(countn)+".csv"
+    while os.path.isfile(app.config['SL']+checkfilename):
+        countn += 1
+        checkfilename = "data"+str(countn)+".csv"
+    dataf.to_csv(app.config['SL']+checkfilename)
+    numlines = dataf.shape[0]
+    fieldlist = build_fieldlist(app.config['SL']+checkfilename)
+    return render_template('editmeta.html', file=checkfilename, descr="",\
+                                fieldlist=fieldlist, numlines=numlines)
+
 
 @app.route('/upload', methods=['GET', 'POST'])
 @app.route('/home/upload', methods=['GET', 'POST'])
