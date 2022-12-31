@@ -933,6 +933,12 @@ def saveasfile():
     savemeta.write_to_file(app.config['S'], myfile)
     return redirect(url_for('appmain'))
 
+@app.route('/visualize', methods=['GET', 'POST'])
+@app.route('/home/visualize', methods=['GET', 'POST'])
+#create maps
+def visualize():
+    return("Sorry not yet implemented")
+
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
 #show/let user declare compatible fields. Should be available to admin only
