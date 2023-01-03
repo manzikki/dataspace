@@ -935,15 +935,21 @@ def saveasfile():
 
 @app.route('/visualize', methods=['GET', 'POST'])
 @app.route('/home/visualize', methods=['GET', 'POST'])
-#create maps by going to the selection of area to visualize
+#create maps by going to the selection of area to visualize -> areaselect
 def visualize():
     return render_template('select_area.html')
 
 @app.route('/areaselect', methods=['GET', 'POST'])
 @app.route('/home/areaselect', methods=['GET', 'POST'])
-#create maps by going to the selection of area to visualize
+#get the area
 def areaselect():
-    return "Sorry not yet implemented"
+    area = ""
+    mydict = request.form
+    if 'area' in mydict:
+        area = mydict['area']
+    else:
+        area = request.args.get('area')
+    return "Sorry not yet implemented "+area
 
 
 @app.route('/compatible', methods=['GET', 'POST'])
