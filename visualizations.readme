@@ -1,0 +1,2 @@
+https://towardsdatascience.com/simplest-way-of-creating-a-choropleth-map-by-u-s-states-in-python-f359ada7735e
+scope (enumerated: "world" | "usa" | "europe" | "asia" | "africa" | "north america" | "south america" ) default: "world"
