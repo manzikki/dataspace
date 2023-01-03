@@ -22,6 +22,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from forms import LoginForm, UploadForm, PastedTextForm, WikiForm
 from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList, Cube
+import matplotlib.pyplot as plt
+import geopandas as gpd
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13'
