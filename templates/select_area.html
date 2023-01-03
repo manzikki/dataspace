@@ -11,7 +11,7 @@
     <h1>Please Select the Area to Visualize</h1>
 
     Drop down list: World and indiv countries here
-    <form>
+    <form method="post" action="{{ url_for('areaselect') }}">
     <select name="areaselect">
 <option value=AFG>Afghanistan</option>
 <option value=ALB>Albania</option>
@@ -263,6 +263,7 @@
 <option value=ZWE>Zimbabwe</option>
 <option value=ALA>Åland Islands</option>
     </select>
+<input type="submit"/>
     </form>
     </div>
   </body>

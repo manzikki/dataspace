@@ -935,9 +935,16 @@ def saveasfile():
 
 @app.route('/visualize', methods=['GET', 'POST'])
 @app.route('/home/visualize', methods=['GET', 'POST'])
-#create maps
+#create maps by going to the selection of area to visualize
 def visualize():
-    return("Sorry not yet implemented")
+    return render_template('select_area.html')
+
+@app.route('/areaselect', methods=['GET', 'POST'])
+@app.route('/home/areaselect', methods=['GET', 'POST'])
+#create maps by going to the selection of area to visualize
+def areaselect():
+    return "Sorry not yet implemented"
+
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
