@@ -938,12 +938,19 @@ def saveasfile():
 @app.route('/visualize', methods=['GET', 'POST'])
 @app.route('/home/visualize', methods=['GET', 'POST'])
 #create maps by going to the selection of area to visualize -> areaselect
+#which file to visualize: get the file parameter
 def visualize():
-    return render_template('select_area.html')
+    file = ""
+    mydict = request.form
+    if 'file' in mydict:
+        file = mydict['file']
+    else:
+        file = request.args.get('file')
+    return render_template('select_area.html', file=file)
 
 @app.route('/areaselect', methods=['GET', 'POST'])
 @app.route('/home/areaselect', methods=['GET', 'POST'])
-#get the area
+#get the area and generate the map
 def areaselect():
     area = ""
     mydict = request.form
@@ -951,6 +958,8 @@ def areaselect():
         area = mydict['area']
     else:
         area = request.args.get('area')
+    mapdata = gpd.read_file("static/"+area+".geojson")
+    
     return "Sorry not yet implemented "+area
 
 
