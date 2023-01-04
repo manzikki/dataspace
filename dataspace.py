@@ -976,7 +976,7 @@ def areaselect():
     mymeta = MetaInfo(file)
     mymeta.read_from_file(app.config['S'], file)
     fields = mymeta.get_fieldlist()
-    return render_template('select_area_params.html', file=file, area=area, mypic=mypic, fields=fields)
+    return render_template('select_area_params.html', file=file, area=area, mypic=mypic, fieldlist=fields)
 
 
 @app.route('/compatible', methods=['GET', 'POST'])

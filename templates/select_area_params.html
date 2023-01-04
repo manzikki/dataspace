@@ -12,6 +12,12 @@
     {{ file }}
     {{ area }}
     <img src="../{{ mypic }}"/>
+
+    {% for f in fieldlist %}
+    
+     {{ f.name }}
+
+    {% endfor %}
     </div>
   </body>
 </html>

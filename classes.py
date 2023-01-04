@@ -279,6 +279,12 @@ class MetaInfo:
         s = s + "\n"
         return s
 
+    def __str__(self):
+        """
+        For debugging.
+        """
+        return self.get_as_string()
+
     def get_fieldlist(self, samplehash={}):
         """
         Returns a list of hashes as follows
