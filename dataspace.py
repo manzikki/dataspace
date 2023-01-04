@@ -21,10 +21,10 @@ from werkzeug.utils import secure_filename
 import numpy
 import pandas as pd
 from bs4 import BeautifulSoup
-from forms import LoginForm, UploadForm, PastedTextForm, WikiForm
-from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList, Cube
 import matplotlib.pyplot as plt
 import geopandas as gpd
+from forms import LoginForm, UploadForm, PastedTextForm, WikiForm
+from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList, Cube
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '5791628bb0b13'
@@ -973,7 +973,10 @@ def areaselect():
     mapdata.plot()
     plt.savefig(mypic)
     plt.close()
-    return render_template('select_area_params.html', file=file, area=area, mypic=mypic)
+    mymeta = MetaInfo(file)
+    mymeta.read_from_file(app.config['S'], file)
+    fields = mymeta.get_fieldlist()
+    return render_template('select_area_params.html', file=file, area=area, mypic=mypic, fields=fields)
 
 
 @app.route('/compatible', methods=['GET', 'POST'])
