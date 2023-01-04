@@ -10,6 +10,8 @@ import io
 import codecs
 import hashlib
 import base64
+from io import BytesIO
+from matplotlib.figure import Figure
 import requests
 from shutil import move, copyfile
 import chardet
@@ -958,9 +960,23 @@ def areaselect():
         area = mydict['area']
     else:
         area = request.args.get('area')
+    file = ""
+    mydict = request.form
+    if 'file' in mydict:
+        file = mydict['file']
+    else:
+        file = request.args.get('file')
     mapdata = gpd.read_file("static/"+area+".geojson")
-    
-    return "Sorry not yet implemented "+area
+    #generate a map for fun
+    fig = Figure()
+    ax = fig.subplots()
+    ax.plot([1, 2])
+    # Save it to a temporary buffer.
+    buf = BytesIO()
+    fig.savefig(buf, format="png") # this works but it should be the map ..
+    with open("tmp.png", "wb") as f:
+        f.write(buf.getbuffer())    
+    return render_template('select_area_params.html', file=file, area=area)
 
 
 @app.route('/compatible', methods=['GET', 'POST'])
