@@ -1,0 +1,77 @@
+x,Seal,Name,Namein_Thai,Population_December_2022,Area_km2,Population_density,Namesake_towncity,HS,ISO,FIPS
+1,,Amnat Charoen,อำนาจเจริญ,402000,3290,115,Amnat Charoen,ACR,TH-37,TH77
+2,,Ang Thong,อ่างทอง,301000,950,294,Ang Thong,ATG,TH-15,TH35
+3,,Bueng Kan,บึงกาฬ,450000,4003,106,Bueng Kan,BKN,TH-38,TH81
+4,,Buriram,บุรีรัมย์,1623000,10080,159,Buriram,BRM,TH-31,TH28
+5,,Chachoengsao,ฉะเชิงเทรา,754000,5169,139,Chachoengsao,CCO,TH-24,TH44
+6,,Chai Nat,ชัยนาท,331000,2506,131,Chai Nat,CNT,TH-18,TH32
+7,,Chaiyaphum,ชัยภูมิ,1156000,12698,91,Chaiyaphum,CPM,TH-36,TH26
+8,,Chanthaburi,จันทบุรี,572000,6415,84,Chanthaburi,CTI,TH-22,TH48
+9,,Chiang Mai,เชียงใหม่,1820000,22135,79,Chiang Mai,CMI,TH-50,TH02
+10,,Chiang Rai,เชียงราย,1315000,11503,113,Chiang Rai,CRI,TH-57,TH03
+11,,Chonburi,ชลบุรี,1603000,4508,346,Chonburi,CBI,TH-20,TH46
+12,,Chumphon,ชุมพร,524000,5998,85,Chumphon,CPN,TH-86,TH58
+13,,Kalasin,กาฬสินธุ์,1010000,6936,142,Kalasin,KSN,TH-46,TH23
+14,,Kamphaeng Phet,กำแพงเพชร,748000,8512,86,Kamphaeng Phet,KPT,TH-62,TH11
+15,,Kanchanaburi,กาญจนบุรี,914000,19385,46,Kanchanaburi,KRI,TH-71,TH50
+16,,Khon Kaen,ขอนแก่น,1826000,10659,169,Khon Kaen,KKN,TH-40,TH22
+17,,Krabi,กระบี่,500000,5323,90,Krabi,KBI,TH-81,TH63
+18,,Lampang,ลำปาง,762000,12488,59,Lampang,LPG,TH-52,TH06
+19,,Lamphun,ลำพูน,421000,4478,92,Lamphun,LPN,TH-51,TH05
+20,,Loei,เลย,656000,10500,61,Loei,LEI,TH-42,TH18
+21,,Lopburi,ลพบุรี,779000,6493,116,Lopburi,LRI,TH-16,TH34
+22,,Mae Hong Son,แม่ฮ่องสอน,174000,12765,23,Mae Hong Son,MSN,TH-58,TH01
+23,,Maha Sarakham,มหาสารคาม,1000000,5607,172,Maha Sarakham,MKM,TH-44,TH24
+24,,Mukdahan,มุกดาหาร,338000,4126,87,Mukdahan,MDH,TH-49,TH78
+25,,Nakhon Nayok,นครนายก,224000,2141,122,Nakhon Nayok,NYK,TH-26,TH43
+26,,Nakhon Pathom,นครปฐม,955000,2142,430,Nakhon Pathom,NPT,TH-73,TH53
+27,,Nakhon Phanom,นครพนม,698000,5637,127,Nakhon Phanom,NPM,TH-48,TH73
+28,,Nakhon Ratchasima,นครราชสีมา,2703000,20736,128,Nakhon Ratchasima,NMA,TH-30,TH27
+29,,Nakhon Sawan,นครสวรรค์,997000,9526,111,Nakhon Sawan,NSN,TH-60,TH16
+30,,Nakhon Si Thammarat,นครศรีธรรมราช,1602000,9885,158,Nakhon Si Thammarat,NRT,TH-80,TH64
+31,,Nan,น่าน,492000,12130,40,Nan,NAN,TH-55,TH04
+32,,Narathiwat,นราธิวาส,847000,4491,180,Narathiwat,NWT,TH-96,TH31
+33,,Nong Bua Lamphu,หนองบัวลำภู,481000,4099,125,Nong Bua Lam Phu,NBP,TH-39,TH79
+34,,Nong Khai,หนองคาย,536000,3275,160,Nong Khai,NKI,TH-43,TH17
+35,,Nonthaburi,นนทบุรี,1335000,637,1986,Nonthaburi,NBI,TH-12,TH38
+36,,Pathum Thani,ปทุมธานี,1142000,1520,766,Pathum Thani,PTE,TH-13,TH39
+37,,Pattani,ปัตตานี,756000,1977,367,Pattani,PTN,TH-94,TH69
+38,,Phang Nga,พังงา,243000,5495,49,Phang Nga,PNA,TH-82,TH61
+39,,Phatthalung,พัทลุง,567000,3861,135,Phatthalung,PLG,TH-93,TH66
+40,,Phayao,พะเยา,489000,6189,76,Phayao,PYO,TH-56,TH41
+41,,Phetchabun,เพชรบูรณ์,1034000,12340,80,Phetchabun,PNB,TH-67,TH14
+42,,Phetchaburi,เพชรบุรี,469000,6172,77,Phetchaburi,PBI,TH-76,TH56
+43,,Phichit,พิจิตร,578000,4319,124,Phichit,PCT,TH-66,TH13
+44,,Phitsanulok,พิษณุโลก,900000,10589,82,Phitsanulok,PLK,TH-65,TH12
+45,,Phra Nakhon Si Ayutthaya,พระนครศรีอยุธยา,812000,2548,322,Phra Nakhon Si Ayutthaya,AYA,TH-14,TH36
+46,,Phrae,แพร่,426000,6483,68,Phrae,PRE,TH-54,TH07
+47,,Phuket,ภูเก็ต,387000,547,762,Phuket,PKT,TH-83,TH62
+48,,Prachinburi,ปราจีนบุรี,506000,5026,99,Prachinburi,PRI,TH-25,TH74
+49,,Prachuap Khiri Khan,ประจวบคีรีขันธ์,530000,6414,88,Prachuap Khiri Khan,PKN,TH-77,TH57
+50,,Ranong,ระนอง,204000,3230,60,Ranong,RNG,TH-85,TH59
+51,,Ratchaburi,ราชบุรี,895000,5189,168,Ratchaburi,RBR,TH-70,TH52
+52,,Rayong,ระยอง,727000,3666,201,Rayong,RYG,TH-21,TH47
+53,,Roi Et,ร้อยเอ็ด,1295000,7873,166,Roi Et,RET,TH-45,TH25
+54,,Sa Kaeo,สระแก้ว,608000,6831,83,Sa Kaeo,SKW,TH-27,TH80
+55,,Sakon Nakhon,สกลนคร,1200000,9580,121,Sakon Nakhon,SNK,TH-47,TH20
+56,,Samut Prakan,สมุทรปราการ,1324000,947,1420,Samut Prakan,SPK,TH-11,TH42
+57,,Samut Sakhon,สมุทรสาคร,567000,866,675,Samut Sakhon,SKN,TH-74,TH55
+58,,Samut Songkhram,สมุทรสงคราม,209000,414,467,Samut Songkhram,SKM,TH-75,TH54
+59,,Saraburi,สระบุรี,708000,3499,185,Saraburi,SRI,TH-19,TH37
+60,,Satun,สตูล,311000,3019,107,Satun,STN,TH-91,TH67
+61,,Sing Buri,สิงห์บุรี,198000,817,255,Sing Buri,SBR,TH-17,TH33
+62,,Sisaket,ศรีสะเกษ,1484000,8936,165,Sisaket,SSK,TH-33,TH30
+63,,Songkhla,สงขลา,1444000,7741,186,Songkhla,SKA,TH-90,TH68
+64,,Sukhothai,สุโขทัย,615000,6671,89,Sukhothai (Sukhothai Thani),STI,TH-64,TH09
+65,,Suphan Buri,สุพรรณบุรี,891000,5410,156,Suphan Buri,SPB,TH-72,TH51
+66,,Surat Thani,สุราษฎร์ธานี,1101000,13079,81,Surat Thani,SNI,TH-84,TH60
+67,,Surin,สุรินทร์,1442000,8854,157,Surin,SRN,TH-32,TH29
+68,,Tak,ตาก,704000,17303,39,Tak,TAK,TH-63,TH08
+69,,Trang,ตรัง,636000,4726,136,Trang,TRG,TH-92,TH65
+70,,Trat,ตราด,218000,2866,78,Trat,TRT,TH-23,TH49
+71,,Ubon Ratchathani,อุบลราชธานี,1903000,15626,120,Ubon Ratchathani,UBN,TH-34,TH75
+72,,Udon Thani,อุดรธานี,1608000,11072,143,Udon Thani,UDN,TH-41,TH76
+73,,Uthai Thani,อุทัยธานี,342000,6647,50,Uthai Thani,UTI,TH-61,TH15
+74,,Uttaradit,อุตรดิตถ์,470000,7906,58,Uttaradit,UTD,TH-53,TH10
+75,,Yala,ยะลา,523000,4476,119,Yala,YLA,TH-95,TH70
+76,,Yasothon,ยโสธร,575000,4131,130,Yasothon,YST,TH-35,TH72
