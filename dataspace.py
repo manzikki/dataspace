@@ -10,8 +10,7 @@ import io
 import codecs
 import hashlib
 import base64
-from io import BytesIO
-from matplotlib.figure import Figure
+import random
 import requests
 from shutil import move, copyfile
 import chardet
@@ -967,16 +966,14 @@ def areaselect():
     else:
         file = request.args.get('file')
     mapdata = gpd.read_file("static/"+area+".geojson")
-    #generate a map for fun
-    fig = Figure()
-    ax = fig.subplots()
-    ax.plot([1, 2])
-    # Save it to a temporary buffer.
-    buf = BytesIO()
-    fig.savefig(buf, format="png") # this works but it should be the map ..
-    with open("tmp.png", "wb") as f:
-        f.write(buf.getbuffer())    
-    return render_template('select_area_params.html', file=file, area=area)
+    # Save plot with matplotlib in a random file
+    myrand = str(random.randint(0, 5000))
+    mypic = "static/tmp"+myrand+".jpg"
+    plt.ioff()
+    mapdata.plot()
+    plt.savefig(mypic)
+    plt.close()
+    return render_template('select_area_params.html', file=file, area=area, mypic=mypic)
 
 
 @app.route('/compatible', methods=['GET', 'POST'])
