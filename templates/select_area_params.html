@@ -9,15 +9,28 @@
   <body>
     <div class="container">
     <h1>Please Select the Parameters to Visualize</h1>
-    {{ file }}
-    {{ area }}
-    <img src="../{{ mypic }}"/>
-
+    <br/>
+    <form method="post" action="{{ url_for('areaselect') }}">
+    Please select the parameter you want to visualize on the map:
+    <select name="visualize-param">
     {% for f in fieldlist %}
-    
-     {{ f.name }}
-
+    <option value={{ f.name }}>{{ f.name }}</option>
     {% endfor %}
+    </select>
+    <br/> and the parameter that contains the province ISO code:
+    <select name="iso-param">
+    {% for f in fieldlist %}
+    <option value={{ f.name }}>{{ f.name }}</option>
+    {% endfor %}
+    </select>
+    <input type="hidden" name="file" value="{{ file }}"/>
+    <input type="hidden" name="area" value="{{ area }}"/>
+    <input type="submit" name="OK"/>
+    <form>
+
+    {{ file }} {{ area }} {{ isoparam }} {{ vparam }}
+    <br/>
+    <img src="../{{ mypic }}"/>
     </div>
   </body>
 </html>

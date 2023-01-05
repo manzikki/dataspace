@@ -938,7 +938,7 @@ def saveasfile():
 
 @app.route('/visualize', methods=['GET', 'POST'])
 @app.route('/home/visualize', methods=['GET', 'POST'])
-#create maps by going to the selection of area to visualize -> areaselect
+#create maps by going to the selection of area (country ISO code) to visualize -> areaselect
 #which file to visualize: get the file parameter
 def visualize():
     file = ""
@@ -951,33 +951,46 @@ def visualize():
 
 @app.route('/areaselect', methods=['GET', 'POST'])
 @app.route('/home/areaselect', methods=['GET', 'POST'])
-#get the area and generate the map
+#get the area (area like THA, file like data0.csv) and generate the map
+#OR: get the parameters (visualize-param, iso-param) and generate the map
 def areaselect():
-    area = ""
+    area = "" #like THA
+    file = "" #the CSV file
+    vparam = "" #parameter to visualize
+    isoparam = "" #province code
     mydict = request.form
+    if 'visualize-param' in mydict:
+        vparam = mydict['visualize-param']
+    if 'iso-param' in mydict:
+        isoparam = mydict['iso-param']    
     if 'area' in mydict:
         area = mydict['area']
     else:
         area = request.args.get('area')
-    file = ""
     mydict = request.form
     if 'file' in mydict:
         file = mydict['file']
     else:
         file = request.args.get('file')
     mapdata = gpd.read_file("static/"+area+".geojson")
+    #merge with the data if we have the para
+    if isoparam and vparam:
+        df = pd.read_csv(app.config['SL']+file)
+        mapdata = mapdata.merge(df,on=isoparam)
     # Save plot with matplotlib in a random file
     myrand = str(random.randint(0, 5000))
     mypic = "static/tmp"+myrand+".jpg"
     plt.ioff()
-    mapdata.plot()
+    if isoparam and vparam:
+        mapdata.plot(column=vparam, cmap='OrRd')
+    else:
+        mapdata.plot()
     plt.savefig(mypic)
     plt.close()
     mymeta = MetaInfo(file)
     mymeta.read_from_file(app.config['S'], file)
     fields = mymeta.get_fieldlist()
-    return render_template('select_area_params.html', file=file, area=area, mypic=mypic, fieldlist=fields)
-
+    return render_template('select_area_params.html', file=file, area=area, mypic=mypic, fieldlist=fields, isoparam=isoparam, vparam=vparam)
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
