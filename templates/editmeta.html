@@ -45,7 +45,9 @@
       </select>
 
     </td>
-
+    <td>Delete
+    <input type="checkbox" name="{{loop.index}}=delete"/>
+    </td>
 </tr>
 <td>Data type:</td><td><select name="{{loop.index}}-{{f.name}}=datatype"><option></option>
     <option value="integer" {% if f.datatype == "integer" %}selected{% endif %} >Integer</option>

@@ -321,8 +321,20 @@ def editmetasubmit():
     fielddatatype = ""
     fieldmin = ""
     fieldmax = ""
+    delfields = [] #fields marked by the user as delete
     fieldnames = [] #will be written to the CSV file as header
+    num = 0 #counter
     for fiter in natural_sort(mydict):
+        #get the number
+        hyphenpos = fiter.find("-")
+        if hyphenpos > 0:
+            equalpos = fiter.find("=")
+            if equalpos > 0:
+                delfname = fiter[hyphenpos+1:equalpos]
+                num = int(fiter[:hyphenpos])
+                if str(num)+"=delete" in mydict:
+                    if delfname not in delfields:
+                        delfields.append(delfname)
         #print(fiter)
         if fiter == "file":
             next
@@ -351,6 +363,10 @@ def editmetasubmit():
         if "=unit" in fiter: #infieldcount == 5: #unit
             fieldunit = mydict[fiter].strip()
             #we construct here, this is the last one
+            #do not add the field if it's in delfields
+            if fieldname in delfields:
+                print("Wont add "+fieldname)
+            print("Adding field "+fieldname)
             mymeta.addfield(fieldname, fielddescr, fielddatatype, fieldmin, fieldmax)
             fieldmin = None
             fieldmax = None
