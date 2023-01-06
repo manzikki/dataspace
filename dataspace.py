@@ -420,11 +420,15 @@ def editmetasubmit():
         return redirect(url_for('appmain'))
     #finally: we are deleting a column
     #first read the entire cvs file
-    with open(app.config['SL']+myfile) as csv_file:
-        #add handling here
-        csv_reader = csv.reader(csv_file)
-        for row in csv_reader:
-            print(", ".join(row))
+    df = pd.read_csv(app.config['SL']+myfile)
+    #delete the columns that are in delfields
+    df = df.drop(columns=delfields)
+    #write it back
+    df.to_csv(app.config['SL']+myfile, encoding='utf-8', index=None)
+    #remove the field from meta
+    for delf in delfields:
+        mymeta.removefield(delf)
+    mymeta.write_to_file(app.config['S'], myfile)
     return redirect(url_for('appmain'))
 
 def count_lines(filename):
