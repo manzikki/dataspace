@@ -302,6 +302,7 @@ def natural_sort(mylist):
 def editmetasubmit():
     """
     Receives metadata values from the edit form (editmeta). Writes the metadata into a jmeta file.
+    If headers have changed, rewrites them. If columns have been deleted, rewrites the entite file.
     """
     #get the file field
     mydict = request.form
@@ -363,10 +364,8 @@ def editmetasubmit():
         if "=unit" in fiter: #infieldcount == 5: #unit
             fieldunit = mydict[fiter].strip()
             #we construct here, this is the last one
-            #do not add the field if it's in delfields
-            if fieldname in delfields:
-                print("Wont add "+fieldname)
-            print("Adding field "+fieldname)
+            #We'll handle the deleted fields later
+            #print("Adding field "+fieldname)
             mymeta.addfield(fieldname, fielddescr, fielddatatype, fieldmin, fieldmax)
             fieldmin = None
             fieldmax = None
@@ -396,10 +395,12 @@ def editmetasubmit():
     hlinefromfile = csvfile.readline().strip()
 
     if hlinefromfile == headerline or hlinefromfile == hlinewithquotes:
-        #print("No need to rewrite.")
-        csvfile.close()
-        return redirect(url_for('appmain'))
-        #print("Diff "+hlinefromfile+"\n"+headerline+" "+hlinewithquotes)
+        if not delfields:
+            print("No need to rewrite.")
+            csvfile.close()
+            return redirect(url_for('appmain'))
+            #print("Diff "+hlinefromfile+"\n"+headerline+" "+hlinewithquotes)
+    #otherwise: need to rewrite headers
     #replace non-ascii
     headerline = re.sub(r'[^\x00-\x7F]+', '', headerline)
 
@@ -407,6 +408,7 @@ def editmetasubmit():
     outfile = io.open(outfilen, 'w', encoding='utf-8')
     outfile.write(headerline+"\n")
     line = csvfile.readline()
+    #write the rest
     line = csvfile.readline()
     while line:
         outfile.write(line)
@@ -414,7 +416,15 @@ def editmetasubmit():
     csvfile.close()
     outfile.close()
     move(outfilen, app.config['SL']+myfile)
-    #call appmain if ok
+    if not delfields:
+        return redirect(url_for('appmain'))
+    #finally: we are deleting a column
+    #first read the entire cvs file
+    with open(app.config['SL']+myfile) as csv_file:
+        #add handling here
+        csv_reader = csv.reader(csv_file)
+        for row in csv_reader:
+            print(", ".join(row))
     return redirect(url_for('appmain'))
 
 def count_lines(filename):

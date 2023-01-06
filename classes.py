@@ -116,6 +116,13 @@ class MetaInfo:
             self.fieldmaxs.append(mymaxs)
         self.fielddatatypes.append(myfielddt)
 
+    def removefield(field, fieldname):
+        """
+        Removes a field called fieldname.
+        """
+        if fieldname in self.fields:
+            fields.remove(fieldname)
+
     def addmeasurespec(self, fieldname, measurespec):
         """
         Adds a field fieldname->measurespec assoc array in the array measures.
