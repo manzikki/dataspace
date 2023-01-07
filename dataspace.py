@@ -986,8 +986,8 @@ def visualize():
 def areaselect():
     area = "" #like THA
     file = "" #the CSV file
-    vparam = "" #parameter to visualize
-    isoparam = "" #province code
+    vparam = "" #parameter to visualize.
+    isoparam = "" #province code. If not submitted, give a hint.
     mydict = request.form
     if 'visualize-param' in mydict:
         vparam = mydict['visualize-param']
@@ -1003,10 +1003,10 @@ def areaselect():
     else:
         file = request.args.get('file')
     mapdata = gpd.read_file("static/"+area+".geojson")
-    #merge with the data if we have the para
+    #merge with the data if we have the parameters
     if isoparam and vparam:
         df = pd.read_csv(app.config['SL']+file)
-        mapdata = mapdata.merge(df,on=isoparam)
+        mapdata = mapdata.merge(df,left_on="ISO", right_on=isoparam) #We know it's ISO in our map data
     # Save plot with matplotlib in a random file
     myrand = str(random.randint(0, 5000))
     mypic = "static/tmp"+myrand+".jpg"
@@ -1020,7 +1020,20 @@ def areaselect():
     mymeta = MetaInfo(file)
     mymeta.read_from_file(app.config['S'], file)
     fields = mymeta.get_fieldlist()
-    return render_template('select_area_params.html', file=file, area=area, mypic=mypic, fieldlist=fields, isoparam=isoparam, vparam=vparam)
+    #try to find something like ISO in the fields
+    #get the first numeric field, maybe the user wants to visualize it
+    #NB: We should limit the fields to numeric only!
+    isohint = ""
+    vhint = ""
+    for field in fields:
+        if "ISO" in field['name'] or "iso" in field['name']:
+            isohint = field['name']
+        if field['datatype'] == "integer":
+            vhint = field['name']
+
+    return render_template('select_area_params.html', file=file, 
+                           area=area, mypic=mypic, fieldlist=fields, isoparam=isoparam, vparam=vparam,
+                           isohint = isohint, vhint=vhint)
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])

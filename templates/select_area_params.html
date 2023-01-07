@@ -14,13 +14,13 @@
     Please select the parameter you want to visualize on the map:
     <select name="visualize-param">
     {% for f in fieldlist %}
-    <option value={{ f.name }}>{{ f.name }}</option>
+    <option value={{ f.name }} {% if f.name == vhint %}selected{% endif %} >{{ f.name }}</option>
     {% endfor %}
     </select>
     <br/> and the parameter that contains the province ISO code:
     <select name="iso-param">
     {% for f in fieldlist %}
-    <option value={{ f.name }}>{{ f.name }}</option>
+    <option value={{ f.name }} {% if f.name == isohint %}selected{% endif %} >{{ f.name }}</option>
     {% endfor %}
     </select>
     <input type="hidden" name="file" value="{{ file }}"/>
@@ -28,7 +28,7 @@
     <input type="submit" name="OK"/>
     <form>
 
-    {{ file }} {{ area }} {{ isoparam }} {{ vparam }}
+    <!-- {{ file }} {{ area }} {{ isoparam }} {{ vparam }} -->
     <br/>
     <img src="../{{ mypic }}"/>
     </div>
