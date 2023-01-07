@@ -633,7 +633,7 @@ def fromwikimany():
     while os.path.isfile(app.config['SL']+checkfilename):
         countn += 1
         checkfilename = "data"+str(countn)+".csv"
-    dataf.to_csv(app.config['SL']+checkfilename)
+    dataf.to_csv(app.config['SL']+checkfilename, index=None)
     numlines = dataf.shape[0]
     fieldlist = build_fieldlist(app.config['SL']+checkfilename)
     return render_template('editmeta.html', file=checkfilename, descr="",\
