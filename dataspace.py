@@ -342,7 +342,7 @@ def addiso_resp():
                  "jersey","curaçao","northern mariana islands","seychelles","bermuda","falkland islands","macau",
                  "saint kitts and nevis","andorra","cook islands","san marino","american samoa","niue",
                  "british virgin islands","saint helena","anguilla","christmas island","turks and caicos islands",
-                 "saint pierre and miquelon","maldives","norfolk island","sint maarten","nauru","gibraltar",
+                 "saint pierre","maldives","norfolk island","sint maarten","nauru","gibraltar",
                  "cocos","tuvalu"]
 
     isos = ["USA","IND","CHN","BRA","RUS","FRA","CAN","AUS","MEX","ZAF","THA","ESP","DEU","SWE","VNM","IDN","ITA",
@@ -372,9 +372,14 @@ def addiso_resp():
 
     df["ISO"] = addthese
     #write it back
-    df.to_csv(app.config['SL']+myfile+"-iso", encoding='utf-8', index=None)
+    df.to_csv(app.config['SL']+myfile, encoding='utf-8', index=None)
     #add the metadata here
-    return("Sorry not yet implemented")
+    mymeta = MetaInfo(myfile)
+    mymeta.read_from_file(app.config['S'], myfile)
+    mymeta.addfield("ISO", "country iso code")    
+    mymeta.write_to_file(app.config['S'], myfile)
+    return redirect(url_for('appmain'))
+
 
 def natural_sort(mylist):
     """
