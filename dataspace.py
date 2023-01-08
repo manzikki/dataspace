@@ -301,6 +301,9 @@ def add_iso():
     mymeta.read_from_file(app.config['S'], myfile)
     fields = mymeta.get_fieldlist()
     #Is there already an ISO column?
+    for field in fields:
+        if field['name'] == "ISO":
+            return "An ISO field already exists."
     #ask the user where the country data is
     return render_template('addiso.html', file=myfile, fieldlist=fields)
 
