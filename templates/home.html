@@ -51,23 +51,27 @@ Collections:
  <input name="file" type="hidden" value="{{ entry.name }}"> 
  <button class="btn btn-secondary btn-block" type="submit">Compatibility</button></form>
  <form>
-
- <form action="{{ url_for('add_iso') }}" method="post">
- <input name="file" type="hidden" value="{{ entry.name }}"> 
- <button class="btn btn-secondary btn-block" type="submit">Add ISO code</button></form>
- <form>
-
- <input name="file" type="hidden" value="{{ entry.name }}">
  <br/>
+
+ <form>
+ <input name="file" type="hidden" value="{{ entry.name }}">
  <button id="{{ entry.name }}" type="button" 
  onclick="d1=document.getElementById('delf1'); d1.innerHTML='{{entry.name}}'" 
  class="btn btn-secondary btn-block" data-toggle="modal" data-target="#myModal">Delete</button>
  </form>
  <br/>
+
  <!--Visualize form/button-->
  <form action="{{ url_for('visualize') }}" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}">
  <button class="btn btn-secondary btn-block" type="submit">Visualize</button></form><br/>
+
+ <!--Add iso-->
+ <form action="{{ url_for('add_iso') }}" method="post">
+ <input name="file" type="hidden" value="{{ entry.name }}">
+ <button class="btn btn-secondary btn-block" type="submit">Add ISO</button></form><br/>
+
+
 </td>
 {% endif %}
 {% endfor %}

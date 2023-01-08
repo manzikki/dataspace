@@ -292,9 +292,89 @@ def editmeta():
 @app.route("/home/add_iso", methods=['GET', 'POST'])
 def add_iso():
     """
+    Add an ISO code in the CVS if the data is about countries -> addiso -> addiso_resp.
+    """
+    #get the file
+    mydict = request.form
+    myfile = mydict['file']
+    mymeta = MetaInfo(myfile)
+    mymeta.read_from_file(app.config['S'], myfile)
+    fields = mymeta.get_fieldlist()
+    #Is there already an ISO column?
+    #ask the user where the country data is
+    return render_template('addiso.html', file=myfile, fieldlist=fields)
+
+@app.route("/addiso_resp", methods=['GET', 'POST'])
+@app.route("/home/addiso_resp", methods=['GET', 'POST'])
+def addiso_resp():
+    """
     Add an ISO code in the CVS if the data is about countries.
     """
-    return("Sorry not yet implemented.")
+    #get the file and field info
+    mydict = request.form
+    myfile = mydict['file']
+    countryp = mydict['country-param']
+    #put the file into a dataframe
+    df = pd.read_csv(app.config['SL']+myfile)
+    df["ISO"] = ""
+
+    countries = ["united states","india","china","brazil","russia","france","canada","australia","mexico",
+                 "south africa","thailand","spain","germany","sweden","vietnam","indonesia","italy","finland",
+                 "turkey","united kingdom","poland","bangladesh","japan","argentina","pakistan","malaysia","iran",
+                 "saudi arabia","philippines","hungary","uzbekistan","colombia","nigeria","kenya","ukraine",
+                 "myanmar","dr congo","uganda","peru","mali","netherlands","algeria","austria","ethiopia",
+                 "belgium","greece","sri lanka","south korea","ghana","ireland","zimbabwe","new zealand",
+                 "kazakhstan","tanzania","romania","lithuania","switzerland","uruguay","denmark","zambia",
+                 "czech republic","cambodia","ecuador","taiwan","chad","laos","slovakia","slovenia","libya",
+                 "afghanistan","kyrgyzstan","botswana","madagascar","mozambique","sudan","tajikistan","nepal",
+                 "croatia","puerto rico","north korea","central african republic","nicaragua","congo",
+                 "bosnia","jamaica","lebanon","georgia","tunisia","cyprus","dominican republic","israel",
+                 "bulgaria","niger","guatemala","senegal","benin","eritrea","malawi","burkina faso","somalia",
+                 "honduras","gabon","north macedonia","iceland","burundi","mauritania","bhutan","togo",
+                 "sierra leone","liberia","moldova","papua new guinea","el salvador","montenegro","armenia",
+                 "jordan","qatar","east timor","lesotho","kuwait","new caledonia","costa rica","rwanda",
+                 "west bank","guinea-bissau","suriname","haiti","bahrain","united arab","guyana","albania",
+                 "eswatini","singapore","fiji","belize","gambia","brunei","djibouti","equatorial guinea",
+                 "luxembourg","bahamas","french polynesia","mauritius","malta","hong kong","marshall islands",
+                 "kosovo","barbados","dominica","solomon islands","cape verde","são tomé and príncipe",
+                 "u.s. virgin islands","saint lucia","antigua and barbuda","samoa","grenada","isle of man",
+                 "vanuatu","guam","faroe islands","comoros","cayman islands","tonga","kiribati","liechtenstein",
+                 "jersey","curaçao","northern mariana islands","seychelles","bermuda","falkland islands","macau",
+                 "saint kitts and nevis","andorra","cook islands","san marino","american samoa","niue",
+                 "british virgin islands","saint helena","anguilla","christmas island","turks and caicos islands",
+                 "saint pierre and miquelon","maldives","norfolk island","sint maarten","nauru","gibraltar",
+                 "cocos","tuvalu"]
+
+    isos = ["USA","IND","CHN","BRA","RUS","FRA","CAN","AUS","MEX","ZAF","THA","ESP","DEU","SWE","VNM","IDN","ITA",
+            "FIN","TUR","GBR","POL","BGD","JPN","ARG","PAK","MYS","IRN","SAU","PHL","HUN","UZB","COL","NGA","KEN",
+            "UKR","MMR","COD","UGA","PER","MLI","NLD","DZA","AUT","ETH","BEL","GRC","LKA","KOR","GHA","IRL","ZWE",
+            "NZL","KAZ","TZA","ROU","LTU","CHE","URY","DNK","ZMB","CZE","KHM","ECU","TWN","TCD","LAO","SVK","SVN",
+            "LBY","AFG","KGZ","BWA","MDG","MOZ","SDN","TJK","NPL","HRV","PRI","PRK","CAF","NIC","COG","BIH","JAM",
+            "LBN","GEO","TUN","CYP","DOM","ISR","BGR","NER","GTM","SEN","BEN","ERI","MWI","BFA","SOM","HND","GAB",
+            "MKD","ISL","BDI","MRT","BTN","TGO","SLE","LBR","MDA","PNG","SLV","MNE","ARM","JOR","QAT","TLS","LSO",
+            "KWT","NCL","CRI","RWA","WBG","GNB","SUR","HTI","BHR","ARE","GUY","ALB","SWZ","SGP","FJI","BLZ","GMB",
+            "BRN","DJI","GNQ","LUX","BHS","PYF","MUS","MLT","HKG","MHL","XKX","BRB","DMA","SLB","CPV","STP","VIR",
+            "LCA","ATG","WSM","GRD","IMN","VUT","GUM","FRO","COM","CYM","TON","KIR","LIE","JEY","CUW","MNP","SYC",
+            "BMU","FLK","MAC","KNA","AND","COK","SMR","ASM","NIU","VGB","SHN","AIA","CXR","TCA","SPM","MDV","NFK",
+            "SXM","NRU","GIB","CCK","TUV"]
+
+    addthese = []
+
+    for countryname in df[countryp]:
+        #print(countryname)
+        matchediso = ""
+        matchn = countryname.lower()
+        for idx, country in enumerate(countries):
+            if  matchn.startswith(country):
+                #print(isos[idx])
+                matchediso = isos[idx]
+        addthese.append(matchediso)
+
+    df["ISO"] = addthese
+    #write it back
+    df.to_csv(app.config['SL']+myfile+"-iso", encoding='utf-8', index=None)
+    #add the metadata here
+    return("Sorry not yet implemented")
 
 def natural_sort(mylist):
     """
