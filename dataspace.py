@@ -288,6 +288,14 @@ def editmeta():
     return render_template('editmeta.html', file=myfile, descr=mymeta.descr,
                            fieldlist=fields, numlines=numlines)
 
+@app.route("/add_iso", methods=['GET', 'POST'])
+@app.route("/home/add_iso", methods=['GET', 'POST'])
+def add_iso():
+    """
+    Add an ISO code in the CVS if the data is about countries.
+    """
+    return("Sorry not yet implemented.")
+
 def natural_sort(mylist):
     """
     Natural sort: 1-line will appear before 10-line.

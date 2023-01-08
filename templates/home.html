@@ -44,11 +44,19 @@ Collections:
 {% if username != "" %}
  <form action="{{ url_for('editmeta') }}" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}"> 
- <button class="btn btn-secondary btn-block" type="submit">Edit metadata</button></form><br/>
+ <button class="btn btn-secondary btn-block" type="submit">Edit metadata</button>
+ </form><br/>
+
  <form action="{{ url_for('compatible') }}" method="post">
  <input name="file" type="hidden" value="{{ entry.name }}"> 
  <button class="btn btn-secondary btn-block" type="submit">Compatibility</button></form>
  <form>
+
+ <form action="{{ url_for('add_iso') }}" method="post">
+ <input name="file" type="hidden" value="{{ entry.name }}"> 
+ <button class="btn btn-secondary btn-block" type="submit">Add ISO code</button></form>
+ <form>
+
  <input name="file" type="hidden" value="{{ entry.name }}">
  <br/>
  <button id="{{ entry.name }}" type="button" 
