@@ -21,6 +21,7 @@ from werkzeug.utils import secure_filename
 import numpy
 import pandas as pd
 from bs4 import BeautifulSoup
+import matplotlib
 import matplotlib.pyplot as plt
 import geopandas as gpd
 from forms import LoginForm, UploadForm, PastedTextForm, WikiForm
@@ -1080,6 +1081,7 @@ def visualize():
 #get the area (area like THA, file like data0.csv) and generate the map
 #OR: get the parameters (visualize-param, iso-param) and generate the map
 def areaselect():
+    matplotlib.use('Agg') #prevent crash
     area = "" #like THA
     file = "" #the CSV file
     vparam = "" #parameter to visualize.
@@ -1107,7 +1109,17 @@ def areaselect():
     myrand = str(random.randint(0, 5000))
     mypic = "static/tmp"+myrand+".jpg"
     plt.ioff()
+    maxval = ""
+    minval = ""
     if isoparam and vparam:
+        maxval = mapdata[vparam].max()
+        minval = mapdata[vparam].min()
+        maxValueIndex = mapdata[vparam].idxmax()
+        minValueIndex = mapdata[vparam].idxmin()
+        isomax = mapdata['ISO'][maxValueIndex]
+        isomin = mapdata['ISO'][minValueIndex]
+        print("maxval "+str(maxval)+" "+isomax)
+        print("minval "+str(minval)+" "+isomin)
         mapdata.plot(column=vparam, cmap='OrRd')
     else:
         mapdata.plot()
@@ -1595,4 +1607,4 @@ def delfile():
     return redirect(url_for('appmain'))
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", debug=True, use_reloader=False)
