@@ -12,6 +12,8 @@ pip3 install bs4
 pip3 install lxml
 pip3 install geopandas
 pip3 install matplotlib
+pip3 install folium
+pip3 install mapclassify
 
 Running:
 python3 dataspace.py

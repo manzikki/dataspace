@@ -1108,6 +1108,7 @@ def areaselect():
     # Save plot with matplotlib in a random file
     myrand = str(random.randint(0, 5000))
     mypic = "static/tmp"+myrand+".jpg"
+    mymaph = "static/map"+myrand+".html"
     plt.ioff()
     maxval = ""
     minval = ""
@@ -1120,7 +1121,9 @@ def areaselect():
         isomin = mapdata['ISO'][minValueIndex]
         print("maxval "+str(maxval)+" "+isomax)
         print("minval "+str(minval)+" "+isomin)
-        mapdata.plot(column=vparam, cmap='OrRd', legend=True)
+        mymap=mapdata.explore(column=vparam, cmap='OrRd', legend=True)
+        mymap.save(mymaph)
+        return redirect("/"+mymaph)
     else:
         mapdata.plot()
     plt.savefig(mypic)
