@@ -1,5 +1,5 @@
 """
-Simple dataspace management for CSV files. Marko Niinimaki marko.niinimaki@protonmail.com 2017-2022
+Simple dataspace management for CSV files. Marko Niinimaki marko.niinimaki@protonmail.com 2017-2023
 """
 import tarfile
 import re
@@ -1120,7 +1120,7 @@ def areaselect():
         isomin = mapdata['ISO'][minValueIndex]
         print("maxval "+str(maxval)+" "+isomax)
         print("minval "+str(minval)+" "+isomin)
-        mapdata.plot(column=vparam, cmap='OrRd')
+        mapdata.plot(column=vparam, cmap='OrRd', legend=True)
     else:
         mapdata.plot()
     plt.savefig(mypic)
