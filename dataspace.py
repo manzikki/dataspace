@@ -1108,11 +1108,12 @@ def areaselect():
     # Save plot with matplotlib in a random file
     myrand = str(random.randint(0, 5000))
     mypic = "static/tmp"+myrand+".jpg"
-    mymaph = "static/map"+myrand+".html"
     plt.ioff()
     maxval = ""
     minval = ""
+    mymaph = "" #link to interactive map
     if isoparam and vparam:
+        mymaph = "static/map"+myrand+".html"
         maxval = mapdata[vparam].max()
         minval = mapdata[vparam].min()
         maxValueIndex = mapdata[vparam].idxmax()
@@ -1123,7 +1124,8 @@ def areaselect():
         print("minval "+str(minval)+" "+isomin)
         mymap=mapdata.explore(column=vparam, cmap='OrRd', legend=True)
         mymap.save(mymaph)
-        return redirect("/"+mymaph)
+        mapdata.plot(column=vparam, cmap='OrRd', legend=True)
+        #return redirect("/"+mymaph)
     else:
         mapdata.plot()
     plt.savefig(mypic)
@@ -1144,7 +1146,7 @@ def areaselect():
 
     return render_template('select_area_params.html', file=file, 
                            area=area, mypic=mypic, fieldlist=fields, isoparam=isoparam, vparam=vparam,
-                           isohint = isohint, vhint=vhint)
+                           isohint = isohint, vhint=vhint, mymaph = mymaph)
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])

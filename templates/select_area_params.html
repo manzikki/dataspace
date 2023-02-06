@@ -1,3 +1,4 @@
+<!--Visualization: select the parameters with an empty map or show the rendered map -->
 <html>
   <head>
     <title>Select the Parameters to Visualize</title>
@@ -30,7 +31,11 @@
 
     <!-- {{ file }} {{ area }} {{ isoparam }} {{ vparam }} -->
     <br/>
-    <img src="../{{ mypic }}"/>
+    <img width="70%" height="70%" src="../{{ mypic }}"/>
+    <br/>
+    {% if mymaph != "" %}
+    <a href="/{{ mymaph }}">Interactive map</a>
+    {% endif %}
     </div>
   </body>
 </html>
