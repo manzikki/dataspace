@@ -41,8 +41,11 @@
       {% endfor %}
       <input name="fname" type="hidden" value="{{ file }}"/>
       <td><input type="submit" value="Save changes"/></td>
+      </form>
+      <form action="{{ url_for('graphrow') }}" method="post">
+      <td><button onclick="alert('Write this row into a file and graph it')">📈</button></td>
+      </form>
     </tr>
-    </form>
     {% endfor %}
     </table>
     <form action="{{ url_for('editsave') }}" method="post">

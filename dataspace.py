@@ -1,5 +1,5 @@
 """
-Simple dataspace management for CSV files. Marko Niinimaki marko.niinimaki@protonmail.com 2017-2022
+Simple dataspace management for CSV files. Marko Niinimaki marko.niinimaki@protonmail.com 2017-2023
 """
 import tarfile
 import re
@@ -1395,6 +1395,14 @@ def delfile():
     os.remove(app.config['SL']+myfile)
     os.remove(app.config['SL']+myfile+".jmeta")
     return redirect(url_for('appmain'))
+
+@app.route('/graphrow', methods=['GET'])
+@app.route('/home/graphrow', methods=['GET'])
+def graphrow():
+    """
+    Simple graph of just 1 row of numbers.
+    """
+    return "Sorry, not yet implemented."
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
