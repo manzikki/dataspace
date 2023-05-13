@@ -1396,12 +1396,17 @@ def delfile():
     os.remove(app.config['SL']+myfile+".jmeta")
     return redirect(url_for('appmain'))
 
-@app.route('/graphrow', methods=['GET'])
-@app.route('/home/graphrow', methods=['GET'])
+@app.route('/graphrow', methods=['GET','POST'])
+@app.route('/home/graphrow', methods=['GET','POST'])
 def graphrow():
     """
     Simple graph of just 1 row of numbers.
     """
+    #debug: print everything
+    mydict = request.form
+    print(mydict)
+    for key, val in request.form.items():
+        print(key + " " + val)
     return "Sorry, not yet implemented."
 
 if __name__ == "__main__":
