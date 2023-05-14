@@ -8,9 +8,12 @@ import os
 import csv
 import io
 import codecs
+import random
 import hashlib
 import base64
 import requests
+import matplotlib
+import matplotlib.pyplot as plt
 from shutil import move, copyfile
 import chardet
 from dateutil.parser import parse
@@ -1404,10 +1407,36 @@ def graphrow():
     """
     #debug: print everything
     mydict = request.form
-    print(mydict)
+    #print(mydict)
+    mytitle = ""
+    fname = mydict['00fname']
+    itemno = 0
+    countnumitems = 0
+    xitems = []
+    yitems = []
     for key, val in request.form.items():
+        itemno = itemno + 1
+        if itemno == 2: # 1 is 00fname
+             mytitle = fname + " " + val
+        else:
+             try:
+                float(val)
+                countnumitems = countnumitems + 1
+                yitems.append(float(val))
+                xitems.append(key)
+             except:
+                 pass
         print(key + " " + val)
-    return "Sorry, not yet implemented."
+    if countnumitems < 2:
+        return "Less than 2 numeric items."
+    #build the graph
+    rastr = str(random.randint(0, 99999999))
+    matplotlib.use('Agg')
+    plt.plot(xitems, yitems, 'o')
+    plt.title(mytitle)
+    plt.xticks(rotation=45, fontsize=12)
+    plt.savefig("static/"+rastr+"tmp.svg")
+    return "<a href=../static/"+rastr+"tmp.svg>Your graph</a>."
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
