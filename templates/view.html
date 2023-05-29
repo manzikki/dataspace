@@ -17,13 +17,23 @@
     {% for entry in headers %}
     <th>  {{ entry }} </th>
     {% endfor %}
+    <th></th>
     </thead>
      </tr>
     {% for row in rows %}
     <tr>
       {% for col in row %}
       <td>{{ col }}</td>
-      {% endfor %}  
+      {% endfor %}
+      <form action="{{ url_for('graphrow') }}" method="post">
+      <!-- add the name of the file -->
+      <input type="hidden" name="00fname" value= {{ file }} />
+      <!-- build a sequence of header - value -->
+      {% for header in headers %}
+      <input type="hidden" name=" {{ header }} " value=" {{ row[loop.index-1] }} " />
+      {% endfor %}
+      <td><button type="submit">📈</button></td>
+      </form>
     </tr>
     {% endfor %}
     </table>
