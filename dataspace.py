@@ -1,5 +1,5 @@
 """
-Simple dataspace management for CSV files. Marko Niinimaki marko.niinimaki@protonmail.com 2017-2022
+Simple dataspace management for CSV files. Marko Niinimaki marko.niinimaki@protonmail.com 2017-2023
 """
 import tarfile
 import re
@@ -8,9 +8,12 @@ import os
 import csv
 import io
 import codecs
+import random
 import hashlib
 import base64
 import requests
+import matplotlib
+import matplotlib.pyplot as plt
 from shutil import move, copyfile
 import chardet
 from dateutil.parser import parse
@@ -1395,6 +1398,45 @@ def delfile():
     os.remove(app.config['SL']+myfile)
     os.remove(app.config['SL']+myfile+".jmeta")
     return redirect(url_for('appmain'))
+
+@app.route('/graphrow', methods=['GET','POST'])
+@app.route('/home/graphrow', methods=['GET','POST'])
+def graphrow():
+    """
+    Simple graph of just 1 row of numbers.
+    """
+    #debug: print everything
+    mydict = request.form
+    #print(mydict)
+    mytitle = ""
+    fname = mydict['00fname']
+    itemno = 0
+    countnumitems = 0
+    xitems = []
+    yitems = []
+    for key, val in request.form.items():
+        itemno = itemno + 1
+        if itemno == 2: # 1 is 00fname
+             mytitle = fname + " " + val
+        else:
+             try:
+                float(val)
+                countnumitems = countnumitems + 1
+                yitems.append(float(val))
+                xitems.append(key)
+             except:
+                 pass
+        print(key + " " + val)
+    if countnumitems < 2:
+        return "Less than 2 numeric items."
+    #build the graph
+    rastr = str(random.randint(0, 99999999))
+    matplotlib.use('Agg')
+    plt.plot(xitems, yitems, 'o')
+    plt.title(mytitle)
+    plt.xticks(rotation=45, fontsize=12)
+    plt.savefig("static/"+rastr+"tmp.svg")
+    return "<a href=../static/"+rastr+"tmp.svg>Your graph</a>."
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
