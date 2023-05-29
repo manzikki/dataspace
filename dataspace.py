@@ -347,7 +347,8 @@ def addiso_resp():
                  "saint kitts and nevis","andorra","cook islands","san marino","american samoa","niue",
                  "british virgin islands","saint helena","anguilla","christmas island","turks and caicos islands",
                  "saint pierre","maldives","norfolk island","sint maarten","nauru","gibraltar",
-                 "cocos","tuvalu"]
+                 "cocos","tuvalu","aruba","antilles","angola","antarctica","azerbaijan","belarus","bolivia", "bouvet",
+                 "chile", "ivoire", "cameroon", "of the congo", "cook", "czechoslovakia","cuba"]
 
     isos = ["USA","IND","CHN","BRA","RUS","FRA","CAN","AUS","MEX","ZAF","THA","ESP","DEU","SWE","VNM","IDN","ITA",
             "FIN","TUR","GBR","POL","BGD","JPN","ARG","PAK","MYS","IRN","SAU","PHL","HUN","UZB","COL","NGA","KEN",
@@ -360,7 +361,8 @@ def addiso_resp():
             "BRN","DJI","GNQ","LUX","BHS","PYF","MUS","MLT","HKG","MHL","XKX","BRB","DMA","SLB","CPV","STP","VIR",
             "LCA","ATG","WSM","GRD","IMN","VUT","GUM","FRO","COM","CYM","TON","KIR","LIE","JEY","CUW","MNP","SYC",
             "BMU","FLK","MAC","KNA","AND","COK","SMR","ASM","NIU","VGB","SHN","AIA","CXR","TCA","SPM","MDV","NFK",
-            "SXM","NRU","GIB","CCK","TUV"]
+            "SXM","NRU","GIB","CCK","TUV","ABW","ANT","AGO","ATA","AZE","BLR","BOL","BVT", "CHL", "CIV", "CMR", "COD",
+            "COK", "CSK", "CUB"]
 
     addthese = []
 
