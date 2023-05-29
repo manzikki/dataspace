@@ -348,7 +348,10 @@ def addiso_resp():
                  "british virgin islands","saint helena","anguilla","christmas island","turks and caicos islands",
                  "saint pierre","maldives","norfolk island","sint maarten","nauru","gibraltar",
                  "cocos","tuvalu","aruba","antilles","angola","antarctica","azerbaijan","belarus","bolivia", "bouvet",
-                 "chile", "ivoire", "cameroon", "of the congo", "cook", "czechoslovakia","cuba"]
+                 "chile", "ivoire", "cameroon", "of the congo", "cook", "czechoslovakia","cuba", "guinea" ,"guadeloupe",
+                 "guernsey", "greenland", "french guiana", "iraq", "latvia", "morocco", "mongolia", "montserrat", "norway",
+                 "oman", "paraguay", "portugal", "reunion", "serbia", "south sudan", "swaziland", "syria", "turkmenistan",
+                 "timor-leste", "venezuela", "USA"]
 
     isos = ["USA","IND","CHN","BRA","RUS","FRA","CAN","AUS","MEX","ZAF","THA","ESP","DEU","SWE","VNM","IDN","ITA",
             "FIN","TUR","GBR","POL","BGD","JPN","ARG","PAK","MYS","IRN","SAU","PHL","HUN","UZB","COL","NGA","KEN",
@@ -362,7 +365,8 @@ def addiso_resp():
             "LCA","ATG","WSM","GRD","IMN","VUT","GUM","FRO","COM","CYM","TON","KIR","LIE","JEY","CUW","MNP","SYC",
             "BMU","FLK","MAC","KNA","AND","COK","SMR","ASM","NIU","VGB","SHN","AIA","CXR","TCA","SPM","MDV","NFK",
             "SXM","NRU","GIB","CCK","TUV","ABW","ANT","AGO","ATA","AZE","BLR","BOL","BVT", "CHL", "CIV", "CMR", "COD",
-            "COK", "CSK", "CUB"]
+            "COK", "CSK", "CUB", "GIN", "GLP", "GGY", "GRL", "GUF", "IRQ", "LVA", "MAR", "MNG", "MSR", "NOR", "OMN",
+            "PRY", "PRT", "REU", "SRB", "SSD", "SWZ", "SYR", "TKM", "TLS", "VEN", "USA"]
 
     addthese = []
 
