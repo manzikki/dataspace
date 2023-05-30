@@ -351,7 +351,7 @@ def addiso_resp():
                  "chile", "ivoire", "cameroon", "of the congo", "cook", "czechoslovakia","cuba", "guinea" ,"guadeloupe",
                  "guernsey", "greenland", "french guiana", "iraq", "latvia", "morocco", "mongolia", "montserrat", "norway",
                  "oman", "paraguay", "portugal", "reunion", "serbia", "south sudan", "swaziland", "syria", "turkmenistan",
-                 "timor-leste", "venezuela", "USA", "egypt", "estonia", "liectenstein", ""namibia"]
+                 "timor-leste", "venezuela", "USA", "egypt", "estonia", "liectenstein", "namibia"]
 
     isos = ["USA","IND","CHN","BRA","RUS","FRA","CAN","AUS","MEX","ZAF","THA","ESP","DEU","SWE","VNM","IDN","ITA",
             "FIN","TUR","GBR","POL","BGD","JPN","ARG","PAK","MYS","IRN","SAU","PHL","HUN","UZB","COL","NGA","KEN",
