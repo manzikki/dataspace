@@ -63,7 +63,7 @@ if linkn:
     if forms:
         for upform in forms:
             if 'CSVfiles' in upform.keys():
-                upform['CSVfiles'].value = open("1901.tar.gz",'rw')
+                upform['CSVfiles'].value = open("1901.tar.gz",'rb')
                 time.sleep(1)
                 browser.submit_form(upform)
                 #print(str(browser.parsed))
