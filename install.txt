@@ -1,7 +1,7 @@
 This program uses the following python modules: flask, flask_wtf, pandas.
 You do not need to install/configure a database.
 
-Installation of dependencies by python pip program:
+Installation of dependencies by the Python pip program:
 pip3 install flask
 pip3 install flask-wtf
 pip3 install pandas
@@ -14,11 +14,12 @@ pip3 install geopandas
 pip3 install matplotlib
 pip3 install folium
 pip3 install mapclassify
+pip3 install matplotlib
 
 Running:
 python3 dataspace.py
 Direct your browser to localhost:5000
-Check dataspace.py for admin password. You can change it later within the application.
+Check dataspace.py for the admin password. You can change it later within the application.
 
 
 OPTIONAL:

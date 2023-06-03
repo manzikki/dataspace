@@ -353,6 +353,7 @@ def addiso_resp():
                  "oman", "paraguay", "portugal", "reunion", "serbia", "south sudan", "swaziland", "syria", "turkmenistan",
                  "timor-leste", "venezuela", "USA", "egypt", "estonia", "liectenstein", "namibia"]
 
+
     isos = ["USA","IND","CHN","BRA","RUS","FRA","CAN","AUS","MEX","ZAF","THA","ESP","DEU","SWE","VNM","IDN","ITA",
             "FIN","TUR","GBR","POL","BGD","JPN","ARG","PAK","MYS","IRN","SAU","PHL","HUN","UZB","COL","NGA","KEN",
             "UKR","MMR","COD","UGA","PER","MLI","NLD","DZA","AUT","ETH","BEL","GRC","LKA","KOR","GHA","IRL","ZWE",
@@ -367,6 +368,7 @@ def addiso_resp():
             "SXM","NRU","GIB","CCK","TUV","ABW","ANT","AGO","ATA","AZE","BLR","BOL","BVT", "CHL", "CIV", "CMR", "COD",
             "COK", "CSK", "CUB", "GIN", "GLP", "GGY", "GRL", "GUF", "IRQ", "LVA", "MAR", "MNG", "MSR", "NOR", "OMN",
             "PRY", "PRT", "REU", "SRB", "SSD", "SWZ", "SYR", "TKM", "TLS", "VEN", "USA", "EGY", "EST", "LIE", "NAM"]
+
 
     addthese = []
 
@@ -770,7 +772,7 @@ def fromwikimany():
     while os.path.isfile(app.config['SL']+checkfilename):
         countn += 1
         checkfilename = "data"+str(countn)+".csv"
-    dataf.to_csv(app.config['SL']+checkfilename)
+    dataf.to_csv(app.config['SL']+checkfilename, index=None)
     numlines = dataf.shape[0]
     fieldlist = build_fieldlist(app.config['SL']+checkfilename)
     return render_template('editmeta.html', file=checkfilename, descr="",\
@@ -1618,5 +1620,45 @@ def delfile():
     os.remove(app.config['SL']+myfile+".jmeta")
     return redirect(url_for('appmain'))
 
+@app.route('/graphrow', methods=['GET','POST'])
+@app.route('/home/graphrow', methods=['GET','POST'])
+def graphrow():
+    """
+    Simple graph of just 1 row of numbers.
+    """
+    #debug: print everything
+    mydict = request.form
+    #print(mydict)
+    mytitle = ""
+    fname = mydict['00fname']
+    itemno = 0
+    countnumitems = 0
+    xitems = []
+    yitems = []
+    for key, val in request.form.items():
+        itemno = itemno + 1
+        if itemno == 2: # 1 is 00fname
+             mytitle = fname + " " + val
+        else:
+             try:
+                float(val)
+                countnumitems = countnumitems + 1
+                yitems.append(float(val))
+                xitems.append(key)
+             except:
+                 pass
+        print(key + " " + val)
+    if countnumitems < 2:
+        return "Less than 2 numeric items."
+    #build the graph
+    rastr = str(random.randint(0, 99999999))
+    matplotlib.use('Agg')
+    plt.plot(xitems, yitems, 'o')
+    plt.title(mytitle)
+    plt.xticks(rotation=45, fontsize=12)
+    plt.savefig("static/"+rastr+"tmp.svg")
+    return "<a href=../static/"+rastr+"tmp.svg>Your graph</a>."
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, use_reloader=False)
+    app.run(debug=True, use_reloader=False)
+

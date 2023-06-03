@@ -18,7 +18,7 @@
     {% for entry in headers %}
     <th>  {{ entry }} </th>
     {% endfor %}
-    <th></th>
+    <th></th><th></th>
     </thead>
      </tr>
     {% set rowcount = [0] %}
@@ -41,8 +41,17 @@
       {% endfor %}
       <input name="fname" type="hidden" value="{{ file }}"/>
       <td><input type="submit" value="Save changes"/></td>
+      </form>
+      <form action="{{ url_for('graphrow') }}" method="post">
+      <!-- add the name of the file -->
+      <input type="hidden" name="00fname" value= {{ file }} />
+      <!-- build a sequence of header - value -->
+      {% for header in headers %}
+      <input type="hidden" name=" {{ header }} " value=" {{ row[loop.index-1] }} " />
+      {% endfor %}
+      <td><button type="submit">📈</button></td>
+      </form>
     </tr>
-    </form>
     {% endfor %}
     </table>
     <form action="{{ url_for('editsave') }}" method="post">
