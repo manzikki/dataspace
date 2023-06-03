@@ -116,6 +116,16 @@ class MetaInfo:
             self.fieldmaxs.append(mymaxs)
         self.fielddatatypes.append(myfielddt)
 
+    def removefield(self, fieldname):
+        """
+        Removes a field called fieldname.
+        """
+        newfields = []
+        for field in self.fields:
+            if not fieldname in field.keys():
+                newfields.append(field)
+        self.fields = newfields
+
     def addmeasurespec(self, fieldname, measurespec):
         """
         Adds a field fieldname->measurespec assoc array in the array measures.
@@ -278,6 +288,12 @@ class MetaInfo:
                                                      self.get_eventness(mykey)+') '
         s = s + "\n"
         return s
+
+    def __str__(self):
+        """
+        For debugging.
+        """
+        return self.get_as_string()
 
     def get_fieldlist(self, samplehash={}):
         """

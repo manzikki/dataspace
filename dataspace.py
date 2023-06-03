@@ -8,12 +8,10 @@ import os
 import csv
 import io
 import codecs
-import random
 import hashlib
 import base64
+import random
 import requests
-import matplotlib
-import matplotlib.pyplot as plt
 from shutil import move, copyfile
 import chardet
 from dateutil.parser import parse
@@ -23,6 +21,9 @@ from werkzeug.utils import secure_filename
 import numpy
 import pandas as pd
 from bs4 import BeautifulSoup
+import matplotlib
+import matplotlib.pyplot as plt
+import geopandas as gpd
 from forms import LoginForm, UploadForm, PastedTextForm, WikiForm
 from classes import MetaInfo, MetaList, UTF8Recoder, UnicodeReader, CollectionList, Cube
 
@@ -288,6 +289,102 @@ def editmeta():
     return render_template('editmeta.html', file=myfile, descr=mymeta.descr,
                            fieldlist=fields, numlines=numlines)
 
+@app.route("/add_iso", methods=['GET', 'POST'])
+@app.route("/home/add_iso", methods=['GET', 'POST'])
+def add_iso():
+    """
+    Add an ISO code in the CVS if the data is about countries -> addiso -> addiso_resp.
+    """
+    #get the file
+    mydict = request.form
+    myfile = mydict['file']
+    mymeta = MetaInfo(myfile)
+    mymeta.read_from_file(app.config['S'], myfile)
+    fields = mymeta.get_fieldlist()
+    #Is there already an ISO column?
+    for field in fields:
+        if field['name'] == "ISO":
+            return "An ISO field already exists."
+    #ask the user where the country data is
+    return render_template('addiso.html', file=myfile, fieldlist=fields)
+
+@app.route("/addiso_resp", methods=['GET', 'POST'])
+@app.route("/home/addiso_resp", methods=['GET', 'POST'])
+def addiso_resp():
+    """
+    Add an ISO code in the CVS if the data is about countries.
+    """
+    #get the file and field info
+    mydict = request.form
+    myfile = mydict['file']
+    countryp = mydict['country-param']
+    #put the file into a dataframe
+    df = pd.read_csv(app.config['SL']+myfile)
+    df["ISO"] = ""
+
+    countries = ["united states","india","china","brazil","russia","france","canada","australia","mexico",
+                 "south africa","thailand","spain","germany","sweden","vietnam","indonesia","italy","finland",
+                 "turkey","united kingdom","poland","bangladesh","japan","argentina","pakistan","malaysia","iran",
+                 "saudi arabia","philippines","hungary","uzbekistan","colombia","nigeria","kenya","ukraine",
+                 "myanmar","dr congo","uganda","peru","mali","netherlands","algeria","austria","ethiopia",
+                 "belgium","greece","sri lanka","south korea","ghana","ireland","zimbabwe","new zealand",
+                 "kazakhstan","tanzania","romania","lithuania","switzerland","uruguay","denmark","zambia",
+                 "czech republic","cambodia","ecuador","taiwan","chad","laos","slovakia","slovenia","libya",
+                 "afghanistan","kyrgyzstan","botswana","madagascar","mozambique","sudan","tajikistan","nepal",
+                 "croatia","puerto rico","north korea","central african republic","nicaragua","congo",
+                 "bosnia","jamaica","lebanon","georgia","tunisia","cyprus","dominican republic","israel",
+                 "bulgaria","niger","guatemala","senegal","benin","eritrea","malawi","burkina faso","somalia",
+                 "honduras","gabon","north macedonia","iceland","burundi","mauritania","bhutan","togo",
+                 "sierra leone","liberia","moldova","papua new guinea","el salvador","montenegro","armenia",
+                 "jordan","qatar","east timor","lesotho","kuwait","new caledonia","costa rica","rwanda",
+                 "west bank","guinea-bissau","suriname","haiti","bahrain","united arab","guyana","albania",
+                 "eswatini","singapore","fiji","belize","gambia","brunei","djibouti","equatorial guinea",
+                 "luxembourg","bahamas","french polynesia","mauritius","malta","hong kong","marshall islands",
+                 "kosovo","barbados","dominica","solomon islands","cape verde","são tomé and príncipe",
+                 "u.s. virgin islands","saint lucia","antigua and barbuda","samoa","grenada","isle of man",
+                 "vanuatu","guam","faroe islands","comoros","cayman islands","tonga","kiribati","liechtenstein",
+                 "jersey","curaçao","northern mariana islands","seychelles","bermuda","falkland islands","macau",
+                 "saint kitts and nevis","andorra","cook islands","san marino","american samoa","niue",
+                 "british virgin islands","saint helena","anguilla","christmas island","turks and caicos islands",
+                 "saint pierre","maldives","norfolk island","sint maarten","nauru","gibraltar",
+                 "cocos","tuvalu"]
+
+    isos = ["USA","IND","CHN","BRA","RUS","FRA","CAN","AUS","MEX","ZAF","THA","ESP","DEU","SWE","VNM","IDN","ITA",
+            "FIN","TUR","GBR","POL","BGD","JPN","ARG","PAK","MYS","IRN","SAU","PHL","HUN","UZB","COL","NGA","KEN",
+            "UKR","MMR","COD","UGA","PER","MLI","NLD","DZA","AUT","ETH","BEL","GRC","LKA","KOR","GHA","IRL","ZWE",
+            "NZL","KAZ","TZA","ROU","LTU","CHE","URY","DNK","ZMB","CZE","KHM","ECU","TWN","TCD","LAO","SVK","SVN",
+            "LBY","AFG","KGZ","BWA","MDG","MOZ","SDN","TJK","NPL","HRV","PRI","PRK","CAF","NIC","COG","BIH","JAM",
+            "LBN","GEO","TUN","CYP","DOM","ISR","BGR","NER","GTM","SEN","BEN","ERI","MWI","BFA","SOM","HND","GAB",
+            "MKD","ISL","BDI","MRT","BTN","TGO","SLE","LBR","MDA","PNG","SLV","MNE","ARM","JOR","QAT","TLS","LSO",
+            "KWT","NCL","CRI","RWA","WBG","GNB","SUR","HTI","BHR","ARE","GUY","ALB","SWZ","SGP","FJI","BLZ","GMB",
+            "BRN","DJI","GNQ","LUX","BHS","PYF","MUS","MLT","HKG","MHL","XKX","BRB","DMA","SLB","CPV","STP","VIR",
+            "LCA","ATG","WSM","GRD","IMN","VUT","GUM","FRO","COM","CYM","TON","KIR","LIE","JEY","CUW","MNP","SYC",
+            "BMU","FLK","MAC","KNA","AND","COK","SMR","ASM","NIU","VGB","SHN","AIA","CXR","TCA","SPM","MDV","NFK",
+            "SXM","NRU","GIB","CCK","TUV"]
+
+    addthese = []
+
+    for countryname in df[countryp]:
+        #print(countryname)
+        matchediso = ""
+        matchn = countryname.lower()
+        for idx, country in enumerate(countries):
+            if  matchn.startswith(country):
+                #print(isos[idx])
+                matchediso = isos[idx]
+        addthese.append(matchediso)
+
+    df["ISO"] = addthese
+    #write it back
+    df.to_csv(app.config['SL']+myfile, encoding='utf-8', index=None)
+    #add the metadata here
+    mymeta = MetaInfo(myfile)
+    mymeta.read_from_file(app.config['S'], myfile)
+    mymeta.addfield("ISO", "country iso code")    
+    mymeta.write_to_file(app.config['S'], myfile)
+    return redirect(url_for('appmain'))
+
+
 def natural_sort(mylist):
     """
     Natural sort: 1-line will appear before 10-line.
@@ -302,6 +399,7 @@ def natural_sort(mylist):
 def editmetasubmit():
     """
     Receives metadata values from the edit form (editmeta). Writes the metadata into a jmeta file.
+    If headers have changed, rewrites them. If columns have been deleted, rewrites the entite file.
     """
     #get the file field
     mydict = request.form
@@ -321,8 +419,20 @@ def editmetasubmit():
     fielddatatype = ""
     fieldmin = ""
     fieldmax = ""
+    delfields = [] #fields marked by the user as delete
     fieldnames = [] #will be written to the CSV file as header
+    num = 0 #counter
     for fiter in natural_sort(mydict):
+        #get the number
+        hyphenpos = fiter.find("-")
+        if hyphenpos > 0:
+            equalpos = fiter.find("=")
+            if equalpos > 0:
+                delfname = fiter[hyphenpos+1:equalpos]
+                num = int(fiter[:hyphenpos])
+                if str(num)+"=delete" in mydict:
+                    if delfname not in delfields:
+                        delfields.append(delfname)
         #print(fiter)
         if fiter == "file":
             next
@@ -351,6 +461,8 @@ def editmetasubmit():
         if "=unit" in fiter: #infieldcount == 5: #unit
             fieldunit = mydict[fiter].strip()
             #we construct here, this is the last one
+            #We'll handle the deleted fields later
+            #print("Adding field "+fieldname)
             mymeta.addfield(fieldname, fielddescr, fielddatatype, fieldmin, fieldmax)
             fieldmin = None
             fieldmax = None
@@ -380,10 +492,12 @@ def editmetasubmit():
     hlinefromfile = csvfile.readline().strip()
 
     if hlinefromfile == headerline or hlinefromfile == hlinewithquotes:
-        #print("No need to rewrite.")
-        csvfile.close()
-        return redirect(url_for('appmain'))
-        #print("Diff "+hlinefromfile+"\n"+headerline+" "+hlinewithquotes)
+        if not delfields:
+            print("No need to rewrite.")
+            csvfile.close()
+            return redirect(url_for('appmain'))
+            #print("Diff "+hlinefromfile+"\n"+headerline+" "+hlinewithquotes)
+    #otherwise: need to rewrite headers
     #replace non-ascii
     headerline = re.sub(r'[^\x00-\x7F]+', '', headerline)
 
@@ -391,6 +505,7 @@ def editmetasubmit():
     outfile = io.open(outfilen, 'w', encoding='utf-8')
     outfile.write(headerline+"\n")
     line = csvfile.readline()
+    #write the rest
     line = csvfile.readline()
     while line:
         outfile.write(line)
@@ -398,7 +513,19 @@ def editmetasubmit():
     csvfile.close()
     outfile.close()
     move(outfilen, app.config['SL']+myfile)
-    #call appmain if ok
+    if not delfields:
+        return redirect(url_for('appmain'))
+    #finally: we are deleting a column
+    #first read the entire cvs file
+    df = pd.read_csv(app.config['SL']+myfile)
+    #delete the columns that are in delfields
+    df = df.drop(columns=delfields)
+    #write it back
+    df.to_csv(app.config['SL']+myfile, encoding='utf-8', index=None)
+    #remove the field from meta
+    for delf in delfields:
+        mymeta.removefield(delf)
+    mymeta.write_to_file(app.config['S'], myfile)
     return redirect(url_for('appmain'))
 
 def count_lines(filename):
@@ -593,7 +720,7 @@ def fromwiki():
                 while os.path.isfile(app.config['SL']+checkfilename):
                     countn += 1
                     checkfilename = "data"+str(countn)+".csv"
-                dataf.to_csv(app.config['SL']+checkfilename)
+                dataf.to_csv(app.config['SL']+checkfilename, index=None)
                 numlines = dataf.shape[0]
                 fieldlist = build_fieldlist(app.config['SL']+checkfilename)
                 return render_template('editmeta.html', file=checkfilename, descr="",\
@@ -935,6 +1062,91 @@ def saveasfile():
     savemeta.set_formatted_fields()
     savemeta.write_to_file(app.config['S'], myfile)
     return redirect(url_for('appmain'))
+
+@app.route('/visualize', methods=['GET', 'POST'])
+@app.route('/home/visualize', methods=['GET', 'POST'])
+#create maps by going to the selection of area (country ISO code) to visualize -> areaselect
+#which file to visualize: get the file parameter
+def visualize():
+    file = ""
+    mydict = request.form
+    if 'file' in mydict:
+        file = mydict['file']
+    else:
+        file = request.args.get('file')
+    return render_template('select_area.html', file=file)
+
+@app.route('/areaselect', methods=['GET', 'POST'])
+@app.route('/home/areaselect', methods=['GET', 'POST'])
+#get the area (area like THA, file like data0.csv) and generate the map
+#OR: get the parameters (visualize-param, iso-param) and generate the map
+def areaselect():
+    matplotlib.use('Agg') #prevent crash
+    area = "" #like THA
+    file = "" #the CSV file
+    vparam = "" #parameter to visualize.
+    isoparam = "" #province code. If not submitted, give a hint.
+    mydict = request.form
+    if 'visualize-param' in mydict:
+        vparam = mydict['visualize-param']
+    if 'iso-param' in mydict:
+        isoparam = mydict['iso-param']    
+    if 'area' in mydict:
+        area = mydict['area']
+    else:
+        area = request.args.get('area')
+    mydict = request.form
+    if 'file' in mydict:
+        file = mydict['file']
+    else:
+        file = request.args.get('file')
+    mapdata = gpd.read_file("static/"+area+".geojson")
+    #merge with the data if we have the parameters
+    if isoparam and vparam:
+        df = pd.read_csv(app.config['SL']+file)
+        mapdata = mapdata.merge(df,left_on="ISO", right_on=isoparam) #We know it's ISO in our map data
+    # Save plot with matplotlib in a random file
+    myrand = str(random.randint(0, 5000))
+    mypic = "static/tmp"+myrand+".jpg"
+    plt.ioff()
+    maxval = ""
+    minval = ""
+    mymaph = "" #link to interactive map
+    if isoparam and vparam:
+        mymaph = "static/map"+myrand+".html"
+        maxval = mapdata[vparam].max()
+        minval = mapdata[vparam].min()
+        maxValueIndex = mapdata[vparam].idxmax()
+        minValueIndex = mapdata[vparam].idxmin()
+        isomax = mapdata['ISO'][maxValueIndex]
+        isomin = mapdata['ISO'][minValueIndex]
+        print("maxval "+str(maxval)+" "+isomax)
+        print("minval "+str(minval)+" "+isomin)
+        mymap=mapdata.explore(column=vparam, cmap='OrRd', legend=True)
+        mymap.save(mymaph)
+        mapdata.plot(column=vparam, cmap='OrRd', legend=True)
+        #return redirect("/"+mymaph)
+    else:
+        mapdata.plot()
+    plt.savefig(mypic)
+    plt.close()
+    mymeta = MetaInfo(file)
+    mymeta.read_from_file(app.config['S'], file)
+    fields = mymeta.get_fieldlist()
+    #try to find something like ISO in the fields
+    #get the first numeric field, maybe the user wants to visualize it
+    #NB: We should limit the fields to numeric only!
+    isohint = ""
+    vhint = ""
+    for field in fields:
+        if "ISO" in field['name'] or "iso" in field['name']:
+            isohint = field['name']
+        if field['datatype'] == "integer":
+            vhint = field['name']
+
+    return render_template('select_area_params.html', file=file, 
+                           area=area, mypic=mypic, fieldlist=fields, isoparam=isoparam, vparam=vparam,
+                           isohint = isohint, vhint=vhint, mymaph = mymaph)
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
