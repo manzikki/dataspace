@@ -1,0 +1,42 @@
+<!--Visualization: select the parameters with an empty map or show the rendered map -->
+<html>
+  <head>
+    <title>Select the Parameters to Visualize</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+  </head>
+  <body>
+    <div class="container">
+    <h1>Please Select the Parameters to Visualize</h1>
+    <br/>
+    <form method="post" action="{{ url_for('areaselect') }}">
+    Please select the parameter you want to visualize on the map:
+    <select name="visualize-param">
+    {% for f in fieldlist %}
+    <option value="{{ f.name }}" {% if f.name == vhint %}selected{% endif %} >{{ f.name }}</option>
+    {% endfor %}
+    </select>
+    <br/> and the parameter that contains the province ISO code:
+    <select name="iso-param">
+    {% for f in fieldlist %}
+    <option value="{{ f.name }}" {% if f.name == isohint %}selected{% endif %} >{{ f.name }}</option>
+    {% endfor %}
+    </select>
+    <input type="hidden" name="file" value="{{ file }}"/>
+    <input type="hidden" name="area" value="{{ area }}"/>
+    <input type="submit" name="OK"/>
+    <form>
+
+    <!-- {{ file }} {{ area }} {{ isoparam }} {{ vparam }} -->
+    <br/>
+    <img width="70%" height="70%" src="../{{ mypic }}"/>
+    <br/>
+    {% if mymaph != "" %}
+    <a href="/{{ mymaph }}">Interactive map</a>
+    {% endif %}
+    </div>
+  </body>
+</html>
+
