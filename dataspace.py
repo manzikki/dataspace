@@ -1118,8 +1118,7 @@ def areaselect():
     myrand = str(random.randint(0, 5000))
     mypic = "static/tmp"+myrand+".jpg"
     plt.ioff()
-    maxval = ""
-    minval = ""
+    minmaxstr = "" #info string about min and max values to be shown in the form
     mymaph = "" #link to interactive map
     if isoparam and vparam:
         mymaph = "static/map"+myrand+".html"
@@ -1129,8 +1128,7 @@ def areaselect():
         minValueIndex = mapdata[vparam].idxmin()
         isomax = mapdata['ISO'][maxValueIndex]
         isomin = mapdata['ISO'][minValueIndex]
-        print("maxval "+str(maxval)+" "+isomax)
-        print("minval "+str(minval)+" "+isomin)
+        minmaxstr = "max "+str(maxval)+" "+isomax + " min "+str(minval)+" "+isomin
         mymap=mapdata.explore(column=vparam, cmap='OrRd', legend=True)
         mymap.save(mymaph)
         mapdata.plot(column=vparam, cmap='OrRd', legend=True)
@@ -1153,9 +1151,14 @@ def areaselect():
         if field['datatype'] == "integer":
             vhint = field['name']
 
+    #if we have the isoparam and vparam, use them
+    if isoparam:
+        isohint=isoparam
+    if vparam:
+        vhint=vparam
     return render_template('select_area_params.html', file=file, 
                            area=area, mypic=mypic, fieldlist=fields, isoparam=isoparam, vparam=vparam,
-                           isohint = isohint, vhint=vhint, mymaph = mymaph)
+                           isohint = isohint, vhint=vhint, mymaph = mymaph, minmaxstr = minmaxstr)
 
 @app.route('/compatible', methods=['GET', 'POST'])
 @app.route('/home/compatible', methods=['GET', 'POST'])
