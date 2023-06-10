@@ -18,7 +18,7 @@
     <option value="{{ f.name }}" {% if f.name == vhint %}selected{% endif %} >{{ f.name }}</option>
     {% endfor %}
     </select>
-    <br/> and the parameter that contains the province ISO code:
+    <br/> and the parameter that contains the country or province ISO code:
     <select name="iso-param">
     {% for f in fieldlist %}
     <option value="{{ f.name }}" {% if f.name == isohint %}selected{% endif %} >{{ f.name }}</option>
@@ -33,6 +33,7 @@
     <br/>
     <img width="70%" height="70%" src="../{{ mypic }}"/>
     <br/>
+    {{ minmaxstr }}
     {% if mymaph != "" %}
     <a href="/{{ mymaph }}">Interactive map</a>
     {% endif %}
